@@ -50,7 +50,7 @@ export function ensProblems(e){
 }
 const goodsTotals=e=>({count:e.goods.length,gross:r2(e.goods.reduce((s,g)=>s+n0(g.gross),0)),net:r2(e.goods.reduce((s,g)=>s+n0(g.net),0)),packages:e.goods.reduce((s,g)=>s+n0(g.packages),0),amounts:e.goods.reduce((m,g)=>{if(n0(g.amount)){m[g.currency||'—']=r2((m[g.currency||'—']||0)+n0(g.amount))}return m},{})});
 
-export function installEns({navigate,toast,confirmAction,getCompanies,getDeclarations,getGoods,knownPlates}){
+export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction,getCompanies,getDeclarations,getGoods,knownPlates}){
  let db=load(),cur=null,saved=false,dirty=false,filter='',saveTimer=null,customs=null,tariffs=null;
  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{toast('ENS kayıtları saklanamadı (tarayıcı alanı dolu olabilir). Yedek al.')}};
  const nextRef=()=>'ENS-'+new Date().getFullYear()+'-'+String(db.counter+1).padStart(5,'0');
@@ -137,7 +137,8 @@ export function installEns({navigate,toast,confirmAction,getCompanies,getDeclara
   attachCombo(view.querySelector('[data-f=entryOffice]'),{minChars:2,emptyText:'Gümrük bulunamadı. Resmî kodu elle yazabilirsiniz.',search:async(q,limit)=>{const c=await getCustoms(),n=normalizeSearch(q);return c.records.filter(o=>normalizeSearch(o.code+' '+o.name+' '+o.city+' '+(o.aliases||[]).join(' ')).includes(n)).slice(0,limit)},item:o=>({title:o.code+' · '+o.name,sub:o.country+' · '+o.city}),onPick:o=>{cur.entryOffice=o.code+' '+o.name;view.querySelector('[data-f=entryOffice]').value=cur.entryOffice;touch()}});
   for(const [k,fill] of [['carrier',c=>{cur.carrierEori=c.eori||cur.carrierEori;cur.carrierTax=c.taxNo||cur.carrierTax}],['consignor',c=>{cur.consignorEori=c.eori||c.taxNo||cur.consignorEori;cur.consignorAddress=c.address||cur.consignorAddress}],['consignee',c=>{cur.consigneeEori=c.eori||c.taxNo||cur.consigneeEori;cur.consigneeAddress=c.address||cur.consigneeAddress}],['customer',()=>{}]])
    attachCombo(view.querySelector('[data-f='+k+']'),{minChars:2,emptyText:'Rehberde bulunamadı. Adı elle yazabilirsiniz.',search:async(q,limit)=>findCompanies(await getCompanies(),q,limit),item:c=>({title:c.name,sub:[c.eori||c.taxNo,c.country,c.address].filter(Boolean).join(' · ')}),onPick:c=>{cur[k]=c.name;fill(c);renderFieldValues();touch()}});
-  attachCombo(view.querySelector('[data-f=ncts]'),{minChars:1,search:(q,limit)=>{const n=normalizeSearch(q);return getDeclarations().filter(d=>d.id&&!d.archived&&(!n||normalizeSearch([d.ref,d.vehicle,d.customer].join(' ')).includes(n))).slice(0,limit)},item:d=>({title:d.ref,sub:[d.vehicle,d.customer||d.carrier].filter(Boolean).join(' · ')}),onPick:d=>{cur.ncts=d.ref;view.querySelector('[data-f=ncts]').value=d.ref;touch()}});
+  for(const [k,kind] of [['vehicle','motor'],['trailer','trailer']])attachPlate?.(view.querySelector('[data-f='+k+']'),{kind,onPick:r=>{cur[k]=r.plate;if(r.country)cur[k+'Country']=r.country;if(k==='vehicle'&&r.owner&&!cur.carrier)cur.carrier=r.owner;renderFieldValues();touch()}});
+ attachCombo(view.querySelector('[data-f=ncts]'),{minChars:1,search:(q,limit)=>{const n=normalizeSearch(q);return getDeclarations().filter(d=>d.id&&!d.archived&&(!n||normalizeSearch([d.ref,d.vehicle,d.customer].join(' ')).includes(n))).slice(0,limit)},item:d=>({title:d.ref,sub:[d.vehicle,d.customer||d.carrier].filter(Boolean).join(' · ')}),onPick:d=>{cur.ncts=d.ref;view.querySelector('[data-f=ncts]').value=d.ref;touch()}});
  }
  function renderFieldValues(){view.querySelectorAll('[data-f]').forEach(el=>{const v=cur[el.dataset.f]??'';if(el.value!==v)el.value=v})}
  function updateState(){const el=view.querySelector('#ensSaveState');if(el)el.textContent=(saved?(dirty?'Kaydedilmemiş değişiklik var…':'Kaydedildi · '+new Date(cur.updatedAt).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})):'Henüz kaydedilmedi · ')+(saved?'':'ilk kayıt için “Kaydet”e basın')}
@@ -150,7 +151,7 @@ export function installEns({navigate,toast,confirmAction,getCompanies,getDeclara
  view.addEventListener('input',e=>{
   if(!cur||e.target.closest('.comboPanel'))return;const t=e.target;
   if(t.dataset.f){cur[t.dataset.f]=['dispatchCountry','destinationCountry','vehicleCountry','trailerCountry'].includes(t.dataset.f)?t.value.toUpperCase():t.value;
-   if(t.dataset.f==='vehicle'||t.dataset.f==='trailer'){const ck=t.dataset.f+'Country',r=detectPlate(t.value,knownPlates(),[]);if(!cur[ck]&&r.country){cur[ck]=r.country;const c=view.querySelector('[data-f='+ck+']');if(c)c.value=r.country}}
+   if(t.dataset.f==='vehicle'||t.dataset.f==='trailer'){const ck=t.dataset.f+'Country',reg=lookupPlate?.(t.value,t.dataset.f==='trailer'?'trailer':'motor'),r=reg?{country:reg.country}:detectPlate(t.value,knownPlates(),[]);if(!cur[ck]&&r.country){cur[ck]=r.country;const c=view.querySelector('[data-f='+ck+']');if(c)c.value=r.country}}
    touch()}
   else if(t.dataset.g){const g=cur.goods[Number(t.closest('[data-gi]').dataset.gi)];g[t.dataset.g]=t.value;touch();if(['gross','net','packages','amount','currency'].includes(t.dataset.g))renderTotals()}
  });
