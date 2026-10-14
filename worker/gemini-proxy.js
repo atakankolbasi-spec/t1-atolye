@@ -37,7 +37,7 @@ Alanlar:
 - notes: okumada emin olmadığın noktalar.
 
 Kurallar: Belgede olmayan veya okuyamadığın alanı boş bırak (null); tahmin etme, uydurma. Sayıları kendin hesaplama, belgede yazanı kopyala. Rakamlarda harf/rakam karışıklığına (O/0, I/1, S/5, B/8) dikkat et.`;
-const cors=origin=>({'Access-Control-Allow-Origin':ALLOWED.includes(origin)?origin:ALLOWED[0],'Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Access-Code','Vary':'Origin'});
+const cors=origin=>({'Access-Control-Allow-Origin':ALLOWED.includes(origin)?origin:ALLOWED[0],'Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Access-Code, X-Retry, X-Attempt','Vary':'Origin'});
 const json=(body,status,origin)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...cors(origin)}});
 export function toBase64(bytes){let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s)}
 export function readReply(data){
@@ -46,6 +46,12 @@ export function readReply(data){
  const text=(cand.content?.parts||[]).map(p=>p.text||'').join('').trim();
  if(!text)return {error:'Gemini boş yanıt verdi'+(cand.finishReason?' ('+cand.finishReason+')':'')+'.'};
  try{const v=JSON.parse(text);return {declarations:Array.isArray(v.declarations)?v.declarations:[]}}catch{return {error:'Gemini yanıtı okunamadı (JSON bozuk).',raw:text.slice(0,300)}}
+}
+// Önceki okumada boş kalan alanlar için ek yönerge (X-Retry: {"MRN":["grossKg",...]}).
+export function retryNote(header){
+ if(!header)return '';let obj;try{obj=JSON.parse(header)}catch{return ''}
+ const parts=[];for(const [mrn,fields] of Object.entries(obj||{})){if(!/^[0-9A-Z]{8,24}$/.test(mrn)||!Array.isArray(fields))continue;const f=fields.filter(x=>/^[A-Za-z0-9]{2,24}$/.test(x)).slice(0,20);if(f.length)parts.push(mrn+': '+f.join(', '))}
+ return parts.length?'\n\nÖNCEKİ OKUMADA ŞU ALANLAR BOŞ KALDI. Bu beyannamelerin tüm sayfalarını (fatura, ekli liste, taranmış ve yatay sayfalar dahil) yeniden, çok dikkatli incele ve bu alanları bul; belgede gerçekten yoksa boş bırak:\n'+parts.join('\n'):'';
 }
 export default {
  async fetch(request,env){
@@ -59,11 +65,11 @@ export default {
   if(!bytes.length)return json({error:'PDF boş.'},400,origin);
   if(bytes.length>MAX_BYTES)return json({error:'PDF çok büyük (en çok 18 MB). Dosyayı bölüp tekrar dene.'},413,origin);
   if(String.fromCharCode(...bytes.subarray(0,4))!=='%PDF')return json({error:'Bu dosya PDF görünmüyor.'},400,origin);
-  const model=env.GEMINI_MODEL||MODEL_DEFAULT;
+  const model=env.GEMINI_MODEL||MODEL_DEFAULT,retry=!!request.headers.get('X-Retry');
   let r;
   try{
    r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},
-    body:JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:'application/pdf',data:toBase64(bytes)}},{text:PROMPT}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:SCHEMA}})});
+    body:JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:'application/pdf',data:toBase64(bytes)}},{text:PROMPT+retryNote(request.headers.get('X-Retry'))}]}],generationConfig:{temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA}})});
   }catch(e){return json({error:'Gemini’ye ulaşılamadı.'},502,origin)}
   let data;try{data=await r.json()}catch{data={}}
   if(!r.ok){const m=data?.error?.message||('Gemini hata verdi ('+r.status+').');return json({error:m.slice(0,300),status:r.status},r.status===429?429:502,origin)}
