@@ -1,5 +1,6 @@
 import {attachCombo} from './combo.js';
 import {EU_EORI,normalizeEori,looksLikeEori,euPage,lookupEori} from './eori.js';
+import {toLatinTR,hasNonLatin,countryTR} from './translit.js';
 import {loadCompanies,saveCompanies,mergeCompanies,findCompanies,exactCompany,importCompanyFile,normalizeSearch} from './directory.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const support='Merhaba, PCS / Modaltrans hesabımızda kayıtlı firmaları kendi T1 hazırlık ekranımızda kullanmak istiyoruz. Hesabımız için firma adı, vergi numarası, EORI, ülke, şehir, posta kodu ve açık adres alanlarını içeren tam Excel/CSV dışa aktarımı mevcut mu? Ayrıca yetkili firma sorgulama API erişimi varsa dokümantasyonunu, yetkilendirme yöntemini, hesap yetkisini ve test erişimi koşullarını paylaşabilir misiniz?';
@@ -42,12 +43,15 @@ export function installReferences({form,goodForm,metaChanged,goodChanged,showRef
    const mine=++serial;say('AB sisteminde sorgulanıyor…','busy');btn.disabled=true;
    try{const r=await lookupEori(eori);if(mine!==serial)return;
     if(!r.valid){say('✗ Bu EORI numarası AB sisteminde geçerli görünmüyor.','bad',euPage(eori));return}
-    const address=[r.street,[r.postalCode,r.city].filter(Boolean).join(' '),r.country].filter(Boolean).join(', ');
+    const T={name:toLatinTR(r.name),street:toLatinTR(r.street),city:toLatinTR(r.city)},converted=[r.name,r.street,r.city].some(hasNonLatin),countryName=countryTR(cc)||r.country||'';
+    const address=[T.street,[r.postalCode,T.city].filter(Boolean).join(' '),countryName].filter(Boolean).join(', ');
     input.value=eori;const filled=[];
-    if(goods){if(fill(party,r.name))filled.push('ad');if(fill(party+'Country',cc==='EL'?'GR':cc))filled.push('ülke');if(fill(party+'Postal',r.postalCode))filled.push('posta kodu');if(fill(party+'City',r.city))filled.push('şehir');if(fill(party+'Address',r.street))filled.push('adres');target.elements.reviewed.checked=false;goodChanged()}
-    else{if(fill(party,r.name))filled.push('ad');if(party!=='carrier'&&fill(party+'Address',[r.street,r.postalCode+' '+r.city,r.country].filter(Boolean).join(', ')))filled.push('adres');metaChanged()}
-    say('✓ Geçerli · '+(r.name||'ad bilgisi verilmedi')+(address?' · '+address:'')+(filled.length?' — doldurulan: '+filled.join(', '):''),'ok');
-    if(r.name)importRecords([{name:r.name,eori,country:cc==='EL'?'GR':cc,city:r.city,postal:r.postalCode,address:r.street,sourceId:eori,source:'AB EORI doğrulaması'}]).catch(()=>{});
+    if(goods){if(fill(party,T.name))filled.push('ad');if(fill(party+'Country',cc==='EL'?'GR':cc))filled.push('ülke');if(fill(party+'Postal',r.postalCode))filled.push('posta kodu');if(fill(party+'City',T.city))filled.push('şehir');if(fill(party+'Address',T.street))filled.push('adres');target.elements.reviewed.checked=false;goodChanged()}
+    else{if(fill(party,T.name))filled.push('ad');if(party!=='carrier'&&fill(party+'Address',address))filled.push('adres');metaChanged()}
+    let saved='';
+    if(r.name){try{const res=await importRecords([{name:T.name,originalName:converted?r.name:'',eori,country:cc==='EL'?'GR':cc,city:T.city,postal:r.postalCode,address:T.street,originalAddress:converted?[r.street,r.city].filter(Boolean).join(', '):'',sourceId:eori,source:'AB EORI doğrulaması'}]);saved=res.added?' · rehbere kaydedildi':' · rehberde zaten kayıtlı'}catch{saved=' · rehbere kaydedilemedi'}}
+    if(mine!==serial)return;
+    say('✓ Geçerli · '+(T.name||'ad bilgisi verilmedi')+(address?' · '+address:'')+(converted?' (Türkçe okunuşlu Latin harflere çevrildi; orijinal: '+r.name+')':'')+(filled.length?' — doldurulan: '+filled.join(', '):'')+saved,'ok');
    }catch(err){if(mine!==serial)return;say(err.code==='NOPROXY'?'Otomatik sorgu bağlantısı henüz kurulmadı.':err.message,'warn',euPage(eori))}
    finally{btn.disabled=false}}
   btn.onclick=run;input.addEventListener('change',run);
