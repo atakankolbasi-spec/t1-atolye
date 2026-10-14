@@ -1,5 +1,5 @@
 import {packageTypes,documentCodes} from './schema.js';
-import {parseKolis,parseDocs,defaultKolis,KOLI_MAX,DOC_MAX} from './lines.js';
+import {parseKolis,parseDocs,defaultKolis,docNumber,KOLI_MAX,DOC_MAX} from './lines.js';
 import {attachCombo} from './combo.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const typeLabel=([code,name])=>code+'-'+name,docLabel=([code,name])=>code+'-'+name;
@@ -11,7 +11,7 @@ export function installGoodLines(form){
  const sync=()=>{form.elements.kolis.value=JSON.stringify(K);form.elements.docs.value=JSON.stringify(D)};
  const touch=()=>{sync();form.dispatchEvent(new Event('input'))};
  function renderKoli(){
-  koliBox.innerHTML=K.map((k,i)=>'<div class="lineRow koliRow" data-i="'+i+'"><label class="field"><span>Paket sayısı / paket içi adedi</span><input data-f="count" inputmode="numeric" placeholder="Boşsa toplam kap yazılır" value="'+esc(k.count)+'"></label><label class="field"><span>Paket tipi</span><input data-f="type" autocomplete="off" value="'+esc(k.type)+'"></label><label class="field"><span>Açıklama</span><input data-f="desc" value="'+esc(k.desc)+'"></label><button type="button" class="lineRemove" data-rm="'+i+'" aria-label="Koli satırını sil" '+(K.length<2?'disabled':'')+'>✕</button></div>').join('');
+  koliBox.innerHTML=K.map((k,i)=>'<div class="lineRow koliRow" data-i="'+i+'"><label class="field"><span>Paket sayısı / paket içi adedi</span><input data-f="count" inputmode="numeric" placeholder="Örn. 40" value="'+esc(k.count)+'"></label><label class="field"><span>Paket tipi</span><input data-f="type" autocomplete="off" value="'+esc(k.type)+'"></label><label class="field"><span>Açıklama</span><input data-f="desc" value="'+esc(k.desc)+'"></label><button type="button" class="lineRemove" data-rm="'+i+'" aria-label="Koli satırını sil" '+(K.length<2?'disabled':'')+'>✕</button></div>').join('');
   koliBox.querySelectorAll('[data-f=type]').forEach(input=>{const i=Number(input.closest('[data-i]').dataset.i);attachCombo(input,{minChars:1,emptyText:'Tip bulunamadı. İki harfli kodu elle yazabilirsin.',search:(q,limit)=>(q?match(packageTypes,q,typeLabel):packageTypes).slice(0,limit),item:t=>({title:typeLabel(t)}),onPick:t=>{input.value=typeLabel(t);K[i].type=input.value;touch()}})});
   addKoli.disabled=K.length>=KOLI_MAX;
  }
@@ -26,5 +26,5 @@ export function installGoodLines(form){
  docBox.addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){D.splice(Number(b.dataset.rm),1);renderDocs();touch()}});
  addKoli.onclick=()=>{if(K.length<KOLI_MAX){K.push({count:'',type:'BI-KAP',desc:'ADDR'});renderKoli();touch()}};
  addDoc.onclick=()=>{if(D.length<DOC_MAX){D.push({code:'',ref:'',date:''});renderDocs();touch()}};
- return {load(g){K=parseKolis(g);D=parseDocs(g);renderKoli();renderDocs();sync()}};
+ return {load(g){K=parseKolis(g);D=parseDocs(g);if(K.length===1&&!K[0].count&&g.packages)K[0].count=String(g.packages);const inv=D.find(d=>docNumber(d.code)==='380');if(inv){inv.ref=inv.ref||g.invoice||'';inv.date=inv.date||g.invoiceDate||''}renderKoli();renderDocs();sync()}};
 }
