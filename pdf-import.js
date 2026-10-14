@@ -4,6 +4,20 @@ import {aiProxyUrl,askGemini} from './ai-extract.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let countriesPromise=null;
 const loadCountries=()=>countriesPromise??=fetch('customs.json').then(r=>r.json()).then(v=>v.countries||[]).catch(()=>[]);
+// Mal cinsini sadeleştirir: ölçü/kod/marka atılır, aynı cins bir kez yazılır (örn. "20 MM KEÇE - 15 MM KEÇE" -> "KEÇE").
+const UNIT=/^(?:MM|CM|M|MT|ML|LT|L|KG|GR|G|ADET|AD|M2|M3|LI|Lİ|LÜ|LU|LIK|LİK|X)$/i;
+export function simplifyDesc(raw){
+ const src=String(raw||'').replace(/\([^)]*\)/g,' ');if(!src.trim())return '';
+ const out=[],seen=new Set;
+ for(let part of src.split(/\s+-\s+|,|;|\//)){
+  part=part.trim();if(!part)continue;if(part.includes('*'))part=part.split('*').pop();
+  part=part.replace(/^[A-ZÇĞİÖŞÜ]\s*-\s*/,'');
+  const words=part.split(/\s+/).map(w=>w.replace(/^\d+(?:[.,]\d+)?(?:MM|CM|ML|LT|KG|GR|M2|M3|AD|ADET)?/i,'')).filter(w=>w&&!UNIT.test(w)&&!/^[\d.,+%x-]+$/i.test(w)&&!/\d/.test(w));
+  const t=words.join(' ').toLocaleUpperCase('tr-TR').replace(/[\s.,:;-]+$/,'').trim();
+  if(t.length>=2&&!seen.has(t)){seen.add(t);out.push(t)}
+ }
+ return out.length?out.join(' - '):String(raw).trim();
+}
 const FIELDS=[['sender','Gönderici (ihracatçı)'],['senderTax','Gönderici VKN'],['receiver','Alıcı'],['receiverCountry','Alıcı ülke kodu'],['gtip','GTİP (8 hane)'],['description','Mal cinsi (ticari tanım)'],['gross','Brüt kg'],['net','Net kg'],['packages','Kap adedi'],['amount','Fatura tutarı'],['currency','Döviz'],['invoice','Fatura no'],['invoiceDate','Fatura tarihi']];
 const LABEL=Object.fromEntries(FIELDS);
 // existingMrns: şu anki T1'de olan MRN'ler; addRecords: eşya satırlarını ekler; references: firma rehberi
@@ -23,7 +37,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const dist=(a,b)=>{let d=Math.abs(a.length-b.length);for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d};
  const fixNum=v=>{v=String(v??'').trim();return /^\d+\.\d{2}$/.test(v)?v.replace('.',','):v};
  const sameVal=(a,b)=>String(a).replace(/[\s.]/g,'').toLowerCase()===String(b).replace(/[\s.]/g,'').toLowerCase();
- function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:a.description||'',gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
+ function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:simplifyDesc(a.description||''),gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
  const API_KEY={sender:'senderName',senderTax:'senderTaxNo',receiver:'receiverName',receiverCountry:'receiverCountry',gtip:'gtip8',description:'description',gross:'grossKg',net:'netKg',packages:'packages',amount:'invoiceAmount',currency:'currency',invoice:'invoiceNo',invoiceDate:'invoiceDate'};
  const REQUIRED=['sender','receiver','gtip','description','gross','net','amount','currency','invoice','packages','receiverCountry'];
  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -68,11 +82,11 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const matchOf=v=>({sender:references.matchCompany({taxNo:v.senderTax,name:v.sender}),receiver:references.matchCompany({name:v.receiver})});
  function toValues(g){
   const f=g.fields,v={};for(const [k] of FIELDS)v[k]='';
-  Object.assign(v,{sender:f.sender?.name||'',senderTax:f.senderTax||'',receiver:f.receiver?.name||'',receiverCountry:f.receiverCountry||'',gtip:f.gtip||'',description:f.description||'',gross:f.gross||'',net:f.net||'',packages:f.packages||'',amount:f.amount||'',currency:currencies.includes(f.currency)?f.currency:'',invoice:f.invoice||'',invoiceDate:f.invoiceDate||''});
+  Object.assign(v,{sender:f.sender?.name||'',senderTax:f.senderTax||'',receiver:f.receiver?.name||'',receiverCountry:f.receiverCountry||'',gtip:f.gtip||'',description:simplifyDesc(f.description||''),gross:f.gross||'',net:f.net||'',packages:f.packages||'',amount:f.amount||'',currency:currencies.includes(f.currency)?f.currency:'',invoice:f.invoice||'',invoiceDate:f.invoiceDate||''});
   return v;
  }
- label.querySelector('input').onchange=async e=>{
-  const file=e.target.files[0];e.target.value='';if(!file)return;
+ const runFile=async file=>{
+  if(!file)return;
   let aiOk=false,aiNote='',aiUsed=0;groups=[];const useAi=$('#pdfUseAi').checked&&!!aiProxyUrl(),msgs={ai:'',local:''};
   const show=()=>{$('#pdfStatus').innerHTML=[msgs.ai,msgs.local].filter(Boolean).join('<br>')};
   $('#pdfAiRow').hidden=!aiProxyUrl();$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;msgs.local='PDF açılıyor…';show();dlg.showModal();
@@ -89,6 +103,18 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    render();
   }catch(err){$('#pdfStatus').textContent='PDF okunamadı: '+err.message}
  };
+ label.querySelector('input').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)runFile(f)};
+ // Sürükle-bırak: eşya adımının herhangi bir yerine veya açık pencereye PDF bırakılabilir
+ const zone=document.createElement('div');zone.className='pdfDropZone';zone.innerHTML='<span>📄</span><div><strong>PDF’i buraya sürükleyip bırakın</strong><small>ya da tıklayıp dosya seçin · ihracat beyannameleri ve faturalar okunur</small></div>';
+ document.querySelector('#goodsCards').before(zone);zone.onclick=()=>label.querySelector('input').click();
+ const isPdf=f=>f&&(/\.pdf$/i.test(f.name)||f.type==='application/pdf');
+ const hasFiles=e=>[...(e.dataTransfer?.types||[])].includes('Files');
+ const host=()=>!document.querySelector('#goodsStep').hidden;
+ let depth=0;const mark=on=>{zone.classList.toggle('over',on);document.querySelector('#goodsStep').classList.toggle('pdfOver',on)};
+ document.addEventListener('dragenter',e=>{if(hasFiles(e)&&(host()||dlg.open)){depth++;mark(true)}});
+ document.addEventListener('dragleave',e=>{if(hasFiles(e)&&(host()||dlg.open)){depth=Math.max(0,depth-1);if(!depth)mark(false)}});
+ document.addEventListener('dragover',e=>{if(hasFiles(e)&&(host()||dlg.open))e.preventDefault()});
+ document.addEventListener('drop',e=>{if(!hasFiles(e)||!(host()||dlg.open))return;e.preventDefault();depth=0;mark(false);const f=[...e.dataTransfer.files].find(isPdf);if(f)runFile(f);else toast('Yalnızca PDF dosyası okunabilir.')});
  $('#pdfApply').onclick=async()=>{
   const ex=known(),use=[...$('#pdfResults').querySelectorAll('[data-i]')].filter(c=>c.querySelector('[data-use]').checked&&!c.querySelector('[data-use]').disabled).map(c=>groups[Number(c.dataset.i)]);
   if(!use.length){toast('Eklenecek beyanname seçilmedi.');return}
@@ -105,7 +131,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   }
   const added=addRecords(recs);
   let saved=0;if($('#pdfSaveFirms').checked&&newFirms.length){try{saved=(await references.importRecords(newFirms)).added}catch{}}
-  dlg.close();toast(added+' beyanname forma eklendi'+(saved?'; '+saved+' yeni firma rehbere kaydedildi':'')+'. Alanları kontrol edip “Bilgileri belgelerle karşılaştırdım” kutusunu işaretle.');
+  dlg.close();toast(added+' beyanname forma eklendi'+(saved?'; '+saved+' yeni firma rehbere kaydedildi':'')+'. Alanları kontrol edip gerekirse düzeltin.');
  };
  return {open:()=>label.querySelector('input').click()};
 }

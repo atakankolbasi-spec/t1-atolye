@@ -28,7 +28,7 @@ Alanlar:
 - receiverAddress: alıcının adresi.
 - receiverCountry: alıcının/nihai varış ülkesinin 2 harfli ISO kodu (Arnavutluk=AL gibi).
 - gtip8: ilk kalemin eşya kodunun ilk 8 hanesi (kutu 33). gtip12: 12 haneli tam kod (varsa).
-- description: tüm kalemlerin ticari tanımı; birden çok kalem varsa " - " ile ayır. Belgede yazdığı dilde, olduğu gibi yaz, çevirme.
+- description: malın SADE cinsi. Ölçü, kalınlık, marka, model, renk, adet ve kod yazma: "20 MM KEÇE" yerine sadece "KEÇE", "15 mm siyah kolar 10.000 lik" yerine sadece "KOLAR". Aynı cinsten birden çok kalem varsa cinsi yalnızca BİR KEZ yaz (15 mm keçe ve 20 mm keçe varsa tek "KEÇE"). Farklı cinsleri " - " ile ayır (örn. "ŞİŞE - VALF - KAPAK"). Büyük harfle, belgedeki dilde (Türkçe), çevirme.
 - grossKg, netKg: beyannamenin TOPLAM brüt ve net ağırlığı (çok kalemliyse ekli listedeki "Toplam" satırı). Belgede yazıldığı gibi, binlik nokta ve ondalık virgülle (örn. "1.516,40").
 - packages: toplam kap/koli adedi (kutu 6).
 - invoiceAmount: beyannamedeki toplam fatura bedeli (kutu 22), belgede yazıldığı biçimde (örn. "16.632,00"). currency: para birimi ISO kodu (EUR, USD, TRY...).
