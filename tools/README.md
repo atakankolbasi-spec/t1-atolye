@@ -8,3 +8,5 @@ ve tek bir JSON dosyası indirir. Dosya, sitedeki **Firmalar & GTİP → Firma l
 - Parça parça almak için dosyanın başındaki `start` ve `end` değerlerini değiştirin.
 - Durdurmak için Console'a `__mt.stop()` yazın. O ana kadarki firmalar indirilir.
 - Oturum düşerse betik durur ve o ana kadarki firmaları indirir.
+- İlerleme her 25 sayfada tarayıcıya kaydedilir. Sekme kapanırsa betiği aynı sekmede yeniden çalıştırmak kaldığı yerden devam eder. Baştan başlamak için önce `__mt.reset()` yazın.
+- Çalışırken sekmeyi kapatmaya kalkarsanız tarayıcı uyarı gösterir.
