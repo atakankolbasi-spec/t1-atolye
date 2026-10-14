@@ -1,7 +1,8 @@
 # EORI doğrulama aracısı (Cloudflare Worker)
 
 Tarayıcıdaki site, AB'nin EORI doğrulama sayfasını doğrudan çağıramaz (CORS). Bu Worker araya girer:
-siteden EORI numarasını alır, AB sayfasına sorar, sonucu JSON olarak geri verir.
+siteden EORI numarasını alır, AB'nin resmî doğrulama servisine (SOAP) sorar, sonucu JSON olarak geri verir.
+SOAP başarısız olursa AB sayfasını (oturumlu GET, sonra form gönderimi) yedek olarak dener.
 
 ## Kurulum (yaklaşık 5 dakika)
 
@@ -20,7 +21,7 @@ Tarayıcıda şu adresi açın (kendi Worker adresinizle):
 `https://eori-proxy.<hesap-adı>.workers.dev/?eori=BGC204447680ZZZZ7`
 
 Beklenen: `"valid":true` ve firma adı, adres, posta kodu, şehir, ülke.
-Sonuç boş ya da hatalı gelirse adresin sonuna `&debug=1` ekleyin. AB sayfasından okunan satırlar da görünür, bu bilgiyle ayrıştırma düzeltilir.
+Sonuç boş ya da hatalı gelirse adresin sonuna `&debug=1` ekleyin. `attempts` listesi her yöntemin ne döndürdüğünü gösterir.
 
 ## Notlar
 

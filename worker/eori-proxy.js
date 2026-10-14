@@ -27,7 +27,7 @@ export function parse(html){
  }
  return {out,lines};
 }
-// --- AB'ye üç yöntemle sorar; ilk çalışanın sonucunu döndürür ---
+// --- AB'ye sırayla SOAP, sayfa ve form yöntemiyle sorar; ilk çalışanın sonucunu döndürür ---
 const tag=(xml,name)=>{const m=xml.match(new RegExp('<(?:[\\w-]+:)?'+name+'(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w-]+:)?'+name+'>','i'));return m?decode(m[1].replace(/<[^>]+>/g,'')).trim():''};
 export function parseSoap(xml){
  const status=tag(xml,'status'),descr=tag(xml,'statusDescr');
@@ -40,7 +40,14 @@ async function ask(eori,attempts){
  const note=(method,status,extra={})=>attempts.push({method,status,...extra});
  const q='Lang=en&Expand=true&EoriNumb='+encodeURIComponent(eori);
  const htmlHeaders={'Accept':'text/html,application/xhtml+xml','Accept-Language':'en-US,en;q=0.9','User-Agent':UA};
- // 1) oturum çerezi alıp sayfayı sonuçla birlikte iste
+ // 1) resmî SOAP servisi (canlıda çalışan yol)
+ try{
+  const body='<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:eos="http://eori.ws.eos.dds.s/"><soapenv:Header/><soapenv:Body><eos:validateEORI><eos:eori>'+eori+'</eos:eori></eos:validateEORI></soapenv:Body></soapenv:Envelope>';
+  const r=await fetch(SOAP,{method:'POST',headers:{'Content-Type':'text/xml; charset=utf-8','SOAPAction':'""','Accept':'text/xml','User-Agent':UA},body});
+  const xml=await r.text(),out=parseSoap(xml);note('SOAP',r.status,{okSonuc:!!out,...(out?{}:{ornek:xml.slice(0,400)})});
+  if(out&&(out.valid||out.notValid))return {out};
+ }catch(e){note('SOAP','hata',{mesaj:String(e)})}
+ // 2) yedek: oturum çerezi alıp sayfayı sonuçla birlikte iste
  try{
   const r0=await fetch(JSP+'?Lang=en',{headers:htmlHeaders});await r0.text();
   const cookie=(r0.headers.get('set-cookie')||'').split(/,(?=\s*[\w-]+=)/).map(c=>c.split(';')[0].trim()).filter(Boolean).join('; ');
@@ -49,19 +56,12 @@ async function ask(eori,attempts){
   if(out.valid||out.notValid)return {out};
   attempts[attempts.length-1].satirSayisi=lines.length;
  }catch(e){note('GET+oturum','hata',{mesaj:String(e)})}
- // 2) form gönderimi
+ // 3) yedek: form gönderimi
  try{
   const r=await fetch(JSP,{method:'POST',headers:{...htmlHeaders,'Content-Type':'application/x-www-form-urlencoded',Referer:JSP+'?Lang=en',Origin:'https://ec.europa.eu'},body:q+'&Validate=Validate'});
   const html=await r.text(),{out}=parse(html);note('POST form',r.status,{okSonuc:out.valid||out.notValid});
   if(out.valid||out.notValid)return {out};
  }catch(e){note('POST form','hata',{mesaj:String(e)})}
- // 3) resmî SOAP servisi
- try{
-  const body='<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:eos="http://eori.ws.eos.dds.s/"><soapenv:Header/><soapenv:Body><eos:validateEORI><eos:eori>'+eori+'</eos:eori></eos:validateEORI></soapenv:Body></soapenv:Envelope>';
-  const r=await fetch(SOAP,{method:'POST',headers:{'Content-Type':'text/xml; charset=utf-8','SOAPAction':'""','Accept':'text/xml','User-Agent':UA},body});
-  const xml=await r.text(),out=parseSoap(xml);note('SOAP',r.status,{okSonuc:!!out,...(out?{}:{ornek:xml.slice(0,400)})});
-  if(out&&(out.valid||out.notValid))return {out};
- }catch(e){note('SOAP','hata',{mesaj:String(e)})}
  return null;
 }
 const cors=(origin)=>({'Access-Control-Allow-Origin':ALLOWED.includes(origin)?origin:ALLOWED[0],'Access-Control-Allow-Methods':'GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'});
