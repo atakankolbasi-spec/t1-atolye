@@ -40,6 +40,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:simplifyDesc(a.description||''),gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
  const API_KEY={sender:'senderName',senderTax:'senderTaxNo',receiver:'receiverName',receiverCountry:'receiverCountry',gtip:'gtip8',description:'description',gross:'grossKg',net:'netKg',packages:'packages',amount:'invoiceAmount',currency:'currency',invoice:'invoiceNo',invoiceDate:'invoiceDate'};
  const REQUIRED=['sender','receiver','gtip','description','gross','net','amount','currency','invoice','packages','receiverCountry'];
+ const lastAiErr=r=>r.lastErr||'';
  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const normMrn=m=>findMrn(String(m||'').replace(/\s/g,''))||String(m||'').toUpperCase().replace(/\s/g,'');
  const filled=v=>v!==null&&v!==undefined&&String(v).trim()!=='';
@@ -68,17 +69,17 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
      try{res[j.i]=await askGemini(parts[j.i],{askCode,attempt,retry:j.retry});done[j.i]=true}
      catch(err){lastErr=err;if(err.code==='ACCESS'||err.code==='NOAI')fatal=true}
      fin++;say2()}};
-   await Promise.all([worker(),worker()]);
+   await worker();
    // Parçalar sırayla birleşir; MRN'siz kayıt (parça ortadan başlıyorsa) önceki beyannameye bağlanır
    let lastMrn='';
    for(let i=0;i<N;i++){const list=res[i];if(!list)continue;res[i]=null;
     for(const a of list){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lastMrn;if(!m)continue;a.mrn=m;seen[i].add(m);lastMrn=m}
     mergeRaw(store,list.filter(a=>a.mrn))}
    if(fatal)break;
-   if(!done.every(Boolean)||[...store.values()].some(r=>missingOf(r).length))await sleep(2500*attempt);
+   if(!done.every(Boolean)||[...store.values()].some(r=>missingOf(r).length))await sleep((lastErr&&/429|kota|quota|rate/i.test(lastErr.message)?15000:2500)*attempt);
   }
   if(!store.size)throw lastErr||Error('Yapay zekâ sonuç vermedi.');
-  return {store,used};
+  return {store,used,failed:done.filter(d=>!d).length,parts:N,lastErr:lastErr?lastErr.message:''};
  }
  // Yapay zekâ değeri önceliklidir; boş kalanlar PDF okuyucudan tamamlanır.
  function applyAi(store,tries){
@@ -115,7 +116,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    await references.ready;const countries=await loadCountries();
    // Önce yapay zekâ (yalnızca beyanname ve fatura); olmazsa PDF okuyucu (taranmışsa yazı tanıma ile)
    let aiRes=null;
-   if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
+   if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used;if(aiRes.r.failed)aiNote='UYARI: '+aiRes.r.parts+' parçadan '+aiRes.r.failed+' tanesi okunamadı ('+(lastAiErr(aiRes.r)||'servis hatası')+'). Bazı beyannameler eksik olabilir; PDF’i yeniden yükleyip tekrar deneyin.'}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
    let pages=[];
    try{pages=await readPdf(file,{ocr:!aiOk,onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}})}
    catch(err){if(!aiOk)throw err}
