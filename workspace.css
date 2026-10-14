@@ -150,3 +150,32 @@ a{color:#8a6410}
 .emptyicon{background:#fbf5e3;border-color:#ead9a6;color:#b8923a}.empty h3{color:#17150f}.empty p,.sectionhead p,.railhelp p,.railchecks>div{color:#6f6a5c}.compact .emptyicon{background:#fbf5e3}
 .bottomnote,.bottomnote button{color:#7c7662}.railhead>span:last-child,.routevisual small{color:#a58b4e}.goodcard p{color:#6a6552}.goodsTotals{color:#6f6a5c}.goodsTotals strong{color:#8a6410}
 .goodSection h3,.goodSection h3 *:not(b){color:#17150f!important}.sectionhead h2{color:#0c0c0f}
+
+/* ===== Daha büyük yazılar ===== */
+body{font-size:16px}
+.nav{font-size:15.5px;padding:13px 14px}.nav>span:first-child{font-size:19px}.navlabel{font-size:12px}.brand{font-size:22px}.brand small{font-size:9px}
+.sidebarbottom p{font-size:13px}.localdot{font-size:13.5px}.user{font-size:13.5px}.user small{font-size:12px}
+.breadcrumb{font-size:14.5px}.saveIndicator{font-size:12.5px}.private{font-size:10px}
+h1{font-size:34px}h2{font-size:23px}h3{font-size:17px}.eyebrow,.stepnumber{font-size:12.5px}.pagehead p,.sectionhead p{font-size:15.5px;line-height:1.7}.sectionhead h2{font-size:27px}
+.field{font-size:15.5px}.field small,.hint{font-size:13.5px}.field span em{font-size:13px}
+input,select,textarea{font-size:16px;padding:14px}input::placeholder,textarea::placeholder{font-size:14px}
+button,.upload{font-size:14.5px}.primary{font-size:14.5px}.pagehead>.primary{font-size:14.5px;padding:14px 20px}.wizardfooter button,.headtools button,.exportstrip button,.quiet,.upload,.linkbtn{font-size:14.5px}
+.stepper button{font-size:14px;padding:15px 12px}.stepper b{width:26px;height:26px;font-size:12px}
+th{font-size:12px}td,td strong{font-size:15px}td small{font-size:13px}.tag{font-size:13px}.rowactions button{font-size:15px}
+.search input,.listcontrols select,.filtercontrols select{font-size:14.5px}.pagination{font-size:14px}.pagination button{font-size:14px}
+.kpis span{font-size:12px}.kpis strong{font-size:40px}.kpis small{font-size:13.5px}.connectionKpi strong{font-size:21px}.connectionKpi button{font-size:13px}
+.resume{font-size:15px}.resume span{font-size:13px}.info{font-size:14px;line-height:1.8}.bottomnote{font-size:13px}.optional summary{font-size:15px}
+.railhelp h3{font-size:16px}.railhelp p{font-size:14px}.routevisual strong{font-size:14.5px}.routevisual small{font-size:11px}.railchecks>div{font-size:14px}.railtotals strong{font-size:23px}.railtotals span{font-size:12px}.railhead>span:last-child{font-size:12px}
+.goodcardhead strong{font-size:14px}.goodcard h3{font-size:16px}.goodcard p{font-size:14px}.goodcardfooter span,.goodcardfooter button{font-size:13px}.goodsTotals{font-size:13px}.goodsTotals strong{font-size:18px}
+.reviewblock dd{font-size:15px}.reviewblock dt{font-size:12.5px}.reviewblockhead h3{font-size:15px}.reviewHero{font-size:14px}.reviewissues,.reviewissues button{font-size:13.5px}
+.comboList button strong,.officeResults button strong{font-size:15px}.comboList button small,.officeResults button small{font-size:13px}.eoriBtn,.eoriMsg{font-size:13.5px}.routePreset label{font-size:15px}.routePreset small{font-size:13.5px}
+dialog p,dialog ol{font-size:14.5px}dialog h2{font-size:22px}.drawerintro{font-size:14.5px}.goodSection h3{font-size:17px}#toast{font-size:14.5px}
+footer{font-size:12.5px}.lineHint,.plateHint{font-size:13px}.lstEmpty{font-size:15px}
+@media(min-width:1051px){.sidebar{width:252px}.shell{margin-left:252px}}
+/* KPI kutuları: sol ve sağ altın şerit + ince altın üst çizgi */
+.kpis>div{border:1px solid #4a3c1c;box-shadow:0 6px 20px #0c0c0f22,inset 0 1px 0 #c9a24a55}
+.kpis>div:after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#a8802c,#f0d684)}
+.kpis>div:before{width:3px}
+.summaryrail .card{border-left:3px solid var(--gold);border-right:3px solid var(--gold)}
+.card{border-top:2px solid #e3d3a0}
+.back{font-size:13.5px;color:#8a6410}.resume button{font-size:14px}.exportstrip strong{font-size:15px}.exportstrip p{font-size:12.5px}.connectionMini{font-size:13px}.history{font-size:13px}.history p{font-size:12.5px}
