@@ -1,5 +1,6 @@
 import {readPdf,stopOcr} from './pdf-reader.js';
-import {analyze} from './pdf-parse.js';
+import {analyze,findMrn} from './pdf-parse.js';
+import {aiProxyUrl,askGemini} from './ai-extract.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let countriesPromise=null;
 const loadCountries=()=>countriesPromise??=fetch('customs.json').then(r=>r.json()).then(v=>v.countries||[]).catch(()=>[]);
@@ -8,15 +9,34 @@ const FIELDS=[['sender','Gönderici (ihracatçı)'],['senderTax','Gönderici VKN
 export function installPdfImport({references,toast,existingMrns,addRecords,currencies}){
  const label=document.createElement('label');label.className='upload pdfBtn';label.innerHTML='PDF’den oku<input type="file" id="pdfImport" accept=".pdf,application/pdf" hidden>';
  document.querySelector('#goodsImport').closest('label').before(label);
- const dlg=document.createElement('dialog');dlg.id='pdfDialog';dlg.className='pdfDialog';dlg.innerHTML='<div class="pdfHead"><div><div class="eyebrow">PDF OKUMA</div><h2>Belgelerden bilgi oku</h2></div><button type="button" data-close aria-label="Kapat">✕</button></div><div id="pdfStatus" class="info"></div><div id="pdfResults"></div><div class="dialogactions"><label class="check pdfSave"><input type="checkbox" id="pdfSaveFirms" checked> Rehberde olmayan firmaları rehbere kaydet</label><button type="button" data-close>Vazgeç</button><button type="button" class="primary" id="pdfApply" disabled>Seçilenleri forma ekle</button></div>';document.body.append(dlg);
+ const dlg=document.createElement('dialog');dlg.id='pdfDialog';dlg.className='pdfDialog';dlg.innerHTML='<div class="pdfHead"><div><div class="eyebrow">PDF OKUMA</div><h2>Belgelerden bilgi oku</h2></div><button type="button" data-close aria-label="Kapat">✕</button></div><div id="pdfStatus" class="info"></div><label class="check pdfAiRow" id="pdfAiRow"><input type="checkbox" id="pdfUseAi" checked> <span>Yapay zekâ (Gemini) ile de oku ve karşılaştır — daha doğru sonuç verir; PDF Google’a gönderilir</span></label><div id="pdfResults"></div><div class="dialogactions"><label class="check pdfSave"><input type="checkbox" id="pdfSaveFirms" checked> Rehberde olmayan firmaları rehbere kaydet</label><button type="button" data-close>Vazgeç</button><button type="button" class="primary" id="pdfApply" disabled>Seçilenleri forma ekle</button></div>';document.body.append(dlg);
  const $=s=>dlg.querySelector(s);let groups=[];
  dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());
  dlg.addEventListener('close',()=>stopOcr());
  const known=()=>new Set(existingMrns());
  function render(){
   const ex=known();
-  $('#pdfResults').innerHTML=groups.map((g,i)=>{const dup=ex.has(g.mrn);return '<section class="pdfCard'+(dup?' dup':'')+'" data-i="'+i+'"><header><label class="check"><input type="checkbox" data-use '+(dup?'disabled':'checked')+'> <strong>'+esc(g.mrn)+'</strong></label><span class="pdfPages">Sayfa '+esc(g.pageNumbers.join(', '))+(g.fields.kalemCount>1?' · '+g.fields.kalemCount+' kalem':'')+'</span>'+(g.ocr?'<span class="tag warning">Taranmış sayfa okundu</span>':'<span class="tag checked">Yazı katmanı</span>')+(dup?'<span class="tag">Bu MRN zaten ekli</span>':'')+'</header>'+(g.warnings.length?'<ul class="pdfWarn">'+g.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'')+'<div class="grid pdfGrid">'+FIELDS.map(([k,l])=>'<label class="field'+(k==='description'?' full':'')+(g.values[k]?'':' empty')+'"><span>'+l+'</span>'+(k==='description'?'<textarea data-k="'+k+'">'+esc(g.values[k])+'</textarea>':'<input data-k="'+k+'" value="'+esc(g.values[k])+'">')+'</label>').join('')+'</div><div class="pdfMatch">'+matchNote(g)+'</div></section>'}).join('')||'<p class="info">Bu PDF’de ihracat beyannamesi (MRN) bulunamadı.</p>';
+  $('#pdfResults').innerHTML=groups.map((g,i)=>{const dup=ex.has(g.mrn);return '<section class="pdfCard'+(dup?' dup':'')+'" data-i="'+i+'"><header><label class="check"><input type="checkbox" data-use '+(dup?'disabled':'checked')+'> <strong>'+esc(g.mrn)+'</strong></label><span class="pdfPages">Sayfa '+esc(g.pageNumbers.join(', '))+(g.fields.kalemCount>1?' · '+g.fields.kalemCount+' kalem':'')+'</span>'+(g.ai?'<span class="tag checked">Yapay zekâ ✓</span>':'')+(g.ocr?'<span class="tag warning">Taranmış sayfa okundu</span>':'<span class="tag checked">Yazı katmanı</span>')+(dup?'<span class="tag">Bu MRN zaten ekli</span>':'')+'</header>'+(g.warnings.length?'<ul class="pdfWarn">'+g.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'')+'<div class="grid pdfGrid">'+FIELDS.map(([k,l])=>'<label class="field'+(k==='description'?' full':'')+(g.values[k]?'':' empty')+'"><span>'+l+'</span>'+(k==='description'?'<textarea data-k="'+k+'">'+esc(g.values[k])+'</textarea>':'<input data-k="'+k+'" value="'+esc(g.values[k])+'">')+(g.alt&&g.alt[k]?'<small class="pdfAlt">PDF okuyucu farklı okudu: '+esc(g.alt[k])+'</small>':'')+'</label>').join('')+'</div><div class="pdfMatch">'+matchNote(g)+'</div></section>'}).join('')||'<p class="info">Bu PDF’de ihracat beyannamesi (MRN) bulunamadı.</p>';
   $('#pdfApply').disabled=!groups.some(g=>!ex.has(g.mrn));
+ }
+ const dist=(a,b)=>{let d=Math.abs(a.length-b.length);for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d};
+ const fixNum=v=>{v=String(v??'').trim();return /^\d+\.\d{2}$/.test(v)?v.replace('.',','):v};
+ const sameVal=(a,b)=>String(a).replace(/[\s.]/g,'').toLowerCase()===String(b).replace(/[\s.]/g,'').toLowerCase();
+ function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:a.description||'',gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
+ function mergeAi(list){
+  for(const a of list){
+   const mrn=findMrn(String(a.mrn||'').replace(/\s/g,''))||String(a.mrn||'').toUpperCase().replace(/\s/g,'');if(!mrn)continue;
+   let g=groups.find(x=>x.mrn===mrn)||groups.find(x=>dist(x.mrn,mrn)<=2);
+   const av=aiValues(a);
+   if(!g){g={mrn,pageNumbers:[],ocr:false,warnings:[],fields:{kalemCount:a.kalemCount||1},values:toValues({fields:{}}),alt:{}};g.match=matchOf(g.values);groups.push(g)}
+   g.alt=g.alt||{};
+   for(const k of Object.keys(av)){const v=av[k];if(!v)continue;const old=g.values[k];if(old&&!sameVal(old,v))g.alt[k]=old;g.values[k]=v}
+   g.fields.sender={name:av.sender||g.fields.sender?.name||'',address:a.senderAddress||g.fields.sender?.address||''};
+   g.fields.receiver={name:av.receiver||g.fields.receiver?.name||'',address:a.receiverAddress||g.fields.receiver?.address||''};
+   const g12=String(a.gtip12||'').replace(/\D/g,'');if(g12&&av.gtip&&g12.startsWith(av.gtip))g.fields.gtipFull=g12;
+   g.ai=true;if(a.notes)g.warnings.push('Yapay zekâ notu: '+a.notes);
+   g.match=matchOf(g.values);
+  }
  }
  const matchNote=g=>['sender','receiver'].map(p=>{const m=g.match[p];return '<span>'+(p==='sender'?'Gönderici':'Alıcı')+': '+(m?'✓ rehberde <b>'+esc(m.name)+'</b>':'rehberde yok')+'</span>'}).join(' · ');
  $('#pdfResults').addEventListener('input',e=>{const k=e.target.dataset.k,card=e.target.closest('[data-i]');if(!k||!card)return;const g=groups[Number(card.dataset.i)];g.values[k]=e.target.value;if(k==='sender'||k==='senderTax'||k==='receiver'){g.match=matchOf(g.values)}card.querySelector('.pdfMatch').innerHTML=matchNote(g);e.target.closest('.field').classList.toggle('empty',!e.target.value)});
@@ -28,14 +48,15 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  }
  label.querySelector('input').onchange=async e=>{
   const file=e.target.files[0];e.target.value='';if(!file)return;
-  groups=[];$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;$('#pdfStatus').textContent='PDF açılıyor…';dlg.showModal();
+  let aiOk=false,aiNote='';groups=[];$('#pdfAiRow').hidden=!aiProxyUrl();$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;$('#pdfStatus').textContent='PDF açılıyor…';dlg.showModal();
   try{
    await references.ready;const countries=await loadCountries();
    const pages=await readPdf(file,{onProgress:(n,t)=>$('#pdfStatus').textContent='Sayfa '+n+' / '+t+' okunuyor…',onStatus:s=>$('#pdfStatus').textContent=s});
    const found=analyze(pages,countries);
    groups=found.map(g=>{const x={...g,values:toValues(g)};x.match=matchOf(x.values);return x});
+   if($('#pdfUseAi').checked&&aiProxyUrl()){$('#pdfStatus').textContent='Yapay zekâ ile okunuyor ve karşılaştırılıyor (30 sayfada 1 dakikayı bulabilir)…';try{mergeAi(await askGemini(file,{askCode:async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||''}));aiOk=true}catch(err){aiNote='Yapay zekâ ile okunamadı: '+err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}}
    const scanned=pages.filter(p=>p.ocr).length,unreadable=pages.filter(p=>p.error).length;
-   $('#pdfStatus').innerHTML='<b>'+pages.length+' sayfa okundu</b> · '+groups.length+' ihracat beyannamesi bulundu'+(scanned?' · '+scanned+' taranmış sayfa yazı tanıma ile okundu':'')+(unreadable?' · '+unreadable+' sayfa okunamadı':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.';
+   $('#pdfStatus').innerHTML='<b>'+pages.length+' sayfa okundu</b> · '+groups.length+' ihracat beyannamesi bulundu'+(scanned?' · '+scanned+' taranmış sayfa yazı tanıma ile okundu':'')+(unreadable?' · '+unreadable+' sayfa okunamadı':'')+(aiOk?' · yapay zekâ ile karşılaştırıldı':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+(aiNote?'<br><span class="pdfAiErr">'+esc(aiNote)+'</span>':'')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
    render();
   }catch(err){$('#pdfStatus').textContent='PDF okunamadı: '+err.message}
  };
