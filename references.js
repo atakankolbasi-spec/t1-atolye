@@ -1,4 +1,5 @@
 import {attachCombo} from './combo.js';
+import {EU_EORI,normalizeEori,looksLikeEori,euPage,lookupEori} from './eori.js';
 import {loadCompanies,saveCompanies,mergeCompanies,findCompanies,exactCompany,importCompanyFile,normalizeSearch} from './directory.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const support='Merhaba, PCS / Modaltrans hesabımızda kayıtlı firmaları kendi T1 hazırlık ekranımızda kullanmak istiyoruz. Hesabımız için firma adı, vergi numarası, EORI, ülke, şehir, posta kodu ve açık adres alanlarını içeren tam Excel/CSV dışa aktarımı mevcut mu? Ayrıca yetkili firma sorgulama API erişimi varsa dokümantasyonunu, yetkilendirme yöntemini, hesap yetkisini ve test erişimi koşullarını paylaşabilir misiniz?';
@@ -30,8 +31,31 @@ export function installReferences({form,goodForm,metaChanged,goodChanged,showRef
   input.addEventListener('blur',()=>{const exact=exactCompany(companies,input.value);if(exact)select(exact)});
   if(goods){const tax=target.elements[party+'Tax'];tax?.addEventListener('change',()=>{const exact=exactCompany(companies,tax.value);if(exact)select(exact)})}
  }
+ function attachEori(target,party,goods=false){const input=target.elements[party+'Eori'];if(!input)return;
+  const row=document.createElement('div');row.className='eoriRow';row.innerHTML='<button type="button" class="eoriBtn">EORI doğrula</button><span class="eoriMsg" role="status"></span>';input.closest('label').append(row);
+  const btn=row.querySelector('button'),msg=row.querySelector('.eoriMsg');let serial=0;
+  const say=(text,kind='',link=null)=>{msg.className='eoriMsg '+kind;msg.textContent=text;if(link){msg.append(' ');const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noopener';a.textContent='AB sayfasında doğrula ↗';msg.append(a)}};
+  const fill=(key,value)=>{const el=target.elements[key];if(el&&value&&!el.value.trim()){el.value=value;return true}return false};
+  async function run(){const eori=normalizeEori(input.value);if(!eori){say('');return}
+   if(!looksLikeEori(eori)){say('Biçim: 2 harfli ülke kodu + numara (örn. BGC204447680ZZZZ7).','warn');return}
+   const cc=eori.slice(0,2);if(!EU_EORI.has(cc)){say(cc+' EORI numaraları AB doğrulama sisteminde bulunmaz; elle kontrol et.','warn');return}
+   const mine=++serial;say('AB sisteminde sorgulanıyor…','busy');btn.disabled=true;
+   try{const r=await lookupEori(eori);if(mine!==serial)return;
+    if(!r.valid){say('✗ Bu EORI numarası AB sisteminde geçerli görünmüyor.','bad',euPage(eori));return}
+    const address=[r.street,[r.postalCode,r.city].filter(Boolean).join(' '),r.country].filter(Boolean).join(', ');
+    input.value=eori;const filled=[];
+    if(goods){if(fill(party,r.name))filled.push('ad');if(fill(party+'Country',cc==='EL'?'GR':cc))filled.push('ülke');if(fill(party+'Postal',r.postalCode))filled.push('posta kodu');if(fill(party+'City',r.city))filled.push('şehir');if(fill(party+'Address',r.street))filled.push('adres');target.elements.reviewed.checked=false;goodChanged()}
+    else{if(fill(party,r.name))filled.push('ad');if(party!=='carrier'&&fill(party+'Address',[r.street,r.postalCode+' '+r.city,r.country].filter(Boolean).join(', ')))filled.push('adres');metaChanged()}
+    say('✓ Geçerli · '+(r.name||'ad bilgisi verilmedi')+(address?' · '+address:'')+(filled.length?' — doldurulan: '+filled.join(', '):''),'ok');
+    if(r.name)importRecords([{name:r.name,eori,country:cc==='EL'?'GR':cc,city:r.city,postal:r.postalCode,address:r.street,sourceId:eori,source:'AB EORI doğrulaması'}]).catch(()=>{});
+   }catch(err){if(mine!==serial)return;say(err.code==='NOPROXY'?'Otomatik sorgu bağlantısı henüz kurulmadı.':err.message,'warn',euPage(eori))}
+   finally{btn.disabled=false}}
+  btn.onclick=run;input.addEventListener('change',run);
+ }
  for(const party of ['sender','receiver','carrier','principal','customer'])attachCompany(form,party);
+ for(const party of ['sender','receiver','carrier'])attachEori(form,party);
  for(const party of ['sender','receiver'])attachCompany(goodForm,party,true);
+ for(const party of ['sender','receiver'])attachEori(goodForm,party,true);
  const hidden=document.createElement('input');hidden.type='hidden';hidden.name='gtipFull';goodForm.append(hidden);
  async function getTariffs(){return tariffPromise??=fetch('tariffs.json').then(r=>{if(!r.ok)throw Error('GTİP kataloğu yüklenemedi.');return r.json()}).then(v=>{tariffs=v;view.querySelector('#catalogEdition').textContent=v.meta.count.toLocaleString('tr-TR')+' GTİP · 2026 başlangıç cetveli · 10781 sayılı karar. Yıl içindeki değişiklikler dahil değildir. Kaynak beyannameyle kontrol et; gerektiğinde kodu elle gir.';return v}).catch(err=>{tariffPromise=null;throw err})}
  let searchSerial=0;
