@@ -82,3 +82,5 @@ th{font-size:11px;color:#55677f}td{font-size:14px;color:#33445f}td strong{font-s
 .routePreset{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#eef3fd;border:1px solid #d5e0f6;border-radius:9px;padding:12px 14px;margin-bottom:14px}.routePreset label{display:flex;align-items:center;gap:10px;font-weight:600;color:#2f4468;font-size:14px}.routePreset select{width:auto;min-width:230px}.routePreset small{font-size:12.5px;color:#55677f}
 .repeatitem .comboField{flex:1;min-width:0}
 .info{font-size:13px;color:#4a5d7a}.optional summary{font-size:14px;color:#3f5273}footer{font-size:11px;color:#5d6f8c}.errorbox,.reviewissues{font-size:13.5px}.navlabel{font-size:11px;color:#8fa2c6}.sidebarbottom p{font-size:12px;color:#a3b3d2}.localdot{font-size:12.5px}.user small{font-size:11px}.connectionMini{font-size:12px}
+.whRow{grid-template-columns:1.2fr .7fr .9fr 1.3fr .9fr .8fr .9fr 36px}@media(max-width:900px){.whRow{grid-template-columns:1fr 1fr}.whRow .lineRemove{grid-column:1/-1}}
+#goodFields .grid{gap:20px 18px}
