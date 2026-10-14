@@ -35,9 +35,9 @@ const dbGet=async()=>{const db=await openDB();return new Promise((res,rej)=>{con
 const dbPut=async list=>{const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).put(list,'plates');t.oncomplete=()=>res();t.onerror=t.onabort=()=>rej(Error('Plaka listesi kaydedilemedi.'))})};
 
 export function installPlates({toast}){
- let list=[],byKey=new Map;
+ let list=[],byKey=new Map;const listeners=[],emit=()=>listeners.forEach(f=>f());
  const index=()=>{byKey=new Map;for(const r of list){const a=byKey.get(r.key);if(a)a.push(r);else byKey.set(r.key,[r])}};
- const ready=dbGet().then(v=>{list=v.filter(r=>r&&r.key);index();render()}).catch(e=>toast(e.message));
+ const ready=dbGet().then(v=>{list=v.filter(r=>r&&r.key);index();emit()}).catch(e=>toast(e.message));
  const kindOk=(r,kind)=>!kind||kindOf(r.type)===kind;
  // Plate typed in a form: exact registry match wins when it is unambiguous
  function lookup(plate,kind){
@@ -64,28 +64,15 @@ export function installPlates({toast}){
    if(!old){map.set(id,r);added++}else if((r.owner&&r.owner!==old.owner)||(r.ownership&&r.ownership!==old.ownership)){Object.assign(old,{owner:r.owner||old.owner,ownership:r.ownership||old.ownership});updated++}else skipped++}
   list=[...map.values()];index();return {added,updated,skipped};
  }
- // ---- rehber sayfası kartı ----
- const card=document.createElement('section');card.className='card connectioncard';card.id='plateCard';
- card.innerHTML=`<div class="goodstoolbar"><div><h2>Plaka rehberi</h2><p id="plateCount">Liste yükleniyor…</p></div><div class="plateBtns"><label class="upload primary">Plaka listesi içe aktar<input type="file" id="plateImport" accept=".xlsx,.csv,.tsv,.json" hidden></label><button type="button" id="plateExport">Plaka yedeği indir ↓</button></div></div>
- <p class="accNote">Modaltrans’ta <b>Araçlar → dışa aktar</b> ile aldığınız Excel dosyasını doğrudan yükleyebilirsiniz. Çekici/treyler seçimi, plaka ülkesi ve araç sahibi firma formlarda otomatik önerilir.</p>
- <input id="plateSearch" aria-label="Plaka rehberinde ara" placeholder="Plaka ya da araç sahibi firma ara"><div id="plateResults" class="referenceResults"></div>
- <details class="optional"><summary>Dosya nasıl olmalı?</summary><p>İlk sayfada şu başlıklar aranır: <b>Plaka/Kod</b> (zorunlu), Araç Sınıfı (Çekici, Treyler…), Araç Sahibi Firma, Ülke (iki harfli kod), Özmal/Kiralık. Aynı plaka ve sınıf tekrar yüklenirse çift kayıt oluşmaz.</p></details>`;
- document.querySelector('#referencesView').append(card);
- function render(){
-  const total=list.length,by={};for(const r of list)by[r.type||'Diğer']=(by[r.type||'Diğer']||0)+1;
-  card.querySelector('#plateCount').textContent=total?total.toLocaleString('tr-TR')+' plaka · '+Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([t,n])=>t+' '+n.toLocaleString('tr-TR')).join(' · '):'Henüz plaka yüklenmedi.';
-  const q=card.querySelector('#plateSearch').value,found=q.trim()?search(q,{limit:30}):list.slice(0,30);
-  card.querySelector('#plateResults').innerHTML=found.length?found.map(r=>`<article><strong>${esc(r.plate)}</strong><small>${esc([r.type,r.country,r.ownership].filter(Boolean).join(' · '))}</small><p>${esc(r.owner||'Firma bilgisi yok')}</p></article>`).join('')+(total>30&&!q.trim()?'<p>İlk 30 kayıt gösterilir. Aramayı kullanın.</p>':''):'<p>'+(total?'Plaka bulunamadı.':'Plaka listesi yükleyin.')+'</p>';
- }
- card.querySelector('#plateSearch').oninput=render;
- card.querySelector('#plateImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;
-  try{await ready;const incoming=await readFile(file),r=merge(incoming);await dbPut(list);render();toast(r.added.toLocaleString('tr-TR')+' plaka eklendi'+(r.updated?', '+r.updated+' güncellendi':'')+'; '+r.skipped.toLocaleString('tr-TR')+' tekrar/boş kayıt atlandı.')}
-  catch(err){toast('Plaka listesi alınamadı: '+err.message)}finally{e.target.value=''}};
- card.querySelector('#plateExport').onclick=()=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify({format:'t1-plates',plates:list})],{type:'application/json'}));a.href=url;a.download='T1_Plaka_Rehberi.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
  return {
   ready,lookup,search,attachField,
   count:()=>list.length,
   exportData:()=>list,
-  async importData(plates){await ready;if(!Array.isArray(plates))return 0;const r=merge(plates.map(plateRecord));await dbPut(list);render();return r.added}
+  async importData(plates){await ready;if(!Array.isArray(plates))return 0;const r=merge(plates.map(plateRecord));await dbPut(list);emit();return r.added},
+  all:()=>list,onChange:f=>listeners.push(f),idOf,
+  async upsert(v,oldId){await ready;const r=plateRecord(v);if(!r)throw Error('Plaka gerekli.');const id=idOf(r);if(id!==oldId&&list.some(x=>idOf(x)===id))throw Error('Bu plaka, sınıf ve ülke ile kayıt zaten var.');list=list.filter(x=>idOf(x)!==oldId);list.push(r);index();await dbPut(list);emit();return r},
+  async remove(id){await ready;list=list.filter(x=>idOf(x)!==id);index();await dbPut(list);emit()},
+  async importFile(file){await ready;const r=merge(await readFile(file));await dbPut(list);emit();return r},
+  exportJson:()=>JSON.stringify({format:'t1-plates',plates:list})
  };
 }
