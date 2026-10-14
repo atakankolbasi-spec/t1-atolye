@@ -1,7 +1,7 @@
 import {attachCombo} from './combo.js';
 import {EU_EORI,normalizeEori,looksLikeEori,euPage,lookupEori} from './eori.js';
 import {toLatinTR,hasNonLatin,countryTR} from './translit.js';
-import {loadCompanies,saveCompanies,mergeCompanies,findCompanies,exactCompany,importCompanyFile,normalizeSearch,normalizeCompany} from './directory.js';
+import {loadCompanies,saveCompanies,mergeCompanies,findCompanies,exactCompany,importCompanyFile,normalizeSearch,normalizeCompany,hay} from './directory.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const _support='Merhaba, PCS / Modaltrans hesabımızda kayıtlı firmaları kendi T1 hazırlık ekranımızda kullanmak istiyoruz. Hesabımız için firma adı, vergi numarası, EORI, ülke, şehir, posta kodu ve açık adres alanlarını içeren tam Excel/CSV dışa aktarımı mevcut mu? Ayrıca yetkili firma sorgulama API erişimi varsa dokümantasyonunu, yetkilendirme yöntemini, hesap yetkisini ve test erişimi koşullarını paylaşabilir misiniz?';
 export function installReferences({form,goodForm,metaChanged,goodChanged,showReferences,toast}){
@@ -65,5 +65,12 @@ export function installReferences({form,goodForm,metaChanged,goodChanged,showRef
  goodForm.elements.gtip.addEventListener('input',()=>{hidden.value='';goodForm.elements.reviewed.checked=false});
  async function saveCompany(rec){await ready;const c=normalizeCompany(rec);if(!c.name)throw Error('Firma adı gerekli.');const i=companies.findIndex(x=>x.id===c.id);const next=i>=0?companies.map((x,j)=>j===i?{...c,importedAt:x.importedAt,source:x.source}:x):[...companies,{...c,source:'Elle girilen firma'}];await saveCompanies(next);companies=next;emit();return i<0}
  async function removeCompany(id){await ready;const next=companies.filter(x=>x.id!==id);await saveCompanies(next);companies=next;emit()}
- return {ready,pickCarrier:name=>{const c=exactCompany(companies,name);if(c&&carrierSelect)carrierSelect(c);else{form.elements.carrier.value=name;if(form.elements.carrierEori)form.elements.carrierEori.value='';metaChanged()}},listCompanies:()=>companies,onChange:f=>listeners.push(f),saveCompany,removeCompany,importFile:async f=>importRecords(await importCompanyFile(f)),exportJson:()=>JSON.stringify({format:'t1-companies',companies},null,2),getCompanies:async()=>{await ready;return companies},importRecords,resetGood:g=>{hidden.value=g.gtipFull||'';document.querySelectorAll('.comboPanel').forEach(b=>b.hidden=true)}};
+ function matchCompany({taxNo,name}){
+  const tax=normalizeSearch(taxNo||'');if(tax.length>=8){const c=companies.find(x=>normalizeSearch(x.taxNo)===tax);if(c)return c}
+  const n=normalizeSearch(name||'');if(n.length<4)return null;
+  const eq=companies.find(x=>hay(x)[0]===n);if(eq)return eq;
+  let best=null;for(const x of companies){const h=hay(x)[0];if(h.length>=8&&(n.includes(h)||(n.length>=8&&h.includes(n)))&&(!best||h.length>hay(best)[0].length))best=x}
+  return best;
+ }
+ return {ready,matchCompany,pickCarrier:name=>{const c=exactCompany(companies,name);if(c&&carrierSelect)carrierSelect(c);else{form.elements.carrier.value=name;if(form.elements.carrierEori)form.elements.carrierEori.value='';metaChanged()}},listCompanies:()=>companies,onChange:f=>listeners.push(f),saveCompany,removeCompany,importFile:async f=>importRecords(await importCompanyFile(f)),exportJson:()=>JSON.stringify({format:'t1-companies',companies},null,2),getCompanies:async()=>{await ready;return companies},importRecords,resetGood:g=>{hidden.value=g.gtipFull||'';document.querySelectorAll('.comboPanel').forEach(b=>b.hidden=true)}};
 }
