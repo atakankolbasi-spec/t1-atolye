@@ -3,8 +3,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const download=(value,name,type='application/json')=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([value],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 const PAGE=25;
 // Modaltrans tarzı liste sayfası: arama, filtre, sayfalama, ekle/düzenle/sil, içe/dışa aktar
-function listPage({id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLabel,accept,columns,fields,filters,rows,rowId,match,onSave,onRemove,onImport,exportFile,exportData,toast,confirmAction,anchor,noun}){
- const btn=document.createElement('button');btn.className='nav';btn.id=nav;btn.innerHTML='<span>'+navIcon+'</span>'+navLabel;anchor.before(btn);
+export function listPage({extraActions=[],navAfter=null,id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLabel,accept,columns,fields,filters,rows,rowId,match,onSave,onRemove,onImport,exportFile,exportData,toast,confirmAction,anchor,noun}){
+ const btn=document.createElement('button');btn.className='nav';btn.id=nav;btn.innerHTML='<span>'+navIcon+'</span>'+navLabel;(navAfter?navAfter.after(btn):anchor.before(btn));
  const view=document.createElement('section');view.id=id+'View';view.className='view';view.hidden=true;
  view.innerHTML=`<div class="pagehead"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${intro}</p></div><div class="plateBtns"><label class="upload">${importLabel}<input type="file" data-act="import" accept="${accept}" hidden></label><button type="button" data-act="export">Dışa aktar ↓</button><button type="button" class="primary" data-act="new">${newLabel}</button></div></div>
  <section class="card"><div class="listcontrols"><label class="search"><span>⌕</span><input data-act="q" type="search" placeholder="Ara…" aria-label="${title} içinde ara"></label><div class="filtercontrols">${filters.map(f=>`<select data-filter="${f.key}" aria-label="${f.label}"><option value="">${f.label}: Tümü</option></select>`).join('')}</div></div>
@@ -22,7 +22,7 @@ function listPage({id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLa
   if(!keepPage)page=0;
   const pages=Math.max(1,Math.ceil(filtered.length/PAGE));if(page>=pages)page=pages-1;
   const slice=filtered.slice(page*PAGE,page*PAGE+PAGE);
-  $('tbody').innerHTML=slice.length?slice.map(r=>'<tr>'+columns.map(c=>'<td>'+(c.html?c.html(r):esc(c.get(r)))+'</td>').join('')+'<td><div class="rowactions"><button type="button" data-edit="'+esc(rowId(r))+'" aria-label="Düzenle" title="Düzenle">✎</button><button type="button" data-del="'+esc(rowId(r))+'" aria-label="Sil" title="Sil">🗑</button></div></td></tr>').join(''):'<tr><td colspan="'+(columns.length+1)+'" class="lstEmpty">'+(all.length?'Aramaya uyan '+noun+' bulunamadı.':'Henüz '+noun+' yok. Sağ üstten içe aktarabilir veya yeni ekleyebilirsin.')+'</td></tr>';
+  $('tbody').innerHTML=slice.length?slice.map(r=>'<tr>'+columns.map(c=>'<td>'+(c.html?c.html(r):esc(c.get(r)))+'</td>').join('')+'<td><div class="rowactions"><button type="button" data-edit="'+esc(rowId(r))+'" aria-label="Düzenle" title="Düzenle">✎</button>'+extraActions.map((a,i)=>'<button type="button" data-xa="'+i+'" data-id="'+esc(rowId(r))+'" title="'+esc(a.title)+'" aria-label="'+esc(a.title)+'">'+a.label+'</button>').join('')+'<button type="button" data-del="'+esc(rowId(r))+'" aria-label="Sil" title="Sil">🗑</button></div></td></tr>').join(''):'<tr><td colspan="'+(columns.length+1)+'" class="lstEmpty">'+(all.length?'Aramaya uyan '+noun+' bulunamadı.':'Henüz '+noun+' yok. Sağ üstten içe aktarabilir veya yeni ekleyebilirsin.')+'</td></tr>';
   $('[data-role=info]').textContent=filtered.length?(page*PAGE+1).toLocaleString('tr-TR')+'–'+(page*PAGE+slice.length).toLocaleString('tr-TR')+' / '+filtered.length.toLocaleString('tr-TR')+(filtered.length!==all.length?' (toplam '+all.length.toLocaleString('tr-TR')+')':'')+' kayıt':'0 kayıt';
   $('[data-role=page]').textContent='Sayfa '+(page+1)+' / '+pages.toLocaleString('tr-TR');
   $('[data-act=prev]').disabled=page===0;$('[data-act=next]').disabled=page>=pages-1;
@@ -36,7 +36,7 @@ function listPage({id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLa
  $('[data-act=q]').oninput=e=>{q=normalizeSearch(e.target.value);refresh()};
  view.addEventListener('change',e=>{if(e.target.matches('[data-filter]'))refresh()});
  $('[data-act=prev]').onclick=()=>{page--;refresh(true)};$('[data-act=next]').onclick=()=>{page++;refresh(true)};
- $('tbody').onclick=e=>{const ed=e.target.closest('[data-edit]'),de=e.target.closest('[data-del]');
+ $('tbody').onclick=e=>{const xa=e.target.closest('[data-xa]');if(xa){const r=rows().find(x=>rowId(x)===xa.dataset.id);if(r)extraActions[Number(xa.dataset.xa)].fn(r);return}const ed=e.target.closest('[data-edit]'),de=e.target.closest('[data-del]');
   if(ed)openEdit(rows().find(r=>rowId(r)===ed.dataset.edit));
   if(de){const r=rows().find(x=>rowId(x)===de.dataset.del);if(r)confirmAction('Kaydı sil','Bu kayıt rehberden silinecek. Daha önce hazırlanmış beyannameler etkilenmez.',async()=>{try{await onRemove(r);refresh(true);toast('Kayıt silindi.')}catch(err){toast(err.message)}})}};
  $('[data-act=import]').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{toast(await onImport(file));refresh()}catch(err){toast('Dosya alınamadı: '+err.message)}finally{e.target.value=''}};

@@ -68,3 +68,17 @@ dialog.ensPick{max-width:560px}.ensPick article{padding:10px 0;border-bottom:1px
 /* Firmalar / Araçlar liste sayfaları */
 .plateBtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.lstTable td{white-space:nowrap}.lstTable .lstAddr{display:inline-block;max-width:340px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}.lstEmpty{text-align:center;color:#8398b6;padding:48px 20px!important;white-space:normal!important}.lstTable td small{display:block}.pagination button:disabled{opacity:.35}
 #companiesView .search input,#vehiclesView .search input{width:100%}
+
+/* Daha büyük ve net yazılar */
+body{font-size:15px}.nav{font-size:14.5px}.breadcrumb{font-size:13px;color:#4a5b75}.field{font-size:14px;color:#2b3b55;font-weight:500}.field small{font-size:12.5px;color:#55677f}.field span em{font-size:12px}
+input,select,textarea{font-size:15px;color:#1f2d45;padding:13px 13px;border-color:#c9d4e4}input::placeholder,textarea::placeholder{font-size:13px;color:#8393ab}
+h1{font-size:30px}.sectionhead h2{font-size:25px}.sectionhead p,.pagehead p{font-size:14px;color:#566882}.eyebrow,.stepnumber{font-size:11px;color:#5d6f8c}
+.stepper button{font-size:13px;color:#4a5b75}.stepper b{width:24px;height:24px;font-size:11px}
+th{font-size:11px;color:#55677f}td{font-size:14px;color:#33445f}td strong{font-size:14px;color:#1f2d45}td small{font-size:12px;color:#5c6e88}
+.railhelp h3{font-size:15px;color:#2f4468}.railhelp p{font-size:13px;color:#4f6280;line-height:1.8}.routevisual strong{font-size:13.5px;color:#2b3f61}.railchecks>div{font-size:13px;color:#4f6280}.railtotals strong{font-size:21px}.railtotals span{font-size:11px}
+.goodcard h3{font-size:15px}.goodcard p{font-size:13px;color:#50627e}.tag{font-size:12px}.wizardfooter button,.headtools button,.exportstrip button{font-size:13.5px}.wizardfooter>span{font-size:12px;color:#5d6f8c}
+.reviewblock dd{font-size:14px;color:#33486a}.reviewblock dt{font-size:11.5px;color:#5d6f8c}.pagination{font-size:13px;color:#4f6280}.search input{font-size:14px}.upload,.quiet{font-size:13px}
+.comboList button strong,.officeResults button strong{font-size:14px}.comboList button small,.officeResults button small{font-size:12.5px}
+.routePreset{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#eef3fd;border:1px solid #d5e0f6;border-radius:9px;padding:12px 14px;margin-bottom:14px}.routePreset label{display:flex;align-items:center;gap:10px;font-weight:600;color:#2f4468;font-size:14px}.routePreset select{width:auto;min-width:230px}.routePreset small{font-size:12.5px;color:#55677f}
+.repeatitem .comboField{flex:1;min-width:0}
+.info{font-size:13px;color:#4a5d7a}.optional summary{font-size:14px;color:#3f5273}footer{font-size:11px;color:#5d6f8c}.errorbox,.reviewissues{font-size:13.5px}.navlabel{font-size:11px;color:#8fa2c6}.sidebarbottom p{font-size:12px;color:#a3b3d2}.localdot{font-size:12.5px}.user small{font-size:11px}.connectionMini{font-size:12px}
