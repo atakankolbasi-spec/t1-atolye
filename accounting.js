@@ -212,12 +212,12 @@ export function installAccounting({showAccounting,toast,confirmAction,getDeclara
   fillForm();if(!dlg.open)dlg.showModal();
   if(opts.focus==='pay'){const t=invoiceTotals(draft);el('payAmount').value=t.balance>0?String(t.balance).replace('.',','):'';setTimeout(()=>el('payAmount').focus(),50)}
  }
- function openInvoiceForDeclaration(d){
+ function openInvoiceForDeclaration(d,opts={}){
   if(!d)return;showAccounting();
   const inv=blankInvoice();inv.refs=[d.ref];inv.customer.name=d.customer||'';
   const c=d.customer?exactCompany(companiesCache,d.customer):null;if(c){inv.customer.name=c.name;inv.customer.taxNo=c.taxNo||c.eori||'';inv.customer.address=[c.address,c.city,c.country].filter(Boolean).join(', ')}
-  const sv=data.services.find(s=>/t1/i.test(s.name))||data.services[0];
-  inv.lines.push(newLine({desc:'T1 transit beyannamesi hizmet bedeli — '+d.ref+(d.vehicle?' ('+d.vehicle+')':''),price:sv&&n0(sv.price)?String(sv.price).replace('.',','):'',unit:sv?.unit||'Adet',vat:String(sv?sv.vat:data.settings.defaultVat)}));
+  const sv=data.services.find(s=>(opts.service||/t1/i).test(s.name))||data.services[0];
+  inv.lines.push(newLine({desc:(opts.label||'T1 transit beyannamesi hizmet bedeli')+' — '+d.ref+(d.vehicle?' ('+d.vehicle+')':''),price:sv&&n0(sv.price)?String(sv.price).replace('.',','):'',unit:sv?.unit||'Adet',vat:String(sv?sv.vat:data.settings.defaultVat)}));
   if(sv&&sv.currency)inv.currency=sv.currency;
   openInvoice(inv,{dirty:true});
  }

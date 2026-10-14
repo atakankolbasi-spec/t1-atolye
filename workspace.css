@@ -58,3 +58,9 @@
 .accBar input,.accBar select{width:auto;flex:1 1 190px;max-width:320px}.accBar input[type=date]{flex:0 0 150px}.accBar label.check{flex-direction:row;align-items:center;font-size:12px;color:#53647e;gap:6px}.accBar label.check input{flex:0 0 auto;width:auto;min-width:0}.accBar button{white-space:nowrap}
 .accGrid .field input,.accGrid .field select,.accGrid .field textarea{width:100%}.accExpForm h3{margin-top:0}
 .accBar label input[type=date]{flex:none;width:150px;max-width:none}
+/* ---- ENS ---- */
+.ensHeadBtns{display:flex;gap:10px;align-items:center}.ensCard{padding:20px;margin-bottom:16px}.ensCard h2{font-size:15px;margin:0 0 14px}.ensCard h3{font-size:13px;margin:16px 0 8px}
+.ensGood{border:1px solid #dfe7ef;border-radius:12px;padding:14px;margin-bottom:12px;background:#fbfcff}.ensGoodHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.ensGoodHead b{font-size:11px;color:#4a6fbf;background:#edf3ff;border-radius:7px;padding:5px 8px}
+.ensProblems{border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:12.5px}.ensProblems.bad{background:#fff6e8;border:1px solid #f3d9a6}.ensProblems.ok{background:#e9f7f0;border:1px solid #b9e3d0}.ensProblems ul{margin:8px 0 0;padding-left:18px;line-height:1.7}
+.ensRouteAdd{display:flex;gap:8px;align-items:center;margin-top:6px}.ensRouteAdd input{width:80px;text-transform:uppercase}.ensFooter{display:flex;gap:10px;align-items:center;margin:8px 0 30px}.ensFooter .spacer{flex:1}.chips{display:flex;flex-wrap:wrap}
+dialog.ensPick{max-width:560px}.ensPick article{padding:10px 0;border-bottom:1px solid #eef1f6}.ensPick article small{display:block;color:#7486a1}
