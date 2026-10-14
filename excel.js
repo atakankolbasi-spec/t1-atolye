@@ -1,9 +1,11 @@
+import {parseKolis,parseDocs,typeCode,docNumber} from './lines.js';
 const enc=new TextEncoder(),dec=new TextDecoder();
 export const columns={A:'gtip',B:'description',C:'gross',D:'net',E:'amount',F:'currency',H:'mrn',L:'sender',M:'senderTax',O:'senderCity',Q:'senderAddress',R:'receiver',S:'receiverTax',T:'receiverCountry',U:'receiverCity',V:'receiverPostal',W:'receiverAddress',X:'packages',AE:'invoice',AF:'invoiceDate'};
 const fixed={N:'TR',P:'TR',Y:'BI',Z:'ADDR',AD:'380',AG:'730',AH:'CMR'};
 export function num(v){const s=String(v??'').trim().replace(/\s/g,'');if(!s)return NaN;return Number(s.includes(',')?s.replace(/\./g,'').replace(',','.'):s)}
 const xml=v=>String(v).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
-const numeric=new Set(['C','D','E','X']);
+const numeric=new Set(['C','D','E','X','AA']);
+function lineCells(r){const m={};parseKolis(r).forEach((k,i)=>{const [c,t,z]=i?['AA','AB','AC']:['X','Y','Z'];m[c]=k.count||(i?'':r.packages);m[t]=typeCode(k.type)||'BI';m[z]=k.desc||'ADDR'});parseDocs(r).forEach((d,i)=>{const [t,n,dt]=i?['AG','AH','AI']:['AD','AE','AF'],code=docNumber(d.code);let ref=d.ref,date=d.date;if(code==='380'){ref=ref||r.invoice;date=date||r.invoiceDate}m[t]=code;m[n]=ref;m[dt]=date});return m}
 const colName=n=>n<26?String.fromCharCode(65+n):'A'+String.fromCharCode(65+n-26);
 export function makeExcel(source,records){
  const files=fflate.unzipSync(source),sheet=dec.decode(files['xl/worksheets/sheet1.xml']),strings=dec.decode(files['xl/sharedStrings.xml']);
@@ -11,7 +13,7 @@ export function makeExcel(source,records){
  const styles=Object.fromEntries([...row2.matchAll(/<c\s+r="([A-Z]+)2"\s+s="(\d+)"/g)].map(x=>[x[1],x[2]]));
  const original=[...strings.matchAll(/<si\b[^>]*>[\s\S]*?<\/si>/g)].slice(0,42).map(x=>x[0]);let si=original.slice(),refs=header.match(/t="s"/g).length;
  const add=v=>{si.push('<si><t xml:space="preserve">'+xml(v)+'</t></si>');refs++;return si.length-1};
- const rows=records.map((r,i)=>{const n=i+2;let cells='';for(let c=0;c<50;c++){const col=colName(c),attr=' r="'+col+n+'" s="'+styles[col]+'"';let value=col in fixed?fixed[col]:r[columns[col]];if(value===undefined||value===null||value===''){cells+='<c'+attr+'/>';continue}if(numeric.has(col)){const v=num(value);if(!Number.isFinite(v)||v<0)throw Error('Geçersiz sayı: '+col+n);cells+='<c'+attr+' t="n"><v>'+v+'</v></c>'}else if(col==='AF'){const v=Date.parse(value+'T00:00:00Z')/86400000+25569;if(!Number.isFinite(v))throw Error('Geçersiz fatura tarihi');cells+='<c'+attr+' t="n"><v>'+v+'</v></c>'}else{cells+='<c'+attr+' t="s"><v>'+add(value)+'</v></c>'}}return '<row'+rowAttrs.replace(/r="2"/,'r="'+n+'"')+'>'+cells+'</row>'}).join('');
+ const rows=records.map((r,i)=>{const n=i+2,L=lineCells(r);let cells='';for(let c=0;c<50;c++){const col=colName(c),attr=' r="'+col+n+'" s="'+styles[col==='AI'?'AF':col]+'"';let value=col in L?L[col]:col in fixed?fixed[col]:r[columns[col]];if(value===undefined||value===null||value===''){cells+='<c'+attr+'/>';continue}if(numeric.has(col)){const v=num(value);if(!Number.isFinite(v)||v<0)throw Error('Geçersiz sayı: '+col+n);cells+='<c'+attr+' t="n"><v>'+v+'</v></c>'}else if(col==='AF'||col==='AI'){const v=Date.parse(value+'T00:00:00Z')/86400000+25569;if(!Number.isFinite(v))throw Error('Geçersiz fatura tarihi');cells+='<c'+attr+' t="n"><v>'+v+'</v></c>'}else{cells+='<c'+attr+' t="s"><v>'+add(value)+'</v></c>'}}return '<row'+rowAttrs.replace(/r="2"/,'r="'+n+'"')+'>'+cells+'</row>'}).join('');
  const outSheet=sheet.replace(/<sheetData>[\s\S]*?<\/sheetData>/,'<sheetData>'+header+rows+'</sheetData>').replace(/<dimension[^>]*\/>/,'<dimension ref="A1:BC'+(records.length+1)+'"/>');
  const outStrings=strings.replace(/<sst\b[^>]*>/,m=>m.replace(/count="\d+"/,'count="'+refs+'"').replace(/uniqueCount="\d+"/,'uniqueCount="'+si.length+'"')).replace(/<si\b[\s\S]*<\/si>/,si.join(''));
  return patchZip(source,{'xl/worksheets/sheet1.xml':enc.encode(outSheet),'xl/sharedStrings.xml':enc.encode(outStrings)});

@@ -27,3 +27,6 @@
 .comboFoot{border-top:1px solid #e4e9ef;padding:6px;background:#f8fafd}.comboNew{width:100%;border:1px dashed #9db4d6;border-radius:8px;background:#fff;color:#365cd5;padding:9px;font-weight:600}
 #companyDialog{max-width:560px}#companyDialog .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}#companyDialog .full{grid-column:1/-1}#companyDialog em{color:#d33;font-style:normal}
 .comboPanel.up{top:auto;bottom:calc(100% + 4px)}
+.goodSection.wideAll{grid-column:1/-1}.lineRow{display:grid;grid-template-columns:1fr 1.2fr 1.4fr 36px;gap:12px;align-items:end;margin-bottom:12px}.lineRemove{height:38px;border:1px solid #f1c9c9;border-radius:8px;background:#fdecec;color:#d33;padding:0;cursor:pointer}.lineRemove:disabled{opacity:.35;cursor:default}
+.lineHint{display:block;margin:6px 0 0;font-size:11px;color:#7486a1;line-height:1.5}.linkbtn{display:block;margin-top:6px;border:0;background:none;padding:0;color:#365cd5;font-size:12px;font-weight:600;cursor:pointer;text-align:left}
+@media(max-width:700px){.lineRow{grid-template-columns:1fr}.lineRemove{width:100%}}
