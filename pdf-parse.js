@@ -86,7 +86,7 @@ export function analyze(pages,countries=[]){
   if(!cur)continue;cur.pages.push(p);
   if(isEkli(t))cur.ekli.push(p);else if(mrn&&hasDecl(t)&&!cur.decl)cur.decl=p;else cur.other.push(p);
  }
- return groups.map(g=>{
+ return groups.filter(g=>g.decl||g.ekli.length).map(g=>{
   const fields={mrn:g.mrn},warnings=[],ocr=g.pages.some(p=>p.ocr);
   if(g.decl){Object.assign(fields,parseDecl(g.decl,countries))}else warnings.push('Beyanname sayfası bulunamadı; yalnızca MRN okundu.');
   let kalem=1;const descs=fields.description?[fields.description]:[];

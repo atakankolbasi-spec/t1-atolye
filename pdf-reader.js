@@ -25,13 +25,14 @@ function orient(raw,vp,lib){
  const pts=T.filter(({t,i})=>dir(t)===dom).map(({i,t})=>({s:i.str,X:t[4]*ux+t[5]*uy,Y:-t[4]*uy+t[5]*ux,w:i.width,h:Math.hypot(t[2],t[3])||8}));
  const minX=Math.min(0,...pts.map(p=>p.X)),minY=Math.min(0,...pts.map(p=>p.Y)),out=pts.map(p=>({s:p.s,x:p.X-minX,y:p.Y-minY,w:p.w,h:p.h}));out.swap=dom===90||dom===-90;return out;
 }
-export async function readPdf(file,{onProgress,onStatus}={}){
+export async function readPdf(file,{onProgress,onStatus,ocr:useOcr=true}={}){
  if(file.size>60*1024*1024)throw Error('PDF dosyası 60 MB altında olmalı.');
  const lib=await loadPdfjs(),doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),wasmUrl:abs('./vendor/pdfjs/wasm/')}).promise,pages=[];
  for(let n=1;n<=doc.numPages;n++){
   onProgress?.(n,doc.numPages);const page=await doc.getPage(n),vp=page.getViewport({scale:1});
   const tc=await page.getTextContent();let items=orient(tc.items.filter(i=>i.str!==undefined),vp,lib);let pw=vp.width,ph=vp.height;if(items.swap){pw=vp.height;ph=vp.width}
   const chars=items.reduce((a,i)=>a+i.s.trim().length,0);let ocr=false;
+  if(chars<40&&!useOcr){pages.push({n,w:pw,h:ph,lines:[],ocr:false,skipped:true});continue}
   if(chars<40){
    try{const worker=await getOcr(onStatus);onStatus?.('Sayfa '+n+' taranmış görüntü; yazı okunuyor…');const scale=3,v=page.getViewport({scale}),cv=document.createElement('canvas');cv.width=Math.ceil(v.width);cv.height=Math.ceil(v.height);const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);await page.render({canvasContext:ctx,viewport:v}).promise;
     const res=await worker.recognize(cv,{},{blocks:true});const words=[];for(const b of res.data.blocks||[])for(const p of b.paragraphs||[])for(const l of p.lines||[])for(const w of l.words||[])if(w.text.trim())words.push({s:w.text,x:w.bbox.x0/scale,y:(w.bbox.y0+w.bbox.y1)/2/scale,w:(w.bbox.x1-w.bbox.x0)/scale,h:(w.bbox.y1-w.bbox.y0)/scale});

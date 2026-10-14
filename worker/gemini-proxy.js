@@ -14,9 +14,14 @@ const SCHEMA={type:'OBJECT',properties:{declarations:{type:'ARRAY',items:{type:'
  invoiceAmount:str,currency:str,invoiceNo:str,invoiceDate:str,
  vehiclePlate:str,trailerPlate:str,notes:str
 },required:['mrn']}}},required:['declarations']};
-const PROMPT=`Bu PDF, Türkiye'den çıkan ihracat gümrük beyannamelerinden (GÜMRÜK BEYANNAMESİ), ekli listelerinden (EKLİ LİSTESİ), ticari/e-faturalarından ve diğer eklerinden oluşan bir dosyadır. Bazı sayfalar taranmış görüntüdür; yatay basılmış sayfalar olabilir.
+const PROMPT=`Bu PDF, Türkiye'den çıkan ihracat işlemlerinin belgelerinden oluşan bir dosyadır (büyük dosyanın bir PARÇASI olabilir: ilk sayfalar bir belgenin ortasından başlayabilir, son sayfalar yarım kalabilir; kapak sayfaları, ATR, EUR.1, packing list / çeki listesi, CMR, e-posta yazışmaları, sözleşme, sigorta, gümrük dışı her türlü belge de olabilir). Bazı sayfalar taranmış görüntüdür; yatay basılmış ve yan çevrilmiş sayfalar olabilir.
 
-Her ihracat beyannamesi için bir kayıt döndür. Beyannameleri MRN (tescil numarası) ile ayır; MRN biçimi 8 rakam + EX + 8 rakamdır (örn. 26341200EX00320893). Aynı MRN'nin beyanname sayfası, ekli listesi ve faturası tek kayıtta birleşir. Fatura ve ek sayfaları, kendilerinden önceki en yakın beyannameye aittir.
+YALNIZCA ŞU BELGELERDEN BİLGİ AL:
+1) GÜMRÜK BEYANNAMESİ (ihracat beyannamesi, MRN'li form) ve EKLİ LİSTESİ (yalnızca "Toplam" brüt/net ağırlık satırı ve mal cinsleri için);
+2) TİCARİ FATURA / E-FATURA.
+ATR, packing list, CMR, EUR.1, kapak sayfası, yazışma ve diğer tüm belgeleri TAMAMEN YOKSAY; bunlardaki bilgiyi kullanma ve bunlar için kayıt açma. Ekli listesindeki kalemleri tek tek yazma; sadece toplamı ve cinsleri kullan.
+
+Her ihracat beyannamesi için bir kayıt döndür. Beyannameleri MRN (tescil numarası) ile ayır; MRN biçimi 8 rakam + EX + 8 rakamdır (örn. 26341200EX00320893). Aynı MRN'nin beyanname sayfası, ekli listesi ve faturası tek kayıtta birleşir. Fatura ve ekli listesi sayfaları, kendilerinden önceki en yakın beyannameye aittir. Bu parçanın başında MRN'siz bir fatura/ekli listesi görürsen onu da kayda ekle ve mrn alanını boş bırak (sistem önceki parçadaki beyannameye bağlar). Hiç beyanname veya fatura yoksa boş liste döndür.
 
 Alanlar:
 - mrn: tescil numarası.

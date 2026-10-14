@@ -1,6 +1,6 @@
 import {readPdf,stopOcr} from './pdf-reader.js';
 import {analyze,findMrn} from './pdf-parse.js';
-import {aiProxyUrl,askGemini} from './ai-extract.js';
+import {aiProxyUrl,askGemini,splitPdf} from './ai-extract.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let countriesPromise=null;
 const loadCountries=()=>countriesPromise??=fetch('customs.json').then(r=>r.json()).then(v=>v.countries||[]).catch(()=>[]);
@@ -44,17 +44,38 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const normMrn=m=>findMrn(String(m||'').replace(/\s/g,''))||String(m||'').toUpperCase().replace(/\s/g,'');
  const filled=v=>v!==null&&v!==undefined&&String(v).trim()!=='';
  function mergeRaw(store,list){
-  for(const a of list){const mrn=normMrn(a.mrn);if(!mrn)continue;const key=[...store.keys()].find(k=>k===mrn||dist(k,mrn)<=2)||mrn,cur=store.get(key)||{};
+  for(const a of list){const mrn=normMrn(a.mrn);if(!mrn)continue;const key=mrn,cur=store.get(key)||{};
    for(const [k,v] of Object.entries(a)){if(k!=='mrn'&&filled(v)&&!filled(cur[k]))cur[k]=v}cur.mrn=key;store.set(key,cur)}
  }
  const missingOf=raw=>{const av=aiValues(raw);return REQUIRED.filter(k=>!av[k])};
- // Önce yapay zekâ okur; boş kalan alanlar için en çok 4 denemeye kadar yeniden sorar.
+ // Önce yapay zekâ okur (büyük PDF parçalara bölünür); boş kalan alanlar için en çok 4 denemeye kadar yeniden sorar.
  async function aiRead(file,say){
   const store=new Map,askCode=async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||'';let lastErr=null,used=0;
+  say('PDF hazırlanıyor…');
+  const parts=await splitPdf(file),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N),done=new Array(N).fill(false);
+  const tag=N>1?' · '+N+' parça':'';
   for(let attempt=1;attempt<=4;attempt++){
-   let retry=null;if(store.size){retry={};for(const [mrn,raw] of store){const m=missingOf(raw);if(m.length)retry[mrn]=m.map(k=>API_KEY[k])}if(!Object.keys(retry).length)break}
-   say(attempt===1?'Yapay zekâ okuyor (deneme 1/4)…':'Yapay zekâ eksik alanları yeniden okuyor (deneme '+attempt+'/4)…');used=attempt;
-   try{mergeRaw(store,await askGemini(file,{askCode,attempt,retry}))}catch(err){lastErr=err;if(err.code==='ACCESS'||err.code==='NOAI')break;await sleep(2500*attempt)}
+   const jobs=[];
+   for(let i=0;i<N;i++){
+    if(attempt===1||!done[i]){jobs.push({i,retry:null});continue}
+    const retry={};for(const [mrn,raw] of store){if(!seen[i].has(mrn))continue;const m=missingOf(raw);if(m.length)retry[mrn]=m.map(k=>API_KEY[k])}
+    if(Object.keys(retry).length)jobs.push({i,retry});
+   }
+   if(!jobs.length)break;used=attempt;let fin=0;
+   const say2=()=>say((attempt===1?'Yapay zekâ okuyor':'Yapay zekâ eksik alanları yeniden okuyor')+' (deneme '+attempt+'/4'+tag+(N>1?' · '+fin+'/'+jobs.length+' bitti':'')+')…');say2();
+   let fatal=false,next=0;
+   const worker=async()=>{while(next<jobs.length&&!fatal){const j=jobs[next++];
+     try{res[j.i]=await askGemini(parts[j.i],{askCode,attempt,retry:j.retry});done[j.i]=true}
+     catch(err){lastErr=err;if(err.code==='ACCESS'||err.code==='NOAI')fatal=true}
+     fin++;say2()}};
+   await Promise.all([worker(),worker()]);
+   // Parçalar sırayla birleşir; MRN'siz kayıt (parça ortadan başlıyorsa) önceki beyannameye bağlanır
+   let lastMrn='';
+   for(let i=0;i<N;i++){const list=res[i];if(!list)continue;res[i]=null;
+    for(const a of list){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lastMrn;if(!m)continue;a.mrn=m;seen[i].add(m);lastMrn=m}
+    mergeRaw(store,list.filter(a=>a.mrn))}
+   if(fatal)break;
+   if(!done.every(Boolean)||[...store.values()].some(r=>missingOf(r).length))await sleep(2500*attempt);
   }
   if(!store.size)throw lastErr||Error('Yapay zekâ sonuç vermedi.');
   return {store,used};
@@ -63,7 +84,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  function applyAi(store,tries){
   for(const raw of store.values()){
    const mrn=raw.mrn,av=aiValues(raw);
-   let g=groups.find(x=>x.mrn===mrn)||groups.find(x=>dist(x.mrn,mrn)<=2);
+   let g=groups.find(x=>x.mrn===mrn);if(!g){const near=groups.filter(x=>!x.ai&&dist(x.mrn,mrn)<=1);if(near.length===1)g=near[0]}
    if(!g){g={mrn,pageNumbers:[],ocr:false,warnings:[],fields:{kalemCount:raw.kalemCount||1},values:toValues({fields:{}})};groups.push(g)}
    g.alt={};g.fromLocal={};g.ai=true;
    for(const k of Object.keys(API_KEY)){const v=av[k],old=g.values[k];
@@ -92,14 +113,17 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   $('#pdfAiRow').hidden=!aiProxyUrl();$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;msgs.local='PDF açılıyor…';show();dlg.showModal();
   try{
    await references.ready;const countries=await loadCountries();
-   // Yapay zekâ ve PDF okuyucu aynı anda çalışır; sonuçta yapay zekâ önceliklidir.
-   const aiP=useAi?aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err})):Promise.resolve(null);
-   const pages=await readPdf(file,{onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}});
+   // Önce yapay zekâ (yalnızca beyanname ve fatura); olmazsa PDF okuyucu (taranmışsa yazı tanıma ile)
+   let aiRes=null;
+   if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
+   let pages=[];
+   try{pages=await readPdf(file,{ocr:!aiOk,onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}})}
+   catch(err){if(!aiOk)throw err}
    const found=analyze(pages,countries);
    groups=found.map(g=>{const x={...g,values:toValues(g)};x.match=matchOf(x.values);return x});
-   if(useAi){msgs.local='PDF okuyucu bitti; yapay zekâ bekleniyor…';show();const res=await aiP;if(res?.r){applyAi(res.r.store,res.r.used);aiOk=true;aiUsed=res.r.used}else if(res?.err)aiNote='Yapay zekâ ile okunamadı: '+res.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
+   if(aiOk)applyAi(aiRes.r.store,aiRes.r.used);
    const scanned=pages.filter(p=>p.ocr).length,unreadable=pages.filter(p=>p.error).length;
-   $('#pdfStatus').innerHTML='<b>'+pages.length+' sayfa okundu</b> · '+groups.length+' ihracat beyannamesi bulundu'+(aiOk?' · yapay zekâ önceliğiyle okundu ('+aiUsed+' deneme)':(scanned?' · '+scanned+' taranmış sayfa yazı tanıma ile okundu':''))+(unreadable?' · '+unreadable+' sayfa okunamadı':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+(aiNote?'<br><span class="pdfAiErr">'+esc(aiNote)+'</span>':'')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
+   $('#pdfStatus').innerHTML='<b>'+(pages.length?pages.length+' sayfa okundu':'PDF okundu')+'</b> · '+groups.length+' ihracat beyannamesi bulundu'+(aiOk?' · yapay zekâ önceliğiyle okundu ('+aiUsed+' deneme)':(scanned?' · '+scanned+' taranmış sayfa yazı tanıma ile okundu':''))+(unreadable?' · '+unreadable+' sayfa okunamadı':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+(aiNote?'<br><span class="pdfAiErr">'+esc(aiNote)+'</span>':'')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
    render();
   }catch(err){$('#pdfStatus').textContent='PDF okunamadı: '+err.message}
  };
