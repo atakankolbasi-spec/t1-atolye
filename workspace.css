@@ -201,3 +201,23 @@ dialog.pdfDialog{max-width:1100px;width:96vw;padding:0}.pdfHead{display:flex;jus
 .goodsTable .party{min-width:80px}.goodsTable td:first-child .rowactions{margin-left:22px}
 .goodsTable .party{min-width:80px}
 .goodsTable th,.goodsTable td{padding:10px 6px}.goodsTable td:first-child .rowactions{margin-left:0}.goodsTable td:first-child .tag{margin-left:0}
+
+/* Kalem listesi (gl) */
+.glWrap{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 1px 3px #0c0c0f0a}
+.gl{width:100%;border-collapse:collapse;table-layout:fixed}
+.gl th{background:#faf6e9;color:#7a6a3a;padding:12px 14px;text-align:left;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--line)}
+.gl td{padding:13px 14px;border-bottom:1px solid #f1ecdc;vertical-align:middle;font-size:14px}
+.gl .r{text-align:right}.gl tbody tr:last-child td{border-bottom:0}.gl tbody tr:hover td{background:#fdfaf0}
+.gl td:first-child{display:flex;align-items:center;gap:11px;border-bottom:1px solid #f1ecdc}.gl tbody tr:last-child td:first-child{border-bottom:0}
+.glNo{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f6edd2;color:#8a6410;font-weight:700;font-size:12.5px}
+.glMrn{display:flex;flex-direction:column;min-width:0}.glMrn .ref{padding:0;text-align:left;font-size:14px;font-weight:700;color:#1c1b18;letter-spacing:.2px}.glMrn .ref:hover{color:#9a7424;text-decoration:none}
+.glMrn small{font-size:12px;margin-top:2px}.glWarn{color:#b45309}.glOk{color:#2f7d54}
+.glParty{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.glParty strong{font-size:14px;color:#17150f;font-weight:600}.glParty.to{color:#6f6a5c;font-size:13px;margin-top:2px}
+.glKap{display:inline-block;min-width:34px;text-align:center;padding:3px 9px;border-radius:999px;background:#f6edd2;color:#7a5a14;font-weight:700}
+.gl td small{display:block;color:#7c7662;font-size:12px;margin-top:2px}.gl td strong{font-weight:600;color:#17150f}
+.glAct{white-space:nowrap;text-align:right}.glAct .ico{padding:4px 7px;font-size:13px;margin-left:3px;border:1px solid #eadfbd;background:#fffdf7;color:#8a7a4a;border-radius:6px;opacity:.55;transition:opacity .12s,background .12s}
+.gl tr:hover .glAct .ico,.glAct .ico:focus-visible{opacity:1}.glAct .ico:hover{background:#f0e2b4;color:#0c0c0f}
+.gl tfoot td{background:linear-gradient(180deg,#faf6e9,#f6edd2);border-top:1px solid #e6d9aa;border-bottom:0;font-size:14.5px;vertical-align:top}.gl tfoot td:first-child{display:table-cell}
+@media(max-width:900px){.glAct .ico{opacity:1}}
+.gl td,.gl th{padding-left:10px;padding-right:10px}.glAct{padding-left:4px!important;padding-right:8px!important}.glAct .ico{padding:4px 6px;margin-left:2px;font-size:12.5px}.glParty{max-width:100%}
+.gl td:first-child{padding-right:22px}.gl td:nth-child(2){padding-left:6px}
