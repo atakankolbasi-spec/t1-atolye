@@ -1,4 +1,5 @@
 import {attachCombo} from './combo.js';
+import {attachVknButton} from './vkn.js';
 import {EU_EORI,normalizeEori,looksLikeEori,euPage,lookupEori} from './eori.js';
 import {toLatinTR,hasNonLatin,countryTR} from './translit.js';
 import {loadCompanies,saveCompanies,mergeCompanies,findCompanies,exactCompany,importCompanyFile,normalizeSearch,normalizeCompany,hay} from './directory.js';
@@ -14,7 +15,7 @@ export function installReferences({form,goodForm,metaChanged,goodChanged,showRef
  const ready=loadCompanies().then(v=>{companies=v;emit()}).catch(err=>toast(err.message));
  async function importRecords(records){await ready;const merged=mergeCompanies(companies,records);await saveCompanies(merged.records);companies=merged.records;emit();return merged}
  const dlg=document.createElement('dialog');dlg.id='companyDialog';dlg.innerHTML='<h2>Yeni firma kaydı</h2><p>Bu firma listede yok. Bilgileri gir; firma bu tarayıcıdaki rehbere eklenir ve seçilir.</p><form class="grid" novalidate><label class="field full"><span>Firma adı <em>*</em></span><input name="name" required></label><label class="field"><span>Vergi numarası</span><input name="taxNo"></label><label class="field"><span>EORI</span><input name="eori"></label><label class="field"><span>Ülke kodu</span><input name="country" maxlength="2" placeholder="TR"></label><label class="field"><span>Şehir</span><input name="city"></label><label class="field"><span>Posta kodu</span><input name="postal"></label><label class="field full"><span>Açık adres</span><textarea name="address"></textarea></label><div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kaydet ve seç</button></div></form>';document.body.append(dlg);
- const companyForm=dlg.querySelector('form');let afterSave=null;
+ const companyForm=dlg.querySelector('form');let afterSave=null;attachVknButton(companyForm,toast);
  dlg.querySelector('[data-cancel]').onclick=()=>dlg.close();
  function openCompanyDialog(typed,callback){afterSave=callback;companyForm.reset();const v=String(typed||'').trim();if(/^[0-9 ]{8,}$/.test(v))companyForm.elements.taxNo.value=v.replace(/\s/g,'');else companyForm.elements.name.value=v;dlg.showModal();companyForm.elements.name.focus()}
  companyForm.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(companyForm));if(!data.name.trim()){toast('Firma adı gerekli.');companyForm.elements.name.focus();return}data.country=data.country.trim().toUpperCase();if(data.country&&!/^[A-Z]{2}$/.test(data.country)){toast('Ülke kodu iki harf olmalı (TR, RO…).');return}

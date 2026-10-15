@@ -240,3 +240,6 @@ dialog.pdfDialog{max-width:1100px;width:96vw;padding:0}.pdfHead{display:flex;jus
 .gl td:first-child{display:table-cell}.glCell{display:flex;align-items:center;gap:11px;padding-right:10px;min-width:0}.gl tbody td:first-child{padding-right:6px}.gl td:nth-child(2){padding-left:14px}
 .gl tbody td{border-bottom:1.5px solid #c9a24a!important}.gl tbody td:first-child{padding-right:16px!important}.glMrn .ref{font-size:13.5px}.glCell{padding-right:0}
 [hidden]{display:none!important}
+.vknBtn{margin-top:6px;align-self:flex-start;border:1px solid var(--gold,#c9a24b);background:transparent;color:inherit;border-radius:8px;padding:6px 12px;font-size:.9rem;cursor:pointer}
+.vknBtn:hover{background:rgba(201,162,75,.15)}
+.vknBtn:disabled{opacity:.6;cursor:wait}

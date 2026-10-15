@@ -1,3 +1,4 @@
+import {attachVknButton} from './vkn.js';
 import {hay,normalizeSearch} from './directory.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const download=(value,name,type='application/json')=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([value],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
@@ -11,7 +12,7 @@ export function listPage({extraActions=[],navAfter=null,id,nav,navIcon,navLabel,
  <div class="tablewrap"><table class="lstTable"><thead><tr>${columns.map(c=>'<th>'+c.label+'</th>').join('')}<th></th></tr></thead><tbody></tbody></table></div><div class="pagination"><span data-role="info"></span><div><button type="button" data-act="prev" aria-label="Önceki sayfa">‹</button><span data-role="page"></span><button type="button" data-act="next" aria-label="Sonraki sayfa">›</button></div></div></section>`;
  document.querySelector('main footer').before(view);
  const dlg=document.createElement('dialog');dlg.id=id+'Dialog';dlg.innerHTML=`<h2></h2><form class="grid" novalidate>${fields.map(f=>`<label class="field${f.full?' full':''}"><span>${f.label}${f.required?' <em>*</em>':''}</span>${f.type==='textarea'?`<textarea name="${f.name}"></textarea>`:f.options?`<select name="${f.name}"><option value=""></option>${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input name="${f.name}"${f.max?` maxlength="${f.max}"`:''}${f.placeholder?` placeholder="${f.placeholder}"`:''}>`}</label>`).join('')}<div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kaydet</button></div></form>`;document.body.append(dlg);
- const form=dlg.querySelector('form');let editing=null,page=0,filtered=[],q='';
+ const form=dlg.querySelector('form');if(form.elements.taxNo&&form.elements.name)attachVknButton(form,toast);let editing=null,page=0,filtered=[],q='';
  const $=s=>view.querySelector(s);
  function fillFilters(all){for(const f of filters){const sel=$('[data-filter="'+f.key+'"]'),cur=sel.value,vals=[...new Set(all.map(r=>f.get(r)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));sel.innerHTML='<option value="">'+f.label+': Tümü</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('');sel.value=vals.includes(cur)?cur:''}}
  function refresh(keepPage=false){
