@@ -2,11 +2,13 @@ import {AI_PROXY_URL} from './config.js';
 export const aiProxyUrl=()=>{let saved='';try{saved=localStorage.getItem('t1-ai-proxy')||''}catch{}return(saved||AI_PROXY_URL||'').trim()};
 const getCode=()=>{try{return localStorage.getItem('t1-ai-code')||''}catch{return ''}};
 // PDF'i Worker'a gönderir; [{mrn,senderName,…}] döndürür. Hata: Error (.code 'NOAI' | 'ACCESS' | 'NETWORK' | 'SERVICE')
+const toBase64=blob=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]||'');fr.onerror=()=>rej(Error('PDF hazırlanamadı.'));fr.readAsDataURL(blob)});
 export async function askGemini(file,{askCode,attempt=1,retry=null}={}){
  const base=aiProxyUrl();if(!base)throw Object.assign(Error('Yapay zekâ bağlantısı kurulmadı.'),{code:'NOAI'});
- const send=code=>fetch(base,{method:'POST',headers:{'Content-Type':'application/pdf',...(code?{'X-Access-Code':code}:{}),...(retry?{'X-Retry':JSON.stringify(retry),'X-Attempt':String(attempt)}:{})},body:file});
+ const b64=await toBase64(file);
+ const send=code=>fetch(base,{method:'POST',headers:{'Content-Type':'text/plain',...(code?{'X-Access-Code':code}:{}),...(retry?{'X-Retry':JSON.stringify(retry),'X-Attempt':String(attempt)}:{})},body:b64});
  let r;
- try{r=await send(getCode())}catch{throw Object.assign(Error('Yapay zekâ servisine ulaşılamadı.'),{code:'NETWORK'})}
+ try{r=await send(getCode())}catch{throw Object.assign(Error('Yapay zekâ servisine ulaşılamadı (Worker yanıt vermedi ya da bağlantı koptu).'),{code:'NETWORK'})}
  if(r.status===401&&askCode){const code=await askCode();if(code){try{localStorage.setItem('t1-ai-code',code)}catch{}try{r=await send(code)}catch{throw Object.assign(Error('Yapay zekâ servisine ulaşılamadı.'),{code:'NETWORK'})}}}
  let data;try{data=await r.json()}catch{data={}}
  if(!r.ok)throw Object.assign(Error(data.error||'Yapay zekâ servisi hata verdi ('+r.status+').'),{code:r.status===401?'ACCESS':'SERVICE'});

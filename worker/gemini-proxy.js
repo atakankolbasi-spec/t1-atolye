@@ -61,17 +61,33 @@ export function retryNote(header){
 }
 export default {
  async fetch(request,env){
+  try{return await handle(request,env)}catch(e){return json({error:'Worker hatası: '+String(e?.message||e).slice(0,200)},500,request.headers.get('Origin')||'')}
+ }
+};
+async function handle(request,env){
   const origin=request.headers.get('Origin')||'';
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors(origin)});
   if(request.method!=='POST')return json({error:'Yalnızca POST desteklenir.'},405,origin);
   if(!ALLOWED.includes(origin))return json({error:'Bu adresten kullanıma izin verilmiyor.'},403,origin);
   if(!env.GEMINI_API_KEY)return json({error:'Worker’da GEMINI_API_KEY tanımlı değil.'},500,origin);
   if(env.ACCESS_CODE&&request.headers.get('X-Access-Code')!==env.ACCESS_CODE)return json({error:'Erişim kodu gerekli veya yanlış.',code:'ACCESS'},401,origin);
-  const bytes=new Uint8Array(await request.arrayBuffer());
-  if(!bytes.length)return json({error:'PDF boş.'},400,origin);
-  if(bytes.length>MAX_BYTES)return json({error:'PDF çok büyük (en çok 18 MB). Dosyayı bölüp tekrar dene.'},413,origin);
-  if(String.fromCharCode(...bytes.subarray(0,4))!=='%PDF')return json({error:'Bu dosya PDF görünmüyor.'},400,origin);
-  const retry=!!request.headers.get('X-Retry'),b64=toBase64(bytes),body=JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:'application/pdf',data:b64}},{text:PROMPT+retryNote(request.headers.get('X-Retry'))}]}],generationConfig:{temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA}});
+  // Tarayıcı PDF'i base64 metni olarak gönderir (text/plain): Worker'ın işlemci süresi kısıtlı olduğundan kodlamayı tarayıcı yapar. Eski biçim (ham PDF) de desteklenir.
+  let b64;
+  if((request.headers.get('Content-Type')||'').startsWith('text/plain')){
+   b64=(await request.text()).trim();
+   if(!b64)return json({error:'PDF boş.'},400,origin);
+   if(b64.length*0.75>MAX_BYTES)return json({error:'PDF çok büyük (en çok 18 MB). Dosyayı bölüp tekrar dene.'},413,origin);
+   if(!b64.startsWith('JVBERi0'))return json({error:'Bu dosya PDF görünmüyor.'},400,origin);
+  }else{
+   const bytes=new Uint8Array(await request.arrayBuffer());
+   if(!bytes.length)return json({error:'PDF boş.'},400,origin);
+   if(bytes.length>MAX_BYTES)return json({error:'PDF çok büyük (en çok 18 MB). Dosyayı bölüp tekrar dene.'},413,origin);
+   if(String.fromCharCode(...bytes.subarray(0,4))!=='%PDF')return json({error:'Bu dosya PDF görünmüyor.'},400,origin);
+   b64=toBase64(bytes);
+  }
+  const retry=!!request.headers.get('X-Retry'),text=PROMPT+retryNote(request.headers.get('X-Retry'));
+  // Gövde metin birleştirmeyle kurulur (büyük base64 metnini JSON.stringify ile yeniden işlemekten kaçınır)
+  const body='{"contents":[{"role":"user","parts":[{"inline_data":{"mime_type":"application/pdf","data":"'+b64+'"}},{"text":'+JSON.stringify(text)+'}]}],"generationConfig":'+JSON.stringify({temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA})+'}';
   const chain=[...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))];let model='',r,data;
   for(model of chain){
    try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},body})}
@@ -84,5 +100,4 @@ export default {
   const out=readReply(data);
   if(out.error)return json(out,502,origin);
   return json({model,...out},200,origin);
- }
-};
+}
