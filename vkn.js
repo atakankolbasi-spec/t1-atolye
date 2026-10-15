@@ -9,7 +9,7 @@ const getKey=()=>{try{return localStorage.getItem(KEY)||''}catch{return ''}};
 export const forgetVknKey=()=>{try{localStorage.removeItem(KEY)}catch{}};
 // Worker engellenirse (Cloudflare hata 1106) anahtar yalnızca bu tarayıcıda saklanır ve servis doğrudan sorulur.
 async function direct(vkn,key){
- let r;try{r=await fetch(UP+'?vkn='+vkn,{headers:{Authorization:'Bearer '+key.trim().replace(/^Bearer\s+/i,''),Accept:'application/json'}})}catch{throw Object.assign(Error('Servis tarayıcıdan doğrudan sorguya izin vermiyor (CORS). vknsorgula.net destek ile görüşün.'),{code:'NETWORK'})}
+ let r;try{r=await fetch(UP+'?vkn='+vkn,{headers:{Authorization:'Bearer '+key.trim().replace(/^Bearer\s+/i,''),Accept:'application/json'}})}catch{forgetVknKey();throw Object.assign(Error('Servis tarayıcıdan doğrudan sorguya izin vermiyor (CORS). vknsorgula.net destek ile görüşün.'),{code:'NETWORK'})}
  let data;try{data=await r.json()}catch{data={}}
  if(r.status===404)return {found:false,taxNo:vkn};
  if(r.status===401||r.status===403){forgetVknKey();throw Object.assign(Error('Anahtar kabul edilmedi ('+r.status+'). Anahtar silindi; tekrar deneyince yenisini yazabilirsiniz.'),{code:'ACCESS'})}
