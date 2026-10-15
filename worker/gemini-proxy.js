@@ -3,13 +3,26 @@
 // POST https://<worker-url>/   gövde: PDF dosyasının kendisi (Content-Type: application/pdf)
 const ALLOWED=['https://atakankolbasi-spec.github.io','http://localhost:8765','http://127.0.0.1:8765'];
 const MAX_BYTES=18*1024*1024;
-const MODELS=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash','gemini-2.5-flash-lite']; // Google eski modelleri yeni kullanıcılara kapatabiliyor; sırayla denenir
+const MODELS=['gemini-3.8-flash','gemini-3.5-flash','gemini-flash-latest','gemini-3.5-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite']; // Google eski modelleri yeni kullanıcılara kapatabiliyor; sırayla denenir
 // Google kota hatasından bekleme süresini (sn) ve günlük kota olup olmadığını çıkarır
 export function quotaInfo(err){
  const text=JSON.stringify(err||{});let retryAfter=0;
  const m=text.match(/"retryDelay"\s*:\s*"([\d.]+)s"/)||text.match(/retry in ([\d.]+)\s*s/i);if(m)retryAfter=Math.ceil(parseFloat(m[1]));
  const daily=/PerDay/i.test(text)||/limit:\s*0\b/i.test(text);
  return {retryAfter,daily};
+}
+// ListModels: generateContent destekleyen flash modelleri, yeni sürüm ve "lite" olmayanlar önce
+let modelCache={at:0,list:[]};
+export async function discoverModels(env){
+ if(Date.now()-modelCache.at<3600e3&&modelCache.list.length)return modelCache.list;
+ try{
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':env.GEMINI_API_KEY}});
+  const d=await r.json();
+  const ver=n=>{const m=n.match(/gemini-(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):0};
+  const list=(d.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')).map(m=>String(m.name||'').replace(/^models\//,'')).filter(n=>/flash/.test(n)&&!/image|tts|live|audio|embed|exp|thinking|robotics|computer/.test(n))
+   .sort((a,b)=>(/lite/.test(a)-/lite/.test(b))||(ver(b)-ver(a))||(/preview/.test(a)-/preview/.test(b)));
+  modelCache={at:Date.now(),list:list.slice(0,6)};return modelCache.list;
+ }catch{return []}
 }
 const gone=(status,msg)=>status===404||(status===400||status===403)&&/no longer available|not found|not supported|is not available|deprecated/i.test(msg||'');
 const str={type:'STRING',nullable:true};
@@ -95,18 +108,27 @@ async function handle(request,env){
   const retry=!!request.headers.get('X-Retry'),text=PROMPT+retryNote(request.headers.get('X-Retry'));
   // Gövde metin birleştirmeyle kurulur (büyük base64 metnini JSON.stringify ile yeniden işlemekten kaçınır)
   const body='{"contents":[{"role":"user","parts":[{"inline_data":{"mime_type":"application/pdf","data":"'+b64+'"}},{"text":'+JSON.stringify(text)+'}]}],"generationConfig":'+JSON.stringify({temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA})+'}';
-  const chain=[...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))];let model='',r,data;const quotas=[];
-  for(model of chain){
-   try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},body})}
-   catch(e){return json({error:'Gemini’ye ulaşılamadı.'},502,origin)}
+  const tried=new Set,quotas=[];let model='',r,data;
+  // Modeli dener; model kapanmışsa (404 vb.) ya da kotası doluysa false döner, başka hata ya da başarıda true.
+  const attempt=async name=>{
+   tried.add(name);model=name;
+   try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(name)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},body})}
+   catch(e){return 'net'}
    try{data=await r.json()}catch{data={}}
-   if(!r.ok&&gone(r.status,data?.error?.message))continue;
-   if(r.status===429){const q=quotaInfo(data?.error);quotas.push(q);continue}
-   break;
+   if(!r.ok&&gone(r.status,data?.error?.message))return false;
+   if(r.status===429){quotas.push(quotaInfo(data?.error));return false}
+   return true;
+  };
+  let net=false,ok=false;
+  for(const name of [...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))]){const st=await attempt(name);if(st==='net'){net=true;break}if(st){ok=true;break}}
+  // Hepsi kapalı/dolu ise Google'ın o an sunduğu flash modellerini listeleyip onları dener (model adları sık değişiyor)
+  if(!net&&!ok){
+   for(const name of await discoverModels(env)){if(tried.has(name))continue;const st=await attempt(name);if(st==='net'){net=true;break}if(st){ok=true;break}}
   }
+  if(net)return json({error:'Gemini’ye ulaşılamadı.'},502,origin);
   if(!r.ok){
    const m=data?.error?.message||('Gemini hata verdi ('+r.status+').');
-   if(r.status===429){
+   if(!ok&&quotas.length){
     // Her model ayrı kotaya sahiptir; hepsi dolduysa tek yanıt: günlük mü, kaç sn beklenmeli
     const daily=quotas.length>0&&quotas.every(q=>q.daily),waits=quotas.map(q=>q.retryAfter).filter(Boolean);
     return json({error:m.slice(0,300),status:429,quota:true,daily,retryAfter:waits.length?Math.min(...waits):0},429,origin)
