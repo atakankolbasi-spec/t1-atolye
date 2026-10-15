@@ -31,3 +31,6 @@ Denemek için tarayıcı Console'una yapıştırılabilir:
 - Ücretsiz Gemini katmanında Google, gönderilen içeriği ürünlerini geliştirmek için kullanabilir. Müşteri belgeleri için **ücretli (faturalandırmalı) katman** kullanman daha güvenlidir. Ayrıntı için Google'ın "Gemini API additional terms" sayfasına bak.
 - Model otomatik seçilir: önce `gemini-3.8-flash`, kapalıysa sırayla yedekleri denenir. Değiştirmek için Worker'a `GEMINI_MODEL` adlı bir değişken ekle.
 - Her PDF okuması bir API isteğidir; ücretsiz katmanın günlük sınırı vardır.
+
+## Kota (ücretsiz plan)
+Google ücretsiz planda dakikalık/günlük istek sınırı uygular. Site büyük PDF'i 15 sayfalık parçalara bölüp sırayla gönderir, "çok istek" hatasında Google'ın söylediği süre kadar bekler; biten parçaları tarayıcıda saklar. Günlük kota dolarsa ya da anahtarda ücretsiz kota yoksa Google AI Studio'da faturalandırmayı açmak gerekir.

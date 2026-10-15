@@ -11,12 +11,15 @@ export async function askGemini(file,{askCode,attempt=1,retry=null}={}){
  try{r=await send(getCode())}catch{throw Object.assign(Error('Yapay zekâ servisine ulaşılamadı (Worker yanıt vermedi ya da bağlantı koptu).'),{code:'NETWORK'})}
  if(r.status===401&&askCode){const code=await askCode();if(code){try{localStorage.setItem('t1-ai-code',code)}catch{}try{r=await send(code)}catch{throw Object.assign(Error('Yapay zekâ servisine ulaşılamadı.'),{code:'NETWORK'})}}}
  let data;try{data=await r.json()}catch{data={}}
- if(!r.ok)throw Object.assign(Error(data.error||'Yapay zekâ servisi hata verdi ('+r.status+').'),{code:r.status===401?'ACCESS':'SERVICE'});
+ if(!r.ok){
+  if(r.status===429||data.quota)throw Object.assign(Error(data.daily?'Google ücretsiz günlük kotası dolmuş.':'Google istek sınırı aşıldı.'),{code:'QUOTA',daily:!!data.daily,retryAfter:Number(data.retryAfter)||0,detail:data.error||''});
+  throw Object.assign(Error(data.error||'Yapay zekâ servisi hata verdi ('+r.status+').'),{code:r.status===401?'ACCESS':'SERVICE'});
+ }
  return Array.isArray(data.declarations)?data.declarations:[];
 }
 
 // Büyük PDF'i küçük parçalara böler (her parça bir önceki ile 1 sayfa örtüşür; böylece sayfa kesilmesi bilgi kaybettirmez).
-const PART_PAGES=8,WHOLE_LIMIT=10*1024*1024;
+const PART_PAGES=15,WHOLE_LIMIT=10*1024*1024;
 function loadPdfLib(){return window.PDFLib?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src=new URL('./vendor/pdf-lib.min.js',import.meta.url).href;s.onload=res;s.onerror=()=>rej(Error('PDF bölme bileşeni yüklenemedi.'));document.head.append(s)})}
 export async function splitPdf(file){
  if(file.size<=WHOLE_LIMIT)return [file];

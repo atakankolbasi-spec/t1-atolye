@@ -3,7 +3,14 @@
 // POST https://<worker-url>/   gövde: PDF dosyasının kendisi (Content-Type: application/pdf)
 const ALLOWED=['https://atakankolbasi-spec.github.io','http://localhost:8765','http://127.0.0.1:8765'];
 const MAX_BYTES=18*1024*1024;
-const MODELS=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash']; // Google eski modelleri yeni kullanıcılara kapatabiliyor; sırayla denenir
+const MODELS=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash','gemini-2.5-flash-lite']; // Google eski modelleri yeni kullanıcılara kapatabiliyor; sırayla denenir
+// Google kota hatasından bekleme süresini (sn) ve günlük kota olup olmadığını çıkarır
+export function quotaInfo(err){
+ const text=JSON.stringify(err||{});let retryAfter=0;
+ const m=text.match(/"retryDelay"\s*:\s*"([\d.]+)s"/)||text.match(/retry in ([\d.]+)\s*s/i);if(m)retryAfter=Math.ceil(parseFloat(m[1]));
+ const daily=/PerDay/i.test(text)||/limit:\s*0\b/i.test(text);
+ return {retryAfter,daily};
+}
 const gone=(status,msg)=>status===404||(status===400||status===403)&&/no longer available|not found|not supported|is not available|deprecated/i.test(msg||'');
 const str={type:'STRING',nullable:true};
 const SCHEMA={type:'OBJECT',properties:{declarations:{type:'ARRAY',items:{type:'OBJECT',properties:{
@@ -88,15 +95,24 @@ async function handle(request,env){
   const retry=!!request.headers.get('X-Retry'),text=PROMPT+retryNote(request.headers.get('X-Retry'));
   // Gövde metin birleştirmeyle kurulur (büyük base64 metnini JSON.stringify ile yeniden işlemekten kaçınır)
   const body='{"contents":[{"role":"user","parts":[{"inline_data":{"mime_type":"application/pdf","data":"'+b64+'"}},{"text":'+JSON.stringify(text)+'}]}],"generationConfig":'+JSON.stringify({temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA})+'}';
-  const chain=[...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))];let model='',r,data;
+  const chain=[...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))];let model='',r,data;const quotas=[];
   for(model of chain){
    try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},body})}
    catch(e){return json({error:'Gemini’ye ulaşılamadı.'},502,origin)}
    try{data=await r.json()}catch{data={}}
    if(!r.ok&&gone(r.status,data?.error?.message))continue;
+   if(r.status===429){const q=quotaInfo(data?.error);quotas.push(q);continue}
    break;
   }
-  if(!r.ok){const m=data?.error?.message||('Gemini hata verdi ('+r.status+').');return json({error:m.slice(0,300),status:r.status},r.status===429?429:502,origin)}
+  if(!r.ok){
+   const m=data?.error?.message||('Gemini hata verdi ('+r.status+').');
+   if(r.status===429){
+    // Her model ayrı kotaya sahiptir; hepsi dolduysa tek yanıt: günlük mü, kaç sn beklenmeli
+    const daily=quotas.length>0&&quotas.every(q=>q.daily),waits=quotas.map(q=>q.retryAfter).filter(Boolean);
+    return json({error:m.slice(0,300),status:429,quota:true,daily,retryAfter:waits.length?Math.min(...waits):0},429,origin)
+   }
+   return json({error:m.slice(0,300),status:r.status},502,origin)
+  }
   const out=readReply(data);
   if(out.error)return json(out,502,origin);
   return json({model,...out},200,origin);

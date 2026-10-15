@@ -49,38 +49,65 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    for(const [k,v] of Object.entries(a)){if(k!=='mrn'&&filled(v)&&!filled(cur[k]))cur[k]=v}cur.mrn=key;store.set(key,cur)}
  }
  const missingOf=raw=>{const av=aiValues(raw);return REQUIRED.filter(k=>!av[k])};
- // Önce yapay zekâ okur (büyük PDF parçalara bölünür); boş kalan alanlar için en çok 4 denemeye kadar yeniden sorar.
+ // Önce yapay zekâ okur (büyük PDF parçalara bölünür). Parçalar sırayla ve aralıklı gönderilir; Google "çok istek" derse
+ // söylediği süre kadar beklenip aynı parça yeniden denenir. Biten parçalar saklanır: sayfa yenilense ya da kota dolsa bile kaldığı yerden devam eder.
+ const SIG=f=>'v2|'+f.name+'|'+f.size+'|'+f.lastModified,PCACHE='t1-ai-parts';
+ const loadParts=sig=>{try{const all=JSON.parse(localStorage.getItem(PCACHE)||'{}');return all[sig]||{}}catch{return {}}};
+ const saveParts=(sig,obj)=>{try{const all=JSON.parse(localStorage.getItem(PCACHE)||'{}');delete all[sig];all[sig]=obj;const keys=Object.keys(all);while(keys.length>3)delete all[keys.shift()];localStorage.setItem(PCACHE,JSON.stringify(all))}catch{}};
+ const waitSec=async(sec,msg,say)=>{for(let t=Math.ceil(sec);t>0;t--){say(msg+' ('+t+' sn)…');await sleep(1000)}};
  async function aiRead(file,say){
   const store=new Map,askCode=async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||'';let lastErr=null,used=0;
   say('PDF hazırlanıyor…');
-  const parts=await splitPdf(file),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N),done=new Array(N).fill(false);
+  const sig=SIG(file),cache=loadParts(sig),parts=await splitPdf(file),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N).fill(null),done=new Array(N).fill(false);
   const tag=N>1?' · '+N+' parça':'';
+  for(let i=0;i<N;i++)if(cache[i]){res[i]=cache[i];done[i]=true}
+  const cached=done.filter(Boolean).length;
+  const ask=async(i,attempt,retry,label)=>{
+   // Kota/hız sınırında aynı parçayı bekleyip yeniden dener (deneme hakkından sayılmaz)
+   for(let w=0;;w++){
+    try{return await askGemini(parts[i],{askCode,attempt,retry})}
+    catch(err){
+     if(err.code!=='QUOTA'||err.daily||w>=6)throw err;
+     await waitSec(Math.min(Math.max(err.retryAfter||20,5)+2,90),'Google istek sınırı: bekleniyor · '+label,say);
+    }
+   }
+  };
+  let first=true;
   for(let attempt=1;attempt<=4;attempt++){
    const jobs=[];
    for(let i=0;i<N;i++){
-    if(attempt===1||!done[i]){jobs.push({i,retry:null});continue}
+    if(!done[i]){jobs.push({i,retry:null});continue}
+    if(attempt===1)continue;
     const retry={};for(const [mrn,raw] of store){if(!seen[i].has(mrn))continue;const m=missingOf(raw);if(m.length)retry[mrn]=m.map(k=>API_KEY[k])}
     if(Object.keys(retry).length)jobs.push({i,retry});
    }
-   if(!jobs.length)break;used=attempt;let fin=0;
-   const say2=()=>say((attempt===1?'Yapay zekâ okuyor':'Yapay zekâ eksik alanları yeniden okuyor')+' (deneme '+attempt+'/4'+tag+(N>1?' · '+fin+'/'+jobs.length+' bitti':'')+')…');say2();
-   let fatal=false,next=0;
-   const worker=async()=>{while(next<jobs.length&&!fatal){const j=jobs[next++];
-     try{res[j.i]=await askGemini(parts[j.i],{askCode,attempt,retry:j.retry});done[j.i]=true}
-     catch(err){lastErr=err;if(err.code==='ACCESS'||err.code==='NOAI')fatal=true}
-     fin++;say2()}};
-   await worker();
+   // Saklı parçalar ilk turda doğrudan birleştirilir
+   if(attempt===1){let lm='';for(let i=0;i<N;i++){if(!done[i]||!res[i])continue;for(const a of res[i]){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lm;if(!m)continue;a.mrn=m;seen[i].add(m);lm=m}mergeRaw(store,res[i].filter(a=>a.mrn));res[i]=null}}
+   if(!jobs.length)break;used=attempt;let fin=0,fatal=false;
+   const say2=()=>say((attempt===1?'Yapay zekâ okuyor':'Yapay zekâ eksik alanları yeniden okuyor')+' (deneme '+attempt+'/4'+tag+(cached&&attempt===1?' · '+cached+' parça saklıydı':'')+(N>1?' · '+fin+'/'+jobs.length+' bitti':'')+')…');
+   for(const j of jobs){
+    if(fatal)break;say2();
+    if(!first)await sleep(3000);first=false; // istekler arasında kısa ara: dakikalık sınıra takılmamak için
+    try{res[j.i]=await ask(j.i,attempt,j.retry,'parça '+(j.i+1)+'/'+N);if(!j.retry){done[j.i]=true;cache[j.i]=res[j.i];saveParts(sig,cache)}}
+    catch(err){lastErr=err;if(err.code==='ACCESS'||err.code==='NOAI'||(err.code==='QUOTA'&&err.daily))fatal=true}
+    fin++;
+   }
    // Parçalar sırayla birleşir; MRN'siz kayıt (parça ortadan başlıyorsa) önceki beyannameye bağlanır
    let lastMrn='';
    for(let i=0;i<N;i++){const list=res[i];if(!list)continue;res[i]=null;
     for(const a of list){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lastMrn;if(!m)continue;a.mrn=m;seen[i].add(m);lastMrn=m}
     mergeRaw(store,list.filter(a=>a.mrn))}
    if(fatal)break;
-   if(!done.every(Boolean)||[...store.values()].some(r=>missingOf(r).length))await sleep((lastErr&&/429|kota|quota|rate/i.test(lastErr.message)?15000:2500)*attempt);
   }
-  if(!store.size)throw lastErr||Error('Yapay zekâ sonuç vermedi.');
-  return {store,used,failed:done.filter(d=>!d).length,parts:N,lastErr:lastErr?lastErr.message:''};
+  const failed=done.filter(d=>!d).length;
+  if(!store.size){
+   if(lastErr?.code==='QUOTA')throw Object.assign(Error(quotaText(lastErr)),{code:'QUOTA'});
+   throw lastErr||Error('Yapay zekâ sonuç vermedi.');
+  }
+  if(!failed&&!store.size)try{localStorage.removeItem(PCACHE)}catch{}
+  return {store,used,failed,parts:N,lastErr:lastErr?(lastErr.code==='QUOTA'?quotaText(lastErr):lastErr.message):''};
  }
+ const quotaText=e=>e.daily?'Google’ın ücretsiz günlük kotası dolmuş (ya da bu anahtarda ücretsiz kota yok). Yarın tekrar deneyin ya da Google AI Studio’da faturalandırmayı açın. Biten parçalar saklandı; kaldığı yerden devam eder.':'Google istek sınırına takıldı. Birkaç dakika sonra aynı PDF’i yeniden yükleyin; biten parçalar saklandı, kalanlardan devam eder.';
  // Yapay zekâ değeri önceliklidir; boş kalanlar PDF okuyucudan tamamlanır.
  function applyAi(store,tries){
   for(const raw of store.values()){
@@ -118,7 +145,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    let aiRes=null;
    if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used;if(aiRes.r.failed)aiNote='UYARI: '+aiRes.r.parts+' parçadan '+aiRes.r.failed+' tanesi okunamadı ('+(lastAiErr(aiRes.r)||'servis hatası')+'). Bazı beyannameler eksik olabilir; PDF’i yeniden yükleyip tekrar deneyin.'}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
    let pages=[];
-   try{pages=await readPdf(file,{ocr:!aiOk,onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}})}
+   try{pages=await readPdf(file,{ocr:!aiOk&&aiRes?.err?.code!=='QUOTA',onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}})}
    catch(err){if(!aiOk)throw err}
    const found=analyze(pages,countries);
    groups=found.map(g=>{const x={...g,values:toValues(g)};x.match=matchOf(x.values);return x});
