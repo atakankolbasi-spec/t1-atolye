@@ -25,11 +25,11 @@ export default {
   // Aynı numara 30 gün boyunca önbellekten gelir; sorgu hakkı tekrar harcanmaz.
   const cache=typeof caches!=='undefined'?caches.default:null,key=new Request('https://vkn-cache.invalid/'+vkn);
   if(cache){const hit=await cache.match(key);if(hit){const b=await hit.json();return json({...b,cached:true},200,origin)}}
-  let r;try{r=await fetch(UPSTREAM+'?vkn='+vkn,{headers:{Authorization:'Bearer '+String(env.VKN_API_KEY).trim().replace(/^Bearer\s+/i,''),Accept:'application/json'}})}catch{return json({error:'VKN servisine ulaşılamadı.'},502,origin)}
-  let data;try{data=await r.json()}catch{data={}}
+  let r;try{r=await fetch(UPSTREAM+'?vkn='+vkn,{headers:{Authorization:'Bearer '+String(env.VKN_API_KEY).trim().replace(/^Bearer\s+/i,''),Accept:'application/json','User-Agent':'Mozilla/5.0 (compatible; PCS-Transit/1.0)'}})}catch{return json({error:'VKN servisine ulaşılamadı.'},502,origin)}
+  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={}}
   if(r.status===404)return json({found:false,taxNo:vkn,error:'Bu numarayla firma bulunamadı.'},200,origin);
   if(r.status===429)return json({error:'Sorgu hakkınız bitti ya da çok hızlı sorgulandı.'},429,origin);
-  if(r.status===401||r.status===403)return json({error:'VKN servisi anahtarı kabul etmedi ('+r.status+'): '+String(data?.error||data?.message||'anahtar hatalı ya da paket yetersiz').slice(0,160)},502,origin);
+  if(r.status===401||r.status===403)return json({error:'VKN servisi anahtarı kabul etmedi ('+r.status+'): '+String(data?.error||data?.message||raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()||'yanıt boş').slice(0,200)},502,origin);
   if(!r.ok)return json({error:'VKN servisi hata verdi ('+r.status+').'},502,origin);
   const out=mapReply(data);if(!out)return json({found:false,taxNo:vkn,error:'Bu numarayla firma bulunamadı.'},200,origin);
   if(cache)await cache.put(key,new Response(JSON.stringify(out),{headers:{'Content-Type':'application/json','Cache-Control':'public, max-age=2592000'}}));
