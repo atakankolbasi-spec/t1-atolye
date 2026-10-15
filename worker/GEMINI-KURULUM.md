@@ -29,5 +29,5 @@ Denemek için tarayıcı Console'una yapıştırılabilir:
 
 - PDF'in içindeki bilgiler (firma adları, tutarlar, adresler) Google'ın sunucularına gönderilir.
 - Ücretsiz Gemini katmanında Google, gönderilen içeriği ürünlerini geliştirmek için kullanabilir. Müşteri belgeleri için **ücretli (faturalandırmalı) katman** kullanman daha güvenlidir. Ayrıntı için Google'ın "Gemini API additional terms" sayfasına bak.
-- Model varsayılanı `gemini-2.5-flash`'tır. Değiştirmek için Worker'a `GEMINI_MODEL` adlı bir değişken ekle.
+- Model otomatik seçilir: önce `gemini-3.8-flash`, kapalıysa sırayla yedekleri denenir. Değiştirmek için Worker'a `GEMINI_MODEL` adlı bir değişken ekle.
 - Her PDF okuması bir API isteğidir; ücretsiz katmanın günlük sınırı vardır.

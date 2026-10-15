@@ -3,7 +3,8 @@
 // POST https://<worker-url>/   gövde: PDF dosyasının kendisi (Content-Type: application/pdf)
 const ALLOWED=['https://atakankolbasi-spec.github.io','http://localhost:8765','http://127.0.0.1:8765'];
 const MAX_BYTES=18*1024*1024;
-const MODEL_DEFAULT='gemini-2.5-flash';
+const MODELS=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash']; // Google eski modelleri yeni kullanıcılara kapatabiliyor; sırayla denenir
+const gone=(status,msg)=>status===404||(status===400||status===403)&&/no longer available|not found|not supported|is not available|deprecated/i.test(msg||'');
 const str={type:'STRING',nullable:true};
 const SCHEMA={type:'OBJECT',properties:{declarations:{type:'ARRAY',items:{type:'OBJECT',properties:{
  mrn:{type:'STRING'},kalemCount:{type:'INTEGER',nullable:true},
@@ -70,13 +71,15 @@ export default {
   if(!bytes.length)return json({error:'PDF boş.'},400,origin);
   if(bytes.length>MAX_BYTES)return json({error:'PDF çok büyük (en çok 18 MB). Dosyayı bölüp tekrar dene.'},413,origin);
   if(String.fromCharCode(...bytes.subarray(0,4))!=='%PDF')return json({error:'Bu dosya PDF görünmüyor.'},400,origin);
-  const model=env.GEMINI_MODEL||MODEL_DEFAULT,retry=!!request.headers.get('X-Retry');
-  let r;
-  try{
-   r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},
-    body:JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:'application/pdf',data:toBase64(bytes)}},{text:PROMPT+retryNote(request.headers.get('X-Retry'))}]}],generationConfig:{temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA}})});
-  }catch(e){return json({error:'Gemini’ye ulaşılamadı.'},502,origin)}
-  let data;try{data=await r.json()}catch{data={}}
+  const retry=!!request.headers.get('X-Retry'),b64=toBase64(bytes),body=JSON.stringify({contents:[{role:'user',parts:[{inline_data:{mime_type:'application/pdf',data:b64}},{text:PROMPT+retryNote(request.headers.get('X-Retry'))}]}],generationConfig:{temperature:retry?0.3:0,responseMimeType:'application/json',responseSchema:SCHEMA}});
+  const chain=[...new Set([env.GEMINI_MODEL,...MODELS].filter(Boolean))];let model='',r,data;
+  for(model of chain){
+   try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},body})}
+   catch(e){return json({error:'Gemini’ye ulaşılamadı.'},502,origin)}
+   try{data=await r.json()}catch{data={}}
+   if(!r.ok&&gone(r.status,data?.error?.message))continue;
+   break;
+  }
   if(!r.ok){const m=data?.error?.message||('Gemini hata verdi ('+r.status+').');return json({error:m.slice(0,300),status:r.status},r.status===429?429:502,origin)}
   const out=readReply(data);
   if(out.error)return json(out,502,origin);
