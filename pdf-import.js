@@ -110,7 +110,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const runFile=async file=>{
   if(!file)return;
   let aiOk=false,aiNote='',aiUsed=0;groups=[];const useAi=$('#pdfUseAi').checked&&!!aiProxyUrl(),msgs={ai:'',local:''};
-  const show=()=>{$('#pdfStatus').innerHTML=[msgs.ai,msgs.local].filter(Boolean).join('<br>')};
+  const show=()=>{$('#pdfStatus').innerHTML=[msgs.ai,msgs.local].filter(Boolean).join('<br>')+'<br><small>⏳ Okuma sürerken bu sekmeyi önde tutun; tarayıcı arka plandaki sekmeyi yavaşlatır.</small>'};
   $('#pdfAiRow').hidden=!aiProxyUrl();$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;msgs.local='PDF açılıyor…';show();dlg.showModal();
   try{
    await references.ready;const countries=await loadCountries();
