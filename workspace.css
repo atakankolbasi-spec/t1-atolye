@@ -282,3 +282,40 @@ dialog.pdfDialog{max-width:1100px;width:96vw;padding:0}.pdfHead{display:flex;jus
 .finPerm{display:flex;flex-direction:column;gap:2px;font-size:13px;color:#6a5316}.finPerm b{font-size:16px}.finPerm small{color:#8a7436}
 .aeoBadge{display:inline-block;margin-left:6px;padding:3px 9px;border-radius:7px;background:#fde8ec;color:#d62a45;font-size:12px;font-weight:700;letter-spacing:.4px;border:1px solid #f6c3cc;vertical-align:middle}
 .aeoBadge[hidden]{display:none!important}
+/* Ana liste: ekrana sığar */
+#declarationsTable{table-layout:fixed;width:100%}
+#declarationsTable th,#declarationsTable td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:12px 10px;font-size:13px}
+#declarationsTable td small{display:block;overflow:hidden;text-overflow:ellipsis}
+#declarationsTable .cellMain{display:block;overflow:hidden;text-overflow:ellipsis}
+#declarationsTable .rowactions{display:flex;gap:4px;flex-wrap:nowrap}
+#declarationsTable .rowactions button{padding:5px 8px;min-width:0}
+.listcard .tablewrap{overflow-x:hidden}
+.showExtra col.extra{display:table-column}
+#declarationsTable th{font-size:11px;letter-spacing:.2px;padding:12px 8px}
+#declarationsTable td{padding:10px 8px}
+#declarationsTable .stCell{white-space:normal}
+#declarationsTable .stCell .tag{white-space:nowrap}
+#declarationsTable .rowactions{flex-wrap:wrap;gap:3px;max-width:100px}
+#declarationsTable .rowactions button{padding:3px 6px;font-size:12px}
+#declarationsTable th{font-size:11px;letter-spacing:.2px;padding:12px 8px}
+#declarationsTable td{padding:10px 8px}
+#declarationsTable .stCell{white-space:normal}
+#declarationsTable .stCell .tag{white-space:nowrap}
+#declarationsTable .rowactions{flex-wrap:wrap;gap:3px;max-width:100px}
+#declarationsTable .rowactions button{padding:3px 6px;font-size:12px}
+/* PDF yükleme: dosya listesi */
+.pdfFiles{margin:0 0 12px;border:1px solid var(--line);border-radius:12px;background:#fffefb;overflow:hidden}
+.pdfFilesHead{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fbf5e3;font-size:14px;color:#6a5316}
+.pdfFile{display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--line)}
+.pdfFileIcon{font-size:22px}.pdfFileMain{flex:1;min-width:0}.pdfFileMain strong{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pdfFileMain small{display:block;color:#8a8a94;font-size:12.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdfFileState{font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:#eee;color:#555;white-space:nowrap}
+.pdfFile.busy .pdfFileState{background:#fbf0d2;color:#7a5a14}.pdfFile.ok .pdfFileState{background:#e6f4ec;color:#1d7a4d}.pdfFile.bad .pdfFileState{background:#fde8ec;color:#c0233b}
+.pdfMore{margin-right:auto}
+.pdfSrc{display:inline-block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;margin:0 8px;padding:2px 9px;border-radius:99px;background:#f3efe3;color:#6a5316;font-size:12px}
+.pdfZoneList{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pdfZoneList .zf{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:3px 10px;border-radius:99px;background:#fff;border:1px solid #e3d3a0;font-size:12px;color:#6a5316}
+.pdfZoneList .zf.ok{border-color:#b9dfc9;color:#1d7a4d}.pdfZoneList .zf.bad{border-color:#f0bcc6;color:#c0233b}.pdfZoneList .zf.busy{background:#fbf0d2}
+/* Bütün yazılar büyük harf (lang=tr: İ/ı doğru) */
+*,*::before,*::after{text-transform:uppercase}
+input[type=email],input[type=url],.keepCase{text-transform:none}
+::placeholder{text-transform:uppercase}
