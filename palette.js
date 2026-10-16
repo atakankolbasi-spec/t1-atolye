@@ -19,7 +19,11 @@ function open(){let d=document.getElementById('palette');if(!d){d=document.creat
   list.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)go(Number(b.dataset.i))});
   d.addEventListener('click',e=>{if(e.target===d)d.close()});d._render=render}
  d.querySelector('#pInput').value='';d._render();d.showModal();d.querySelector('#pInput').focus()}
+function help(){let d=document.getElementById('kbdHelp');if(!d){d=document.createElement('dialog');d.id='kbdHelp';d.innerHTML='<h2>KISAYOLLAR</h2><ul class="kbdL"><li><kbd>CTRL</kbd><kbd>K</kbd><span>Hızlı ara</span></li><li><kbd>ALT</kbd><kbd>N</kbd><span>Yeni T1 yaz</span></li><li><kbd>ALT</kbd><kbd>L</kbd><span>Beyanname listesi</span></li><li><kbd>ALT</kbd><kbd>H</kbd><span>Hat bildirimleri</span></li><li><kbd>ALT</kbd><kbd>E</kbd><span>ENS beyannameleri</span></li><li><kbd>?</kbd><span>Bu pencere</span></li><li><kbd>ESC</kbd><span>Pencereyi kapat</span></li></ul><div class="dialogactions"><button type="button" data-kc>KAPAT</button></div>';document.body.append(d);d.onclick=e=>{if(e.target===d||e.target.closest('[data-kc]'))d.close()}}d.showModal()}
 export function installPalette(){
  const top=document.querySelector('.topbar');if(top&&!document.getElementById('topSearch')){const b=document.createElement('button');b.type='button';b.id='topSearch';b.className='topSearch';b.innerHTML='<span>⌕</span> HIZLI ARA <kbd>CTRL K</kbd>';b.onclick=open;const bc=top.querySelector('.breadcrumb');bc?.after(b)}
- document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();open()}});
+ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();open();return}
+  const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)||document.activeElement?.isContentEditable;
+  if(e.altKey&&!e.ctrlKey){const m={n:'navNew',l:'navList',h:'navHat',e:'navEns'}[e.key.toLowerCase()];if(m){e.preventDefault();document.getElementById(m)?.click()}return}
+  if(e.key==='?'&&!typing&&!document.querySelector('dialog[open]')){e.preventDefault();help()}});
 }

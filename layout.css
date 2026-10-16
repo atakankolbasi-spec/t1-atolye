@@ -247,3 +247,23 @@ html.dark .dcInc{filter:invert(1) hue-rotate(180deg)}
 .pdfDropZone{background:linear-gradient(135deg,#f5f8ff,#fff)!important;border:2px dashed #b9ccf6!important;border-radius:16px!important;padding:18px 22px!important;transition:all .25s var(--ease)}
 .pdfDropZone strong{color:var(--a2)!important}.pdfDropZone:hover,.pdfDropZone.over{background:linear-gradient(135deg,#e8f0ff,#f5f8ff)!important;border-color:var(--a)!important;transform:translateY(-2px);box-shadow:var(--sh2)}
 html.dark .hero .primary{filter:none!important}
+
+/* ---------- Kart görünümü ---------- */
+.viewToggle{height:44px;padding:0 16px!important;border-radius:12px!important;background:#eef2ff!important;color:var(--a2)!important;border:1px solid #d6e2fb!important;font-size:12px;letter-spacing:.5px}
+.dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;padding:20px 22px 24px;background:linear-gradient(180deg,#f4f7fc,#eef2f9)}
+.dcards[hidden]{display:none}
+.dcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px 14px;box-shadow:var(--sh1);transition:transform .3s var(--ease),box-shadow .3s var(--ease);overflow:hidden}
+.dcard:before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:#94a3b8}.dcard.st-ok:before{background:linear-gradient(90deg,#16a34a,#34d399)}.dcard.st-pre:before{background:linear-gradient(90deg,#8b5cf6,#c084fc)}.dcard.st-draft:before{background:linear-gradient(90deg,#64748b,#94a3b8)}
+.dcard:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
+.dcard header{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}.dcard .ref{font:800 16px var(--head);border:0;background:none;padding:0;color:var(--a2)}.dcard .tags{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.route{display:flex;align-items:center;gap:12px;margin:2px 0 16px}.rp{display:flex;flex-direction:column;min-width:0;flex:0 0 auto}.rp.r{text-align:right;margin-left:auto}.rp b{font:800 15px var(--head);letter-spacing:-.2px}.rp small{font-size:10.5px;color:var(--mut);letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.rline{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg,#b7c9f2 0 6px,transparent 6px 12px);min-width:40px}.rline em{position:absolute;left:50%;top:-12px;transform:translateX(-50%);font-style:normal;background:#fff;padding:0 6px;font-size:15px}
+.dcard .meta{display:grid;gap:7px;font-size:12px;color:var(--ink2);margin-bottom:14px}.dcard .meta span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dcard .meta b{color:var(--ink)}
+.dcard footer{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px dashed #e3e8f1;padding-top:12px}.dcard footer small{font-size:10.5px;color:var(--mut);letter-spacing:.3px}
+.dcard .rowactions{display:flex;gap:4px}.dcard .rowactions button{padding:5px 7px;font-size:12px;border:0!important;background:#f1f5fd!important;color:var(--ink2)!important}.dcard .rowactions .danger{background:#fee2e2!important;color:#b91c1c!important}.dcard .rowactions button:hover{background:#dfe8fb!important}
+html.dark .dcard .route em{background:transparent}
+
+/* ---------- Adım geçiş animasyonu, kısayol penceresi ---------- */
+.steppanel:not([hidden]){animation:stepin .45s var(--ease)}@keyframes stepin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+#kbdHelp{width:min(440px,92vw);padding:26px 28px!important}#kbdHelp h2{margin:0 0 16px;font-size:20px}
+.kbdL{list-style:none;margin:0;padding:0;display:grid;gap:10px}.kbdL li{display:flex;align-items:center;gap:6px;font-size:13px}.kbdL kbd{font:700 11px var(--font);padding:5px 9px;border-radius:8px;background:#f1f5fb;border:1px solid #d7dfee;color:var(--ink2)}.kbdL span{margin-left:auto;color:var(--ink2);font-weight:600}
