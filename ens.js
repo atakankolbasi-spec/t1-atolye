@@ -2,6 +2,8 @@ import {attachCombo} from './combo.js';
 import {findCompanies,normalizeSearch} from './directory.js';
 import {num} from './excel.js';
 import {detectPlate} from './transport.js';
+import {mountFinancePanel} from './finance-ui.js';
+import {normalizeFin,blankFin} from './finance.js';
 
 const KEY='t1-ens-v1';
 const uid=()=>crypto.randomUUID();
@@ -24,7 +26,7 @@ const blank=()=>({id:uid(),ref:'',status:'Taslak',createdAt:'',updatedAt:'',arch
  entryOffice:'',exitOffice:'',dispatchCountry:'',departurePlace:'',destinationCountry:'',destinationPlace:'',transitMethod:'Karayolu',arrivalDate:'',routeCountries:[],
  carrier:'',carrierEori:'',carrierTax:'',ics2:'ICS-2',vehicle:'',vehicleCountry:'',trailer:'',trailerCountry:'',container:'',seal:'',filingType:FILING[0],agentRef:'',
  consignor:'',consignorEori:'',consignorAddress:'',consignee:'',consigneeEori:'',consigneeAddress:'',customer:'',tags:'',commercialRef:'',
- lrn:'',mrn:'',transitEnd:'',ferryBooking:'',stampDuty:'',consignmentNote:'',ncts:'',goods:[]});
+ lrn:'',mrn:'',transitEnd:'',ferryBooking:'',stampDuty:'',consignmentNote:'',ncts:'',goods:[],fin:null});
 const blankGood=(p={})=>({id:uid(),gtip:'',description:'',consignor:'',consignee:'',exportMrn:'',amount:'',currency:'EUR',gross:'',net:'',packages:'',packageType:'BI',...p});
 const normalize=v=>{const b=blank(),o={...b,...(v&&typeof v==='object'?v:{})};o.routeCountries=Array.isArray(o.routeCountries)?o.routeCountries.map(x=>String(x).toUpperCase()).filter(Boolean):[];o.goods=Array.isArray(o.goods)?o.goods.map(g=>({...blankGood(),...g})):[];return o};
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.records))return {counter:Number(v.counter)||0,records:v.records.filter(r=>r&&r.id).map(normalize)}}catch{}return {counter:0,records:[]}}
@@ -130,8 +132,15 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
   <section class="card ensCard"><h2>Taraflar ve referanslar</h2><div class="accGrid">${F('consignor','Gönderici (Consignor)',{cls:'span2',req:1,autocomplete:false})}${F('consignorEori','Gönderici EORI')}${F('consignorAddress','Gönderici adresi',{area:1})}${F('consignee','Alıcı (Consignee)',{cls:'span2',req:1,autocomplete:false})}${F('consigneeEori','Alıcı EORI')}${F('consigneeAddress','Alıcı adresi',{area:1})}${F('customer','Müşteri',{cls:'span2',autocomplete:false})}${F('tags','Etiketler',{ph:'virgülle ayırın'})}${F('commercialRef','Ticari referans no')}</div></section>
   <section class="card ensCard"><h2>Ek bilgiler</h2><div class="accGrid">${F('lrn','LRN (yetkili sistemden)',{ph:'Varsa yazın'})}${F('mrn','MRN (yetkili sistemden)',{ph:'Varsa yazın'})}${F('transitEnd','Transit bitiş tarihi',{type:'date'})}${F('ferryBooking','Feribot rezervasyonu')}${F('stampDuty','Damga vergisi')}${F('consignmentNote','Konsinye notu',{cls:'span2'})}${F('ncts','Bağlı T1 (NCTS) referansı',{cls:'span2',autocomplete:false})}</div>${linked?`<p class="accNote">Bağlı T1: <a href="#declaration/${esc(linked.id)}">${esc(linked.ref)} ↗</a></p>`:''}</section>
   <section class="card ensCard"><div class="goodstoolbar"><div><h2>Eşya bilgileri</h2><p>Her satır bir eşya kalemidir.</p></div><button type="button" class="primary" id="ensAddGood">＋ Eşya ekle</button></div><div id="ensGoods"></div><div class="goodsTotals" id="ensTotals"></div></section>
+  <section class="card ensCard"><h2>Finansal bilgiler</h2><p class="accNote">Fiyat ayarlarındaki ENS ücreti kuralı kendiliğinden eklenir.</p><div id="ensFinance"></div></section>
   <div class="ensFooter"><button id="ensJson">Hazırlık dosyası (JSON) ↓</button><button id="ensCsv">Eşya listesi (CSV) ↓</button><span class="spacer"></span><button class="primary" id="ensSave2">Kaydet</button></div>`;
-  renderRoute();renderGoods();updateState();attachEditorCombos();
+  renderRoute();renderGoods();updateState();attachEditorCombos();mountFin();
+ }
+ function mountFin(){
+  cur.fin=cur.fin?normalizeFin(cur.fin):blankFin();
+  const host=view.querySelector('#ensFinance');if(!host)return;
+  const panel=mountFinancePanel(host,{getState:()=>({fin:cur.fin,kind:'ens',customerDefault:cur.customer||cur.consignee||'',goods:cur.goods}),commit:fin=>{cur.fin=fin;touch()},getCompanies,toast,confirmAction});
+  panel.render();
  }
  function attachEditorCombos(){
   attachCombo(view.querySelector('[data-f=entryOffice]'),{minChars:2,emptyText:'Gümrük bulunamadı. Resmî kodu elle yazabilirsiniz.',search:async(q,limit)=>{const c=await getCustoms(),n=normalizeSearch(q);return c.records.filter(o=>normalizeSearch(o.code+' '+o.name+' '+o.city+' '+(o.aliases||[]).join(' ')).includes(n)).slice(0,limit)},item:o=>({title:o.code+' · '+o.name,sub:o.country+' · '+o.city}),onPick:o=>{cur.entryOffice=o.code+' '+o.name;view.querySelector('[data-f=entryOffice]').value=cur.entryOffice;touch()}});

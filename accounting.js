@@ -216,6 +216,13 @@ export function installAccounting({showAccounting,toast,confirmAction,getDeclara
   if(!d)return;showAccounting();
   const inv=blankInvoice();inv.refs=[d.ref];inv.customer.name=d.customer||'';
   const c=d.customer?exactCompany(companiesCache,d.customer):null;if(c){inv.customer.name=c.name;inv.customer.taxNo=c.taxNo||c.eori||'';inv.customer.address=[c.address,c.city,c.country].filter(Boolean).join(', ')}
+  if(d.finLines&&d.finLines.length){
+   // Finansal bilgiler adımındaki gelir kalemleri fatura satırı olur
+   const vatOf=code=>{const m=String(code||'').match(/(\d+)/);return m?m[1]:'0'};
+   for(const l of d.finLines)inv.lines.push(newLine({desc:l.name+' — '+d.ref+(d.vehicle?' ('+d.vehicle+')':''),qty:String(l.qty||1).replace('.',','),unit:l.unit||'Adet',price:String(l.price||0).replace('.',','),vat:vatOf(l.vat)}));
+   if(d.finLines[0].currency)inv.currency=d.finLines[0].currency;
+   openInvoice(inv,{dirty:true});return;
+  }
   const sv=data.services.find(s=>(opts.service||/t1/i).test(s.name))||data.services[0];
   inv.lines.push(newLine({desc:(opts.label||'T1 transit beyannamesi hizmet bedeli')+' — '+d.ref+(d.vehicle?' ('+d.vehicle+')':''),price:sv&&n0(sv.price)?String(sv.price).replace('.',','):'',unit:sv?.unit||'Adet',vat:String(sv?sv.vat:data.settings.defaultVat)}));
   if(sv&&sv.currency)inv.currency=sv.currency;
