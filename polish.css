@@ -121,3 +121,20 @@ h1,h2,h3,h4,strong,b,th,.eyebrow,.primary,.tag,.aeoBadge,.glxNo,.kpis strong{fon
 .hatBadge.hb0{background:#eef2f7;color:#475569}.hatBadge.hb1{background:#e0ebff;color:#1f43c0}.hatBadge.hb2{background:#fef3c7;color:#b45309}.hatBadge.hb3{background:#dcfce7;color:#15803d}.hatBadge.hb4{background:#fee2e2;color:#b91c1c}
 #declarationsTable td:nth-child(1) small,#declarationsTable td:nth-child(2) small{display:none!important}
 #declarationsTable .stCell .tag{padding:4px 10px!important;font-size:12px}#declarationsTable .stCell .aeoBadge{padding:4px 9px;font-size:11px}
+
+/* ===== Hat bildirimleri: sığan tablo, plaka, detay ===== */
+#hatView .lstTable{table-layout:fixed;width:100%}
+#hatView .lstTable th,#hatView .lstTable td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:14px 10px!important}
+#hatView .lstTable th:nth-child(1){width:16%}#hatView .lstTable th:nth-child(2){width:7%}#hatView .lstTable th:nth-child(3){width:11%}#hatView .lstTable th:nth-child(4){width:7%}#hatView .lstTable th:nth-child(5){width:8%}#hatView .lstTable th:nth-child(6){width:15%}#hatView .lstTable th:nth-child(7){width:8%}#hatView .lstTable th:nth-child(8){width:10%}#hatView .lstTable th:nth-child(9){width:10%}#hatView .lstTable th:nth-child(10){width:9%}
+#hatView .lstTable small{display:inline;margin-left:8px;color:#7a88a3}
+.plates{color:var(--pc-ink)}
+#declarationsTable td:nth-child(7) small{color:var(--pc-ink)!important;margin-left:0!important}#declarationsTable td:nth-child(7) small:before{content:' / '}
+.hatPri{padding:4px 10px;border-radius:999px;font-size:12px}.hatPri.p0{background:#fef3c7;color:#b45309}.hatPri.p1{background:#e0ebff;color:#1f43c0}.hatPri.p2{background:#fee2e2;color:#b91c1c}.hatPri.p3{background:#1e293b;color:#fff}
+.hatDlg{width:min(1180px,96vw);max-width:96vw;padding:0!important;overflow:hidden}
+.hatDlg .dHead{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 28px;background:#0f1b33;color:#fff}.hatDlg .dHead small{color:#8fb0ff;letter-spacing:1px;font-size:11px}.hatDlg h2{margin:4px 0 0;color:#fff;font-size:22px;display:flex;align-items:center;gap:12px}
+.hatDlg .dBtn{display:flex;gap:8px}.hatDlg .dBtn button{background:#1b2f5c!important;color:#fff!important;border-color:#2a4175!important;font-size:12px}
+.hatDlg .dGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:22px;background:#f3f6fb}
+.hatDlg section{background:#fff;border:1px solid #dbe3f2;border-radius:14px;padding:18px 20px;box-shadow:0 1px 3px #0f1b3310}
+.hatDlg section h3{margin:0 0 12px;font-size:15px;padding-bottom:10px;border-bottom:1px solid #eef2f8}
+.hatDlg .dRow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed #eef2f8;font-size:13px}.hatDlg .dRow span{color:#7a88a3}.hatDlg .dRow b{text-align:right;word-break:break-word}
+@media(max-width:900px){.hatDlg .dGrid{grid-template-columns:1fr}}
