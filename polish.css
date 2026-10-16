@@ -90,7 +90,7 @@ footer{color:#8a97ad!important;border-top-color:var(--pc-line)!important}.bottom
 body,body *{font-weight:600!important}
 h1,h2,h3,h4,strong,b,th,.eyebrow,.primary,.tag,.aeoBadge,.glxNo,.kpis strong{font-weight:800!important}
 /* ===== Kart şeridi kaldırıldı ===== */
-.kpis{display:none!important}
+#listView .kpis{display:none!important}
 /* ===== Bugün şeridi ===== */
 .todayStrip{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
 .todayStrip[hidden]{display:none}
