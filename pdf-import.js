@@ -1,6 +1,7 @@
 import {readPdf,stopOcr} from './pdf-reader.js';
 import {analyze,findMrn,invoiceOrphans} from './pdf-parse.js';
 import {aiProxyUrl,askGemini,splitPdf} from './ai-extract.js';
+import {sleep,startKeepAlive,stopKeepAlive} from './keepalive.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let countriesPromise=null;
 const loadCountries=()=>countriesPromise??=fetch('customs.json').then(r=>r.json()).then(v=>v.countries||[]).catch(()=>[]);
@@ -42,7 +43,6 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const API_KEY={sender:'senderName',senderTax:'senderTaxNo',receiver:'receiverName',receiverCountry:'receiverCountry',gtip:'gtip8',description:'description',gross:'grossKg',net:'netKg',packages:'packages',amount:'invoiceAmount',currency:'currency',invoice:'invoiceNo',invoiceDate:'invoiceDate'};
  const REQUIRED=['sender','receiver','gtip','description','gross','net','amount','currency','invoice','packages','receiverCountry'];
  const lastAiErr=r=>r.lastErr||'';
- const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const normMrn=m=>findMrn(String(m||'').replace(/\s/g,''))||String(m||'').toUpperCase().replace(/\s/g,'');
  const filled=v=>v!==null&&v!==undefined&&String(v).trim()!=='';
  function mergeRaw(store,list){
@@ -151,7 +151,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   const file=item.file;
   let aiOk=false,aiNote='',aiUsed=0;const prevGroups=groups;groups=[];const useAi=$('#pdfUseAi').checked&&!!aiProxyUrl(),msgs={ai:'',local:''};
   const pos=files.indexOf(item)+1,tag='<b>Dosya '+pos+' / '+files.length+'</b> · '+esc(item.name)+'<br>';
-  const show=()=>{$('#pdfStatus').innerHTML=tag+[msgs.ai,msgs.local].filter(Boolean).join('<br>')+'<br><small>⏳ Okuma sürerken bu sekmeyi önde tutun; tarayıcı arka plandaki sekmeyi yavaşlatır.</small>'};
+  const show=()=>{$('#pdfStatus').innerHTML=tag+[msgs.ai,msgs.local].filter(Boolean).join('<br>')+'<br><small>⏳ Okuma arka planda da sürer; başka sekmeye geçebilirsin (pencereyi küçültme).</small>'};
   item.state='okunuyor';renderFiles();msgs.local='PDF açılıyor…';show();
   try{
    await references.ready;const countries=await loadCountries();
@@ -188,8 +188,8 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  }
  async function pump(){
   if(busy)return;busy=true;
-  try{while(queue.length&&dlg.open){const item=queue.shift();await processFile(item)}}
-  finally{busy=false}
+  startKeepAlive();try{while(queue.length&&dlg.open){const item=queue.shift();await processFile(item)}}
+  finally{busy=false;stopKeepAlive()}
   const attached=attachInvoices();render();
   const done=files.filter(f=>f.state==='tamam'),bad=files.filter(f=>f.state==='hata'),noInv=groups.filter(g=>!g.values.invoice).length;
   $('#pdfStatus').innerHTML='<b>'+files.length+' dosya işlendi</b> · '+groups.length+' ihracat beyannamesi bulundu'+(attached?' · '+attached+' faturanın bilgisi ayrı dosyadan eşleştirildi':'')+(noInv?'<br><span class="pdfAiErr">'+noInv+' beyannamede fatura bilgisi yok. Fatura ayrı bir PDF ise “＋ Başka PDF ekle” ile ekleyin; tutarı uyuşan beyannameye otomatik bağlanır.</span>':'')+(bad.length?' · <span class="pdfAiErr">'+bad.length+' dosya okunamadı</span>':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+files.map(f=>f.status&&f.state!=='tamam'?'<br>'+f.status:'').join('')+files.filter(f=>f.state==='tamam'&&/UYARI|okunamadı/.test(f.note)).map(f=>'<br><span class="pdfAiErr">'+esc(f.name)+': '+esc(f.note.split(' · ').pop())+'</span>').join('')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
