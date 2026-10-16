@@ -392,3 +392,7 @@ main{max-width:none!important;padding:16px 22px!important}
  body:not(.navWide) .sidebarbottom{padding:14px 0 0!important}body:not(.navWide) .user{justify-content:center;border:0!important;padding-top:10px}
  body:not(.navWide) .nav:hover::after{content:attr(title);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#0c0c0f;color:#f7efd6;font-size:13px;padding:7px 12px;border-radius:7px;white-space:nowrap;z-index:50;border:1px solid #b8923a55}
  .navToggle{margin-top:10px;width:100%;padding:9px 0;font-size:16px;background:none;border:1px solid #3a3020;color:#b8923a;border-radius:8px}}
+#resumeBanner{display:none!important}
+.sidebar{overflow-y:auto}
+body:not(.navWide) .navToggle{margin:0 0 10px}body.navWide .navToggle{width:auto;align-self:flex-start;margin:8px 0 0 12px;padding:6px 14px}
+.field:has([name=facilityCode]){grid-column:1/-1}

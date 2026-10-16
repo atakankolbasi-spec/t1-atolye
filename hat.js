@@ -22,10 +22,10 @@ export function installHat({toast,confirmAction,show}){
   extraActions:[{label:'⧉',title:'MRN, lokasyon, plaka ve gümrüğü kopyala',fn:copy}]});
  function importData(a){if(!Array.isArray(a))return 0;const seen=new Set(list.map(r=>r.kind+'|'+r.mrn));let n=0;for(const x of a){const r=norm(x);if(!r.mrn||seen.has(r.kind+'|'+r.mrn))continue;seen.add(r.kind+'|'+r.mrn);list.push(r);n++}save();return n}
  // Kalem satırından hazır kayıt: aynı MRN için tekrar açmaz
- function createFromGood({mrn,trailer,vehicle,office,declarationRef,kind=KINDS[0]}){
+ function createFromGood({mrn,trailer,vehicle,office,declarationRef,location,kind=KINDS[0]}){
   const m=clean(mrn).toUpperCase().replace(/\s/g,'');if(!m)return {error:'Önce bu kalemin ihracat MRN numarasını gir.'};
   const dup=list.find(r=>r.kind===kind&&r.mrn===m);if(dup)return {existing:dup};
-  const r=norm({kind,mrn:m,status:'Hazırlandı',location:defaultLocation(),trailer,vehicle,office,readyAt:stamp(),declarationRef});list.push(r);save();return {created:r};
+  const r=norm({kind,mrn:m,status:'Hazırlandı',location:clean(location)||defaultLocation(),trailer,vehicle,office,readyAt:stamp(),declarationRef});list.push(r);save();return {created:r};
  }
  return {show:()=>page.refresh(),createFromGood,exportData:()=>list,importData,count:()=>list.length,refresh:page.refresh};
 }
