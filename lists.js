@@ -1,10 +1,12 @@
+import {attachCombo} from './combo.js';
+import {findCompanies} from './directory.js';
 import {attachVknButton} from './vkn.js';
 import {hay,normalizeSearch} from './directory.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const download=(value,name,type='application/json')=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([value],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 const PAGE=25;
 // Modaltrans tarzı liste sayfası: arama, filtre, sayfalama, ekle/düzenle/sil, içe/dışa aktar
-export function listPage({extraActions=[],navAfter=null,id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLabel,accept,columns,fields,filters,rows,rowId,match,onSave,onRemove,onImport,exportFile,exportData,toast,confirmAction,anchor,noun}){
+export function listPage({combos={},extraActions=[],navAfter=null,id,nav,navIcon,navLabel,eyebrow,title,intro,newLabel,importLabel,accept,columns,fields,filters,rows,rowId,match,onSave,onRemove,onImport,exportFile,exportData,toast,confirmAction,anchor,noun}){
  const btn=document.createElement('button');btn.className='nav';btn.id=nav;btn.innerHTML='<span>'+navIcon+'</span>'+navLabel;(navAfter?navAfter.after(btn):anchor.before(btn));
  const view=document.createElement('section');view.id=id+'View';view.className='view';view.hidden=true;
  view.innerHTML=`<div class="pagehead"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${intro}</p></div><div class="plateBtns"><label class="upload">${importLabel}<input type="file" data-act="import" accept="${accept}" hidden></label><button type="button" data-act="export">Dışa aktar ↓</button><button type="button" class="primary" data-act="new">${newLabel}</button></div></div>
@@ -12,7 +14,7 @@ export function listPage({extraActions=[],navAfter=null,id,nav,navIcon,navLabel,
  <div class="tablewrap"><table class="lstTable"><thead><tr>${columns.map(c=>'<th>'+c.label+'</th>').join('')}<th></th></tr></thead><tbody></tbody></table></div><div class="pagination"><span data-role="info"></span><div><button type="button" data-act="prev" aria-label="Önceki sayfa">‹</button><span data-role="page"></span><button type="button" data-act="next" aria-label="Sonraki sayfa">›</button></div></div></section>`;
  document.querySelector('main footer').before(view);
  const dlg=document.createElement('dialog');dlg.id=id+'Dialog';dlg.innerHTML=`<h2></h2><form class="grid" novalidate>${fields.map(f=>`<label class="field${f.full?' full':''}"><span>${f.label}${f.required?' <em>*</em>':''}</span>${f.type==='textarea'?`<textarea name="${f.name}"></textarea>`:f.options?`<select name="${f.name}"><option value=""></option>${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input name="${f.name}"${f.max?` maxlength="${f.max}"`:''}${f.placeholder?` placeholder="${f.placeholder}"`:''}>`}</label>`).join('')}<div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kaydet</button></div></form>`;document.body.append(dlg);
- const form=dlg.querySelector('form');if(form.elements.taxNo&&form.elements.name)attachVknButton(form,toast);let editing=null,page=0,filtered=[],q='';
+ const form=dlg.querySelector('form');if(form.elements.taxNo&&form.elements.name)attachVknButton(form,toast);for(const [name,c] of Object.entries(combos))if(form.elements[name])attachCombo(form.elements[name],{minChars:2,search:c.search,item:c.item,onPick:r=>{form.elements[name].value=c.value(r)}});let editing=null,page=0,filtered=[],q='';
  const $=s=>view.querySelector(s);
  function fillFilters(all){for(const f of filters){const sel=$('[data-filter="'+f.key+'"]'),cur=sel.value,vals=[...new Set(all.map(r=>f.get(r)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));sel.innerHTML='<option value="">'+f.label+': Tümü</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('');sel.value=vals.includes(cur)?cur:''}}
  function refresh(keepPage=false){
@@ -57,7 +59,7 @@ export function installLists({references,plates,toast,confirmAction,show}){
   onRemove:c=>references.removeCompany(c.id),
   async onImport(f){const r=await references.importFile(f);return r.added.toLocaleString('tr-TR')+' firma eklendi; '+r.skipped.toLocaleString('tr-TR')+' boş veya tekrar kayıt atlandı.'},
   exportFile:'T1_Firma_Rehberi.json',exportData:()=>references.exportJson()});
- const vehicles=listPage({id:'vehicles',nav:'navVehicles',navIcon:'⛟',navLabel:'Araçlar',eyebrow:'KAYITLI BİLGİLER',title:'Araçlar',intro:'Çekici ve treyler plakaları. Modaltrans’tan aldığın araç Excel’ini buraya yükle; T1 ve ENS formlarında plaka yazınca ülke ve araç sahibi otomatik gelir.',newLabel:'＋ Yeni araç',importLabel:'Araç listesi içe aktar (Excel)',accept:'.xlsx,.csv,.tsv,.json',noun:'araç',
+ const vehicles=listPage({combos:{owner:{search:async(q,limit)=>findCompanies(await references.getCompanies(),q,limit),item:c=>({title:c.name,sub:[c.eori||c.taxNo,c.country].filter(Boolean).join(' · ')}),value:c=>c.name}},id:'vehicles',nav:'navVehicles',navIcon:'⛟',navLabel:'Araçlar',eyebrow:'KAYITLI BİLGİLER',title:'Araçlar',intro:'Çekici ve treyler plakaları. Modaltrans’tan aldığın araç Excel’ini buraya yükle; T1 ve ENS formlarında plaka yazınca ülke ve araç sahibi otomatik gelir.',newLabel:'＋ Yeni araç',importLabel:'Araç listesi içe aktar (Excel)',accept:'.xlsx,.csv,.tsv,.json',noun:'araç',
   anchor,toast,confirmAction,
   columns:[{label:'PLAKA',html:r=>'<strong>'+esc(r.plate)+'</strong>'},{label:'ARAÇ SINIFI',get:r=>r.type},{label:'ÜLKE',get:r=>r.country},{label:'ARAÇ SAHİBİ FİRMA',get:r=>r.owner},{label:'ÖZMAL / KİRALIK',get:r=>r.ownership}],
   fields:[{name:'plate',label:'Plaka',required:true},{name:'type',label:'Araç sınıfı',options:['Çekici','Kamyon','Kamyonet','Minivan','Traktör','Treyler','Römork','Swapbody']},{name:'country',label:'Ülke kodu',max:2,placeholder:'TR'},{name:'ownership',label:'Özmal / Kiralık',options:['Özmal','Kiralık']},{name:'owner',label:'Araç sahibi firma',full:true}],
