@@ -138,3 +138,6 @@ h1,h2,h3,h4,strong,b,th,.eyebrow,.primary,.tag,.aeoBadge,.glxNo,.kpis strong{fon
 .hatDlg section h3{margin:0 0 12px;font-size:15px;padding-bottom:10px;border-bottom:1px solid #eef2f8}
 .hatDlg .dRow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed #eef2f8;font-size:13px}.hatDlg .dRow span{color:#7a88a3}.hatDlg .dRow b{text-align:right;word-break:break-word}
 @media(max-width:900px){.hatDlg .dGrid{grid-template-columns:1fr}}
+.finRateBtns{display:flex;gap:10px;margin:0 0 14px}.finRateBtns button{padding:9px 14px;font-size:12px;background:#eaf0ff!important;color:#2447b5!important;border:0!important}.finRateBtns button:disabled{opacity:.6}
+.manualTag{font-style:normal;font-size:10px;background:#fef3c7;color:#b45309;border-radius:999px;padding:2px 7px;margin-left:4px}
+.finHelp:not(.finRateInfo){display:none!important}

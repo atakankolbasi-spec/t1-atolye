@@ -15,7 +15,7 @@ import {installHat} from './hat.js';
 import {t1Draft,cmr,cmrAll,cmrGroups,printHtml} from './documents.js';
 import {installPdfImport} from './pdf-import.js';
 import {attachCombo} from './combo.js';
-import {installFinanceSettings,mountFinancePanel,getFinance,saveFinance} from './finance-ui.js';
+import {installFinanceSettings,mountFinancePanel,getFinance,saveFinance,autoUpdateRates} from './finance-ui.js';
 import * as Fin from './finance.js';
 import {migrateRefs} from './migrate.js';
 import {normalizeSearch} from './directory.js';
@@ -163,3 +163,6 @@ setTitles();new MutationObserver(setTitles).observe(side,{childList:true,subtree
 const t=document.createElement('button');t.type='button';t.className='navToggle';t.title='Menüyü genişlet / daralt';t.textContent=document.body.classList.contains('navWide')?'«':'»';t.onclick=()=>{const w=document.body.classList.toggle('navWide');t.textContent=w?'«':'»';try{localStorage.setItem('t1-nav-wide',w?'1':'0')}catch{}};side.querySelector('.brand').after(t)}
 
 $('#todayStrip').onclick=e=>{const b=e.target.closest('[data-today]');if(!b)return;const k=b.dataset.today;if(k==='due'){dueOnly=!dueOnly;page=1;renderList()}else if(k==='hat')$('#navHat').click();else if(k==='backup')$('#backupDialog').showModal()};
+
+// Kurlar: uygulama açılışında (12 saatte bir) internetten otomatik güncellenir
+autoUpdateRates().then(ch=>{if(ch&&work)refreshGuarantee()}).catch(()=>{});

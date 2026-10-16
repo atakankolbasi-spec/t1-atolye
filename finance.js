@@ -40,7 +40,7 @@ export function normalize(v){
  const firms=Array.isArray(o.firms)?o.firms.filter(x=>x&&text(x.name)).map(x=>({name:text(x.name),permitted:!!x.permitted})):[];
  const vats=Array.isArray(o.vats)&&o.vats.length?o.vats.map(x=>[text(x[0]),n0(x[1])]).filter(x=>x[0]):d.vats;
  const rates={};if(o.rates&&typeof o.rates==='object')for(const [k,val] of Object.entries(o.rates)){const n=n0(val);if(n>0)rates[String(k).toUpperCase().slice(0,3)]=n}
- return {items,rules,firms,vats,rates,guaranteeRate:Number.isFinite(Number(o.guaranteeRate))&&o.guaranteeRate!==''&&o.guaranteeRate!=null?Number(o.guaranteeRate):d.guaranteeRate,units:Array.isArray(o.units)&&o.units.length?o.units.map(text).filter(Boolean):d.units};
+ return {items,rules,firms,vats,rates,ratesAt:text(o.ratesAt).slice(0,40),ratesInfo:text(o.ratesInfo).slice(0,80),ratesManual:Array.isArray(o.ratesManual)?o.ratesManual.map(x=>String(x).toUpperCase().slice(0,3)):[],guaranteeRate:Number.isFinite(Number(o.guaranteeRate))&&o.guaranteeRate!==''&&o.guaranteeRate!=null?Number(o.guaranteeRate):d.guaranteeRate,units:Array.isArray(o.units)&&o.units.length?o.units.map(text).filter(Boolean):d.units};
 }
 export function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)))}catch{return normalize(null)}}
 export function save(f){try{localStorage.setItem(KEY,JSON.stringify(f));return true}catch{return false}}

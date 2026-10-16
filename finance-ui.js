@@ -2,12 +2,20 @@
 import {attachCombo} from './combo.js';
 import {findCompanies} from './directory.js';
 import * as F from './finance.js';
+import {fetchEurRates} from './rates.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=(root,s)=>root.querySelector(s);
 const fm=F.fmtMoney;
 let store=null;
 export const getFinance=()=>store??=F.load();
 export function saveFinance(f){store=f;return F.save(f)}
+// Kurları otomatik güncelle: 12 saatten eskiyse veya eksik kur varsa internetten çeker; elle girilen kurlara dokunmaz.
+export async function autoUpdateRates({force=false}={}){const fin=getFinance(),codes=F.CURRENCIES.filter(c=>c!=='EUR'),manual=new Set(fin.ratesManual||[]);
+ const fresh=fin.ratesAt&&Date.now()-Date.parse(fin.ratesAt)<12*36e5,missing=codes.some(c=>!manual.has(c)&&!(fin.rates[c]>0));
+ if(!force&&fresh&&!missing)return false;
+ const r=await fetchEurRates(codes.filter(c=>!manual.has(c)));
+ for(const [c,v] of Object.entries(r.rates))fin.rates[c]=v;
+ fin.ratesAt=new Date().toISOString();fin.ratesInfo=(r.source+(r.date?' · '+r.date:'')).trim();saveFinance(fin);return true}
 const TYPE_NAME={gelir:'Gelir',gider:'Gider',ikisi:'Gelir / Gider'};
 const opts=(list,sel)=>list.map(x=>{const [v,l]=Array.isArray(x)?x:[x,x];return '<option value="'+esc(v)+'"'+(String(v)===String(sel)?' selected':'')+'>'+esc(l)+'</option>'}).join('');
 const numStr=v=>v||v===0?String(v).replace('.',','):'';
@@ -143,12 +151,12 @@ export function installFinanceSettings({references,getCompanies,toast,confirmAct
   commit();overlapWarn(r);if(k==='itemId'||k==='on'||k==='min'||k==='max'||k==='price')renderFirms()});
  firmPane().addEventListener('input',e=>{const t=e.target;if(t.matches('[data-fq]')){firmQ=t.value;const pos=t.selectionStart;renderFirms();const n=firmPane().querySelector('[data-fq]');n.focus();n.setSelectionRange(pos,pos)}});
  /* --- Kur, teminat, KDV --- */
- function renderRates(){
+ function renderRates(){autoUpdateRates().then(ch=>{if(ch&&tab==='rates'&&!view.querySelector('[data-rate]:focus')){onChange();renderRates()}}).catch(()=>{const el=view.querySelector('.finRateInfo');if(el&&!getFinance().ratesAt)el.textContent='Kurlar internetten alınamadı; elle girebilirsin.'});
   const fin=f(),cur=F.CURRENCIES.filter(c=>c!=='EUR');
   pane('rates').innerHTML=`<div class="finCols"><div><h3>Otomatik teminat hesabı</h3><p class="finHelp">Teminat tutarı = beyannamedeki tüm eşyaların fatura tutarı (EUR’ya çevrilmiş) × aşağıdaki oran. T1’in Teminat adımına ve teminat ücreti kurallarına bu tutar yazılır.</p><label class="field"><span>Teminat oranı (%)</span><input data-gr inputmode="decimal" value="${esc(numStr(fin.guaranteeRate))}"></label><small>Örn. %100: teminat = fatura değeri. Farklı bir oran kullanıyorsan buraya yaz.</small>
   <h3>KDV tipleri</h3><p class="finHelp">Kod ve oran (%). Her satır: KDV0:0</p><textarea data-vats rows="5">${esc(fin.vats.map(v=>v[0]+':'+v[1]).join('\n'))}</textarea>
   <h3>Birimler</h3><input data-units value="${esc(fin.units.join(', '))}" aria-label="Birimler"></div>
-  <div><h3>Kurlar (1 birim = kaç EUR)</h3><p class="finHelp">Teminat hesabı ve toplamlar için. Kur girilmeyen dövizdeki eşyalar teminat hesabına katılmaz (uyarı görürsün). Kurları sen belirlersin; internetten çekilmez.</p><div class="finRates">${cur.map(c=>`<label><span>1 ${c} =</span><input data-rate="${c}" inputmode="decimal" value="${esc(numStr(fin.rates[c]||''))}" placeholder="—"><b>EUR</b></label>`).join('')}</div></div></div><div class="finSave"><button class="primary" data-save>Kaydet</button></div>`;
+  <div><h3>Kurlar (1 birim = kaç EUR)</h3><p class="finHelp finRateInfo">${fin.ratesAt?'Otomatik güncellendi: '+esc(new Date(fin.ratesAt).toLocaleString('tr-TR'))+' · '+esc(fin.ratesInfo||''):'Kurlar internetten alınıyor…'}</p><div class="finRateBtns"><button type="button" data-rates-now>↻ ŞİMDİ GÜNCELLE</button><button type="button" data-rates-auto>OTOMATİĞE DÖNDÜR</button></div><div class="finRates">${cur.map(c=>`<label><span>1 ${c} =</span><input data-rate="${c}" inputmode="decimal" value="${esc(numStr(fin.rates[c]||''))}" placeholder="—"><b>EUR</b>${(fin.ratesManual||[]).includes(c)?'<i class="manualTag" title="Elle girildi; otomatik güncellenmez">ELLE</i>':''}</label>`).join('')}</div></div></div><div class="finSave"><button class="primary" data-save>Kaydet</button></div>`;
  }
 
  /* --- Fiyat denemesi --- */
@@ -175,11 +183,13 @@ export function installFinanceSettings({references,getCompanies,toast,confirmAct
   if(b.dataset.copy){const r=fin.rules.find(x=>x.id===b.dataset.copy);if(r){const seed={...r,id:null};if(r.trigger==='guarantee'&&F.n0(r.max)){seed.min=F.r2(F.n0(r.max)+0.01);seed.max=0}openRule(seed)}return}
   if(b.dataset.del){if(tab==='items'){const used=fin.rules.filter(r=>r.itemId===b.dataset.del).length;confirmAction('Kalemi sil',used?'Bu kalemi kullanan '+used+' kural da silinecek.':'Kalem silinecek. Eski beyannamelerdeki satırlar etkilenmez.',()=>{fin.items=fin.items.filter(x=>x.id!==b.dataset.del);fin.rules=fin.rules.filter(r=>r.itemId!==b.dataset.del);commit('Kalem silindi.');renderItems()})}
    else confirmAction('Kuralı sil','Bu fiyat kuralı silinecek. Daha önce yazılmış satırlar kalır.',()=>{fin.rules=fin.rules.filter(x=>x.id!==b.dataset.del);commit('Kural silindi.');renderRules()});return}
+  if(b.hasAttribute('data-rates-now')){b.disabled=true;b.textContent='GÜNCELLENİYOR…';autoUpdateRates({force:true}).then(()=>{toast('Kurlar güncellendi.');onChange();renderRates()}).catch(e=>{toast(e.message);renderRates()});return}
+  if(b.hasAttribute('data-rates-auto')){fin.ratesManual=[];saveFinance(fin);b.disabled=true;b.textContent='GÜNCELLENİYOR…';autoUpdateRates({force:true}).then(()=>{toast('Tüm kurlar otomatiğe döndü ve güncellendi.');onChange();renderRates()}).catch(e=>{toast(e.message);renderRates()});return}
   if(b.hasAttribute('data-save')){
    const gr=F.n0(($(pane('rates'),'[data-gr]').value));if(gr<0||gr>1000){toast('Teminat oranı 0–1000 arasında olmalı.');return}fin.guaranteeRate=gr;
    const vats=$(pane('rates'),'[data-vats]').value.split('\n').map(l=>l.split(':')).map(([c,r])=>[String(c||'').trim(),F.n0(r)]).filter(v=>v[0]);if(!vats.length){toast('En az bir KDV tipi gerekli.');return}fin.vats=vats;
    fin.units=$(pane('rates'),'[data-units]').value.split(',').map(x=>x.trim()).filter(Boolean);if(!fin.units.length)fin.units=['Adet'];
-   fin.rates={};pane('rates').querySelectorAll('[data-rate]').forEach(i=>{const n=F.n0(i.value);if(n>0)fin.rates[i.dataset.rate]=n});
+   {const old=fin.rates||{},man=new Set(fin.ratesManual||[]);fin.rates={};pane('rates').querySelectorAll('[data-rate]').forEach(i=>{const n=F.n0(i.value),c=i.dataset.rate;if(n>0){fin.rates[c]=n;if(Math.abs((old[c]||0)-n)>1e-9)man.add(c)}else man.delete(c)});fin.ratesManual=[...man]}
    commit('Kur, teminat ve KDV ayarları kaydedildi.');renderRates()}});
  // Fiyat denemesindeki firma kutusuna rehber önerisi
  view.addEventListener('focusin',e=>{const t=e.target;if(t.matches('[data-t=customer]')&&!t.dataset.combo){t.dataset.combo='1';companyCombo(t,getCompanies,c=>{test.customer=c.name;renderTest()})}});
