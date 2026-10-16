@@ -319,3 +319,17 @@ dialog.pdfDialog{max-width:1100px;width:96vw;padding:0}.pdfHead{display:flex;jus
 *,*::before,*::after{text-transform:uppercase}
 input[type=email],input[type=url],.keepCase{text-transform:none}
 ::placeholder{text-transform:uppercase}
+/* Ana sayfa: daha geniş, daha dolu, kompakt */
+main{max-width:none!important;padding:16px 22px!important}
+#listView .pagehead{margin:2px 0 12px}#listView .pagehead h1{font-size:24px;margin:4px 0 4px}#listView .pagehead p{font-size:13px}
+.resume.compact{padding:8px 14px;margin:0 0 10px;font-size:13px;display:flex;align-items:center;justify-content:space-between}.resume.compact span{display:inline;margin:0 0 0 8px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))!important;gap:10px!important;margin-bottom:12px!important}
+.kpis>div{padding:10px 14px!important;border-radius:10px}
+.kpis span{font-size:10px!important;letter-spacing:.7px!important}
+.kpis strong{font-size:22px!important;margin:5px 0 1px!important}
+.kpis small{font-size:11px!important}
+.kpis .incomeKpi strong{font-size:15px!important;margin:9px 0 5px!important;white-space:normal;line-height:1.25}
+.kpis .connectionKpi strong{font-size:15px!important;margin:9px 0 3px!important}
+.listcard{margin-bottom:8px}
+#declarationsTable td{padding:8px 8px!important}
+#declarationsTable .rowactions{max-width:112px}
