@@ -173,7 +173,7 @@ dialog[open]{animation:pop .3s var(--ease)}@keyframes pop{from{opacity:0;transfo
 
 /* ---------- Karanlık mod ---------- */
 html.dark{filter:invert(.92) hue-rotate(180deg);background:#0b1220}
-html.dark img,html.dark video,html.dark svg.emptySvg,html.dark .brandmark,html.dark .hero,html.dark .sidebar,html.dark .primary,html.dark .nav.active,html.dark .stepper .current b,html.dark .stepper .complete b,html.dark .tag,html.dark .aeoBadge,html.dark .dueBadge,html.dark .hatBadge,html.dark .hatPri{filter:invert(1) hue-rotate(180deg)}
+html.dark img,html.dark video,html.dark svg.emptySvg,html.dark .brandmark,html.dark .hero,html.dark .sidebar,html.dark .primary,html.dark .nav.active,html.dark .stepper .current b,html.dark .stepper .complete b,html.dark .aeoBadge,html.dark .dueBadge,html.dark .hatBadge,html.dark .hatPri{filter:invert(1) hue-rotate(180deg)}
 html.dark .sidebar{filter:invert(1) hue-rotate(180deg) brightness(.9)}
 
 /* ---------- Dar ekran ---------- */
@@ -186,7 +186,7 @@ html.dark .sidebar{filter:invert(1) hue-rotate(180deg) brightness(.9)}
 body.navWide .brand,body:not(.navWide) .sidebar:hover .brand{gap:12px!important;justify-content:flex-start!important}
 .brand>span:last-child{color:#fff;font-weight:800;letter-spacing:-.3px;line-height:1.1}.brand small{color:#7f93bd!important;letter-spacing:1.4px!important}
 html.dark{background:#eef2f9!important}
-html.dark .heroBtn,html.dark .hs,html.dark .themeBtn{filter:invert(1) hue-rotate(180deg)}
+html.dark .dcInc{filter:invert(1) hue-rotate(180deg)}
 
 /* ---------- Panel (grafikler) ---------- */
 .dash{margin:0 0 18px}.dashHead{display:flex;align-items:center;justify-content:space-between;margin:0 4px 8px}.dashHead b{font-size:11px;letter-spacing:1.6px;color:var(--mut)}
