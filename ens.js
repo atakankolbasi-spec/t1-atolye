@@ -2,8 +2,8 @@ import {attachCombo} from './combo.js';
 import {findCompanies,normalizeSearch} from './directory.js';
 import {num} from './excel.js';
 import {detectPlate} from './transport.js';
-import {mountFinancePanel} from './finance-ui.js';
-import {normalizeFin,blankFin} from './finance.js';
+import {mountFinancePanel,getFinance} from './finance-ui.js';
+import {normalizeFin,blankFin,syncLines} from './finance.js';
 
 const KEY='t1-ens-v1';
 const uid=()=>crypto.randomUUID();
@@ -81,7 +81,7 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
   if(!e.consignor&&g[0])e.consignor=g[0].sender||'';if(!e.consignee&&g[0])e.consignee=g[0].receiver||'';
   return e;
  }
- function createFromT1(d){if(!d)return;const e=fromT1(d);e.ref=nextRef();db.counter++;e.createdAt=e.updatedAt=stamp();db.records.push(e);persist();toast('T1 bilgileri ENS’e taşındı. Giriş gümrüğü ve varış tarihini girin.');navigate(e.id)}
+ function createFromT1(d){if(!d)return;const e=fromT1(d);e.ref=nextRef();db.counter++;e.createdAt=e.updatedAt=stamp();e.fin=blankFin();syncLines(getFinance(),e.fin,{kind:'ens',customer:e.customer||e.consignee||'',permitted:false,guaranteeEur:0});db.records.push(e);persist();toast('T1 bilgileri ENS’e taşındı ve ENS fiyatı yazıldı. Giriş gümrüğü ve varış tarihini girin.');navigate(e.id)}
  function pickT1(){
   const decls=getDeclarations().filter(d=>!d.archived&&d.id);
   if(!decls.length){toast('Önce bir T1 beyannamesi oluşturun.');return}

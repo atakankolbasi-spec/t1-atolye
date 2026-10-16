@@ -36,7 +36,7 @@ export const defaults=()=>({
 export function normalize(v){
  const d=defaults(),o=v&&typeof v==='object'?v:{};
  const items=Array.isArray(o.items)?o.items.filter(x=>x&&x.id).map(x=>({id:text(x.id),code:text(x.code),name:text(x.name),type:['gelir','gider','ikisi'].includes(x.type)?x.type:'gelir',unit:text(x.unit)||'Adet',price:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0'})):d.items;
- const rules=Array.isArray(o.rules)?o.rules.filter(x=>x&&x.id&&TRIGGER_NAME[x.trigger]).map(x=>({id:text(x.id),on:x.on!==false,trigger:x.trigger,customer:text(x.customer),itemId:text(x.itemId),price:x.price===''||x.price==null?null:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0',min:n0(x.min),max:x.max===''||x.max==null?0:n0(x.max),note:text(x.note)})):[];
+ const rules=Array.isArray(o.rules)?o.rules.filter(x=>x&&x.id&&TRIGGER_NAME[x.trigger]).map(x=>({id:text(x.id),on:x.on!==false,trigger:x.trigger,customer:text(x.customer),itemId:text(x.itemId),price:x.price===''||x.price==null?null:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0',min:n0(x.min),max:x.max===''||x.max==null?0:n0(x.max),note:text(x.note),skipAeo:x.skipAeo===undefined?(x.trigger==='guarantee'||x.trigger==='always'):!!x.skipAeo})):[];
  const firms=Array.isArray(o.firms)?o.firms.filter(x=>x&&text(x.name)).map(x=>({name:text(x.name),permitted:!!x.permitted})):[];
  const vats=Array.isArray(o.vats)&&o.vats.length?o.vats.map(x=>[text(x[0]),n0(x[1])]).filter(x=>x[0]):d.vats;
  const rates={};if(o.rates&&typeof o.rates==='object')for(const [k,val] of Object.entries(o.rates)){const n=n0(val);if(n>0)rates[String(k).toUpperCase().slice(0,3)]=n}
@@ -65,7 +65,9 @@ export function evaluate(f,ctx){
  const out=[],active=f.rules.filter(r=>r.on&&r.itemId&&itemById(f,r.itemId));
  const pick=(trigger,test=()=>true)=>{
   const mine=active.filter(r=>r.trigger===trigger&&r.customer&&ruleApplies(r,ctx.customer)&&test(r));
-  return mine.length?mine:active.filter(r=>r.trigger===trigger&&!r.customer&&test(r));
+  const set=mine.length?mine:active.filter(r=>r.trigger===trigger&&!r.customer&&test(r));
+  // İzinli gönderici (AEO) beyannamesinde "izinlide yazma" işaretli kalemler eklenmez (özel kural varsa genele düşülmez)
+  return set.filter(r=>!(ctx.permitted&&r.skipAeo));
  };
  const add=(rule,extra='')=>{const it=itemById(f,rule.itemId);out.push({ruleId:rule.id,itemId:it.id,name:it.name,unit:it.unit,qty:1,price:rule.price==null?n0(it.price):n0(rule.price),currency:rule.currency||it.currency,vat:rule.vat||it.vat,side:'gelir',note:extra||rule.note||''})};
  if(ctx.kind==='t1')for(const r of pick('t1'))add(r);
