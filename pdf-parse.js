@@ -74,6 +74,18 @@ function parseInvoice(p){
  m=t.match(/Fatura\s*Tarihi\s*:?\s*(\d{1,2})\s*[-./]\s*(\d{1,2})\s*[-./]\s*(\d{4})/i)||t.match(/DATE\s*:?\s*(\d{1,2})[-./](\d{1,2})[-./](\d{4})/i);if(m)f.invoiceDate=m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
  return f;
 }
+// Beyannamesiz (yalnızca fatura içeren) sayfalardan fatura bilgisi: [{invoice,invoiceDate,amount,currency}]
+export function invoiceOrphans(pages){
+ const out=[];
+ for(const p of pages){
+  const t=text(p);if(findMrn(t)||p.error)continue;
+  const f=parseInvoice(p);if(!f.invoice)continue;
+  const m=t.match(/(?:Mal\s*Hizmet\s*Toplam\s*Tutar[ıi]|Vergiler\s*Dahil\s*Toplam\s*Tutar|[ÖO]denecek\s*Tutar|GRAND\s*TOTAL|TOTAL(?:\s*AMOUNT)?)\s*:?\s*([\d.]+,\d{2}|[\d,]+\.\d{2})\s*([A-Z]{3})?/i);
+  const rec={invoice:f.invoice,invoiceDate:f.invoiceDate||'',amount:m?m[1]:'',currency:m&&m[2]?m[2].toUpperCase():''};
+  if(!out.some(x=>x.invoice===rec.invoice))out.push(rec);
+ }
+ return out;
+}
 // pages: readPdf çıktısı, countries: [{code,name}] (customs.json)
 const dist=(a,b)=>{let d=Math.abs(a.length-b.length);for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d};
 export function analyze(pages,countries=[]){

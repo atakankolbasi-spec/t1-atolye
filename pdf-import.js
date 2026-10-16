@@ -1,5 +1,5 @@
 import {readPdf,stopOcr} from './pdf-reader.js';
-import {analyze,findMrn} from './pdf-parse.js';
+import {analyze,findMrn,invoiceOrphans} from './pdf-parse.js';
 import {aiProxyUrl,askGemini,splitPdf} from './ai-extract.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let countriesPromise=null;
@@ -36,6 +36,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  }
  const dist=(a,b)=>{let d=Math.abs(a.length-b.length);for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d};
  const fixNum=v=>{v=String(v??'').trim();return /^\d+\.\d{2}$/.test(v)?v.replace('.',','):v};
+ const toNum=v=>{let t=String(v||'').replace(/[^\d.,-]/g,'');if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');else t=t.replace(/,/g,'');return parseFloat(t)||0};
  const sameVal=(a,b)=>String(a).replace(/[\s.]/g,'').toLowerCase()===String(b).replace(/[\s.]/g,'').toLowerCase();
  function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:simplifyDesc(a.description||''),gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
  const API_KEY={sender:'senderName',senderTax:'senderTaxNo',receiver:'receiverName',receiverCountry:'receiverCountry',gtip:'gtip8',description:'description',gross:'grossKg',net:'netKg',packages:'packages',amount:'invoiceAmount',currency:'currency',invoice:'invoiceNo',invoiceDate:'invoiceDate'};
@@ -55,8 +56,8 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const loadParts=sig=>{try{const all=JSON.parse(localStorage.getItem(PCACHE)||'{}');return all[sig]||{}}catch{return {}}};
  const saveParts=(sig,obj)=>{try{const all=JSON.parse(localStorage.getItem(PCACHE)||'{}');delete all[sig];all[sig]=obj;const keys=Object.keys(all);while(keys.length>3)delete all[keys.shift()];localStorage.setItem(PCACHE,JSON.stringify(all))}catch{}};
  const waitSec=async(sec,msg,say)=>{for(let t=Math.ceil(sec);t>0;t--){say(msg+' ('+t+' sn)…');await sleep(1000)}};
- async function aiRead(file,say){
-  const store=new Map,askCode=async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||'';let lastErr=null,used=0;
+ async function aiRead(file,say,{maxAttempts=4}={}){
+  const store=new Map,orphans=[],askCode=async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||'';let lastErr=null,used=0,prevMissing=Infinity;
   say('PDF hazırlanıyor…');
   const sig=SIG(file),cache=loadParts(sig),parts=await splitPdf(file),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N).fill(null),done=new Array(N).fill(false);
   const tag=N>1?' · '+N+' parça':'';
@@ -73,7 +74,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    }
   };
   let first=true;
-  for(let attempt=1;attempt<=4;attempt++){
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
    const jobs=[];
    for(let i=0;i<N;i++){
     if(!done[i]){jobs.push({i,retry:null});continue}
@@ -95,8 +96,10 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    // Parçalar sırayla birleşir; MRN'siz kayıt (parça ortadan başlıyorsa) önceki beyannameye bağlanır
    let lastMrn='';
    for(let i=0;i<N;i++){const list=res[i];if(!list)continue;res[i]=null;
-    for(const a of list){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lastMrn;if(!m)continue;a.mrn=m;seen[i].add(m);lastMrn=m}
+    for(const a of list){let m=normMrn(a.mrn);if(!m||!/EX/.test(m))m=lastMrn;if(!m){if((a.invoiceNo||a.invoiceAmount)&&!orphans.some(o=>o.invoiceNo&&o.invoiceNo===a.invoiceNo))orphans.push(a);continue}a.mrn=m;seen[i].add(m);lastMrn=m}
     mergeRaw(store,list.filter(a=>a.mrn))}
+   // Önceki turdan beri eksik alan sayısı azalmadıysa tekrar denemek boşuna: dur
+   {const miss=[...store.values()].reduce((n,r)=>n+missingOf(r).length,0);if(attempt>=2&&miss>=prevMissing)break;prevMissing=miss}
    if(fatal)break;
   }
   const failed=done.filter(d=>!d).length;
@@ -105,7 +108,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    throw lastErr||Error('Yapay zekâ sonuç vermedi.');
   }
   if(!failed&&!store.size)try{localStorage.removeItem(PCACHE)}catch{}
-  return {store,used,failed,parts:N,lastErr:lastErr?(lastErr.code==='QUOTA'?quotaText(lastErr):lastErr.message):''};
+  return {store,orphans,used,failed,parts:N,lastErr:lastErr?(lastErr.code==='QUOTA'?quotaText(lastErr):lastErr.message):''};
  }
  const quotaText=e=>e.daily?'Google’ın ücretsiz günlük kotası dolmuş (ya da bu anahtarda ücretsiz kota yok). Yarın tekrar deneyin ya da Google AI Studio’da faturalandırmayı açın. Biten parçalar saklandı; kaldığı yerden devam eder.':'Google istek sınırına takıldı. Birkaç dakika sonra aynı PDF’i yeniden yükleyin; biten parçalar saklandı, kalanlardan devam eder.';
  // Yapay zekâ değeri önceliklidir; boş kalanlar PDF okuyucudan tamamlanır.
@@ -140,7 +143,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  const STATE={bekliyor:['Sırada','pending'],okunuyor:['Okunuyor…','busy'],tamam:['Tamam','ok'],hata:['Hata','bad']};
  const zoneInfo=[];
  function renderFiles(){
-  $('#pdfFiles').innerHTML=files.length?'<div class="pdfFilesHead"><b>Yüklenen dosyalar</b><span>'+files.length+' dosya</span></div>'+files.map(f=>{const st=STATE[f.state];return '<div class="pdfFile '+st[1]+'"><span class="pdfFileIcon">📄</span><div class="pdfFileMain"><strong title="'+esc(f.name)+'">'+esc(f.name)+'</strong><small>'+fmtSize(f.size)+(f.pages?' · '+f.pages+' sayfa':'')+(f.note?' · '+esc(f.note):'')+'</small></div><span class="pdfFileState">'+(f.state==='tamam'?'✓ '+f.count+' beyanname':f.state==='hata'?'✕ Okunamadı':st[0])+'</span></div>'}).join(''):'';
+  $('#pdfFiles').innerHTML=files.length?'<div class="pdfFilesHead"><b>Yüklenen dosyalar</b><span>'+files.length+' dosya</span></div>'+files.map(f=>{const st=STATE[f.state];return '<div class="pdfFile '+st[1]+'"><span class="pdfFileIcon">📄</span><div class="pdfFileMain"><strong title="'+esc(f.name)+'">'+esc(f.name)+'</strong><small>'+fmtSize(f.size)+(f.pages?' · '+f.pages+' sayfa':'')+(f.note?' · '+esc(f.note):'')+'</small></div><span class="pdfFileState">'+(f.state==='tamam'?(f.count===0&&(f.orphans||[]).length?'✓ FATURA '+esc(f.orphans[0].invoice):'✓ '+f.count+' beyanname'):f.state==='hata'?'✕ Okunamadı':st[0])+'</span></div>'}).join(''):'';
   renderZone();
  }
  function renderZone(){const z=document.querySelector('.pdfZoneList');if(!z)return;z.innerHTML=files.length?files.map(f=>'<span class="zf '+STATE[f.state][1]+'" title="'+esc(f.name)+'">📄 '+esc(f.name)+' · '+(f.state==='tamam'?f.count+' beyanname':f.state==='hata'?'okunamadı':STATE[f.state][0])+'</span>').join(''):''}
@@ -154,11 +157,12 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    await references.ready;const countries=await loadCountries();
    // Önce yapay zekâ (yalnızca beyanname ve fatura); olmazsa PDF okuyucu (taranmışsa yazı tanıma ile)
    let aiRes=null;
-   if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used;if(aiRes.r.failed)aiNote='UYARI: '+aiRes.r.parts+' parçadan '+aiRes.r.failed+' tanesi okunamadı ('+(lastAiErr(aiRes.r)||'servis hatası')+'). Bazı beyannameler eksik olabilir; PDF’i yeniden yükleyip tekrar deneyin.'}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
+   if(useAi){aiRes=await aiRead(file,s=>{msgs.ai=esc(s);show()},{maxAttempts:files.length>1?1:4}).then(r=>({r}),err=>({err}));if(aiRes.r){aiOk=true;aiUsed=aiRes.r.used;if(aiRes.r.failed)aiNote='UYARI: '+aiRes.r.parts+' parçadan '+aiRes.r.failed+' tanesi okunamadı ('+(lastAiErr(aiRes.r)||'servis hatası')+'). Bazı beyannameler eksik olabilir; PDF’i yeniden yükleyip tekrar deneyin.'}else aiNote='Yapay zekâ ile okunamadı: '+aiRes.err.message+' Yalnızca PDF okuyucunun sonucu gösteriliyor.'}
    let pages=[];
    try{pages=await readPdf(file,{ocr:!aiOk&&aiRes?.err?.code!=='QUOTA',onProgress:(n,t)=>{msgs.local='PDF okuyucu: sayfa '+n+' / '+t+'…';show()},onStatus:s=>{msgs.local='PDF okuyucu: '+esc(s);show()}})}
    catch(err){if(!aiOk)throw err}
    const found=analyze(pages,countries);
+   item.orphans=[...(aiOk?aiRes.r.orphans.map(o=>({invoice:String(o.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(o.invoiceDate||'')?o.invoiceDate:'',amount:fixNum(o.invoiceAmount),currency:String(o.currency||'').toUpperCase()})):[]),...invoiceOrphans(pages)].filter((o,i,a)=>o.invoice&&a.findIndex(x=>x.invoice===o.invoice)===i);
    groups=found.map(g=>{const x={...g,values:toValues(g)};x.match=matchOf(x.values);return x});
    if(aiOk)applyAi(aiRes.r.store,aiRes.r.used);
    const mine=groups;groups=prevGroups;let dupN=0;
@@ -168,12 +172,27 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   }catch(err){groups=prevGroups;item.state='hata';item.note=err.message;item.status='<span class="pdfAiErr">'+esc(item.name)+' okunamadı: '+esc(err.message)+'</span>'}
   renderFiles();render();
  }
+ // Beyanname ve fatura ayrı PDF'lerde gelirse: fatura bilgisi, tutar+döviz eşleşmesiyle (ya da tek aday varsa) beyannameye bağlanır
+ function attachInvoices(){
+  const pool=[];for(const f of files)for(const o of f.orphans||[])pool.push({...o,file:f.name,used:false});
+  const miss=groups.filter(g=>!g.values.invoice);let n=0;
+  const sameAmt=(a,b)=>a&&b&&Math.abs(toNum(a)-toNum(b))<0.005;
+  for(const g of miss){
+   let cand=pool.filter(o=>!o.used&&sameAmt(o.amount,g.values.amount)&&(!o.currency||!g.values.currency||o.currency===g.values.currency));
+   if(cand.length!==1&&miss.length===1){const un=pool.filter(o=>!o.used);if(un.length===1)cand=un}
+   if(cand.length!==1)continue;const o=cand[0];o.used=true;
+   g.values.invoice=o.invoice;if(!g.values.invoiceDate&&o.invoiceDate)g.values.invoiceDate=o.invoiceDate;if(!g.values.amount&&o.amount)g.values.amount=o.amount;if(!g.values.currency&&o.currency)g.values.currency=o.currency;
+   g.warnings=(g.warnings||[]).filter(w=>!/Fatura no|Fatura tarihi/i.test(w));g.warnings.push('Fatura bilgisi “'+o.file+'” dosyasından eşleştirildi (tutar uyuşuyor). Kontrol et.');n++;
+  }
+  return n;
+ }
  async function pump(){
   if(busy)return;busy=true;
   try{while(queue.length&&dlg.open){const item=queue.shift();await processFile(item)}}
   finally{busy=false}
-  const done=files.filter(f=>f.state==='tamam'),bad=files.filter(f=>f.state==='hata');
-  $('#pdfStatus').innerHTML='<b>'+files.length+' dosya işlendi</b> · '+groups.length+' ihracat beyannamesi bulundu'+(bad.length?' · <span class="pdfAiErr">'+bad.length+' dosya okunamadı</span>':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+files.map(f=>f.status&&f.state!=='tamam'?'<br>'+f.status:'').join('')+files.filter(f=>f.state==='tamam'&&/UYARI|okunamadı/.test(f.note)).map(f=>'<br><span class="pdfAiErr">'+esc(f.name)+': '+esc(f.note.split(' · ').pop())+'</span>').join('')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
+  const attached=attachInvoices();render();
+  const done=files.filter(f=>f.state==='tamam'),bad=files.filter(f=>f.state==='hata'),noInv=groups.filter(g=>!g.values.invoice).length;
+  $('#pdfStatus').innerHTML='<b>'+files.length+' dosya işlendi</b> · '+groups.length+' ihracat beyannamesi bulundu'+(attached?' · '+attached+' faturanın bilgisi ayrı dosyadan eşleştirildi':'')+(noInv?'<br><span class="pdfAiErr">'+noInv+' beyannamede fatura bilgisi yok. Fatura ayrı bir PDF ise “＋ Başka PDF ekle” ile ekleyin; tutarı uyuşan beyannameye otomatik bağlanır.</span>':'')+(bad.length?' · <span class="pdfAiErr">'+bad.length+' dosya okunamadı</span>':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+files.map(f=>f.status&&f.state!=='tamam'?'<br>'+f.status:'').join('')+files.filter(f=>f.state==='tamam'&&/UYARI|okunamadı/.test(f.note)).map(f=>'<br><span class="pdfAiErr">'+esc(f.name)+': '+esc(f.note.split(' · ').pop())+'</span>').join('')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
  }
  const runFiles=list=>{
   const pdfs=[...list].filter(f=>f&&(/\.pdf$/i.test(f.name)||f.type==='application/pdf'));
