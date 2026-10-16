@@ -334,3 +334,14 @@ main{max-width:none!important;padding:16px 22px!important}
 #declarationsTable td{padding:8px 8px!important}
 #declarationsTable .rowactions{max-width:112px}
 .rowactions button.danger{background:#fde8e8;color:#b42318}.rowactions button.danger:hover{background:#f8c9c9}
+/* Geniş ve ferah eşya / beyanname formu */
+#goodDialog.drawer{width:min(1600px,99vw)!important;max-width:99vw!important;max-height:98dvh!important;border-radius:14px!important}
+#goodDialog #goodFields{padding:28px 36px!important;gap:26px!important;max-height:calc(98dvh - 190px)!important}
+#goodDialog .goodSection{padding:26px 30px!important}
+#goodDialog .goodSection .grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:22px 28px!important}
+#goodDialog .goodSection .grid .field:has(textarea){grid-column:1/-1}
+#goodDialog .field input,#goodDialog .field select,#goodDialog .field textarea{padding:15px 16px!important}
+#goodDialog .drawerhead{padding:28px 40px!important}#goodDialog .drawerfooter{padding:20px 40px!important}
+@media(max-width:900px){#goodDialog .goodSection .grid{grid-template-columns:1fr!important}}
+@media print{#goodDialog{display:none}}
+.cmrPick label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}.cmrPick small{display:block;color:#8a7a4a}
