@@ -40,19 +40,25 @@ table.g{width:100%;border-collapse:collapse}table.g th,table.g td{border:.8px so
 .ensBc{width:290px;margin:34px auto 0;text-align:center;font-size:11px}`;
 const B=(label,html,cls='',style='')=>`<div class="b ${cls}"${style?` style="${style}"`:''}><i>${label}</i><div>${html||'&nbsp;'}</div></div>`;
 const party=(name,addr,no)=>[name&&esc(name),addr&&nl(addr),no&&('Numara: '+esc(no))].filter(Boolean).join('<br>');
+// Firma adresi: eşya satırındaki adres + posta kodu + şehir + ülke
+const addrOf=(g,side)=>{const a=g[side+'Address']||'',pc=[g[side+'Postal'],g[side+'City']].filter(Boolean).join(' '),c=g[side+'Country']||'';return [a,pc,c].filter(Boolean).join('\n')};
+const sideInfo=(goods,side,d)=>{const names=[...new Set(goods.map(g=>g[side]).filter(Boolean))];const dn=side==='sender'?d.sender:d.receiver,da=side==='sender'?d.senderAddress:d.receiverAddress;
+ if(names.length===1){const g=goods.find(x=>x[side]===names[0]);return {name:names[0],addr:addrOf(g,side)||da||'',no:g[side+'Eori']||g[side+'Tax']||(side==='sender'?d.senderEori:d.receiverEori)||''}}
+ if(names.length>1)return {name:'ÇOK ('+names.length+') — KALEM LİSTESİNE BKZ.',addr:'',no:''};
+ return {name:dn||'',addr:da||'',no:(side==='sender'?d.senderEori:d.receiverEori)||''}};
 const one=(goods,k)=>{const a=[...new Set(goods.map(g=>g[k]).filter(Boolean))];return a.length===1?a[0]:a.length?'ÇOK ('+a.length+') — KALEM LİSTESİNE BKZ.':''};
 
 // ---- T1 TASLAK: Transit Refakat Belgesi + Kalem Listesi ----
 export function t1Draft(d,goods,ref){
- const mrn=d.mrn||'',lrn=d.lrn||'',consignor=d.sender||one(goods,'sender'),consignee=d.receiver||one(goods,'receiver');
+ const mrn=d.mrn||'',lrn=d.lrn||'',S=sideInfo(goods,'sender',d),R=sideInfo(goods,'receiver',d);
  const veh=[d.vehicle,d.vehicleCountry].filter(Boolean).join(' ')+(d.trailer?' / '+d.trailer+' '+(d.trailerCountry||''):'');
  const bar=mrn||lrn||ref;
  const docs=[...new Set(goods.map(g=>g.invoice&&('N380 / '+g.invoice+(g.invoiceDate?' / '+g.invoiceDate:''))).filter(Boolean))];
  const prev=goods.filter(g=>g.mrn).map(g=>'TCGB / '+g.mrn+' / Hayır / 1');
  const p1=`<div class="pg"><div class="hd">TÜRKİYE CUMHURİYETİ</div>
 <div class="row"><div class="side">TRANSİT REFAKAT BELGESİ</div><div class="col" style="flex:1.45">
-${B('Gönderici/İhracatçı [13 02]',party(consignor,d.senderAddress,d.senderEori)+' '+esc(d.dispatchCountry||''),'','min-height:78px')}
-${B('Alıcı [13 01]',party(consignee,d.receiverAddress,d.receiverEori)+' '+esc(d.destinationCountry||''),'','min-height:78px')}
+${B('Gönderici/İhracatçı [13 02]',party(S.name,S.addr,S.no),'','min-height:78px')}
+${B('Alıcı [13 01]',party(R.name,R.addr,R.no),'','min-height:78px')}
 ${B('Rejim Hak Sahibi [13 07]',party(d.principal||d.customer||d.carrier,'',''),'','min-height:44px')}
 ${B('Temsilci [13 06]',party(d.customer||'','',''),'','min-height:34px')}
 ${B('Taşıyıcı [13 12]',party(d.carrier,'',d.carrierEori),'','min-height:50px')}
@@ -85,8 +91,8 @@ ${B('Ek Referans [12 04]','','','min-height:26px')}
  const items=goods.map((g,i)=>`<div class="pg"><div class="row">${B('','<span style="font-size:13px;display:block;text-align:center">TRANSİT KALEM LİSTESİ</span>','','flex:2')}${B('Formlar [3]','')}<div class="b" style="flex:2.3"><div class="row" style="align-items:center"><span style="font-size:11px">MRN</span>&nbsp;<div style="flex:1">${barcode(bar,34)}<div class="bcw">${esc(bar)}</div></div></div></div></div>
 <div class="row"><div class="col" style="flex:1">
 <div class="row">${B('Eşya Kalem Numarası [11 11]',String(i+1),'','flex:.6')}${B('Kalem Numarası [11 09]',String(i+1),'','flex:.6')}${B('Kapların türü, sayısı ve nakliyeişaretleri [18 06]','Kap Cinsi:'+esc(g.packageType||'BI')+' &nbsp; Kap Adedi:'+fmt(g.packages),'','flex:1.2')}</div>
-${B('Gönderici/İhracatçı [13 02]',party(g.sender||consignor,'',''),'','min-height:70px')}
-${B('Alıcı [13 03]',party(g.receiver||consignee,g.receiverCountry?'':'',''),'','min-height:70px')}
+${B('Gönderici/İhracatçı [13 02]',party(g.sender||S.name,addrOf(g,'sender'),g.senderEori||g.senderTax),'','min-height:70px')}
+${B('Alıcı [13 03]',party(g.receiver||R.name,addrOf(g,'receiver'),g.receiverEori||g.receiverTax),'','min-height:70px')}
 ${B('Arz Zinciri İlave Aktör [13 14]','','','min-height:50px')}
 ${B('Hareketteki Taşıma Aracı [19 05]',esc([d.vehicle,d.vehicleCountry].filter(Boolean).join(' ')))}
 <div class="row">${B('BM Tehlikeli Eşya Kodu[18 07]:','')}${B('CUS Kodu[18 08]:','')}${B('Taşıma Ücretleri[14 02]:','')}</div>
@@ -106,18 +112,18 @@ ${B('Taşıma Belgeleri [12 05]:','','','min-height:34px')}
 
 // ---- CMR ----
 export function cmr(d,goods,ref){
- const consignor=d.sender||one(goods,'sender'),consignee=d.receiver||one(goods,'receiver');
+ const S=sideInfo(goods,'sender',d),R=sideInfo(goods,'receiver',d);
  const rows=goods.map((g,i)=>`<div style="display:flex;gap:8px"><span style="width:22px">${i+1}</span><span style="width:28px">${esc(g.packageType||'BI')}</span><span style="flex:1">${esc(g.description)}</span></div>`).join('');
  const docs=goods.map(g=>g.invoice&&('N380 '+g.invoice+(g.invoiceDate?' '+g.invoiceDate:''))).filter(Boolean);
  const mrns=goods.map(g=>g.mrn).filter(Boolean);
  const L=(n,tr,en)=>`<b>${n}</b>${en}<br>&nbsp;&nbsp;${tr}`;
  const date=dmy();
  return `<div class="pg cmr"><div class="row"><div class="col" style="flex:1.35">
-${B(L(1,'Gönderen (İsim, Adres, Ülke)','Sender (Name, Address, Country)'),party(consignor,d.senderAddress,'')+(d.dispatchCountry?'<br>'+esc(d.dispatchCountry):''),'','min-height:84px')}
+${B(L(1,'Gönderen (İsim, Adres, Ülke)','Sender (Name, Address, Country)'),party(S.name,S.addr,''),'','min-height:84px')}
 </div><div style="flex:1.3;border:.8px solid #555;padding:3px 6px"><div class="red">YÜKLEME VE İSTİFLEMEDEN OLUŞACAK HASARLARDAN TAŞIYICI SORUMLU TUTULMAZ.</div><div class="redS">The carrier is subject, notwithstanding any clause to contrary, to the Convention on the Contract for the International Carriage of goods by road (CMR)</div></div>
 <div style="flex:.9;border:.8px solid #555;padding:3px 6px"><div class="ttl">INTERNATIONAL CONSIGNMENT NOTE<br>ULUSLARARASI HAMULE SENEDİ</div><div style="text-align:center"><span class="cmrLogo">CMR</span></div><div class="redS" style="font-size:6.5px">İş bu irsaliye karşıt kloz lara rağmen, karayolu ile emtianın uluslararası taşıması ile ilgili anlaşılan kon vansiyon düzenlenmiştir.</div></div></div>
 <div class="row"><div class="col" style="flex:1.35">
-${B(L(2,'Alacak Olan (İsim, Adres, Ülke)','Consignee (Name, Address, Country)'),party(consignee,d.receiverAddress,'')+(d.destinationCountry?' '+esc(d.destinationCountry):''),'','min-height:82px')}
+${B(L(2,'Alacak Olan (İsim, Adres, Ülke)','Consignee (Name, Address, Country)'),party(R.name,R.addr,''),'','min-height:82px')}
 ${B(L(3,'Malların alındığı yer ( Şehir, Ülke )','Place and Date of taking over goods ( Place, Country)')+'<span class="nb">Date / Tarih</span>',esc(d.loadPlace||'')+(d.dispatchCountry?', '+esc(d.dispatchCountry):'')+'<span class="nb" style="margin-left:80px">'+date+'</span>','','min-height:66px')}
 ${B(L(4,'Malları teslim edildiği yer ( Şehir, Ülke )','Place of delivery goods ( Place, Country) Maln /')+'<span class="nb">Date / Tarih</span>',esc(d.unloadPlace||'')+(d.destinationCountry?', '+esc(d.destinationCountry):''),'','min-height:40px')}
 ${B(L(5,'Ekli Belgeler','Documents attached'),docs.concat(mrns.length?['EXP MRN: '+mrns.slice(0,3).join(', ')]:[]).map(esc).join('<br>'),'','min-height:40px')}
@@ -138,7 +144,7 @@ ${B(L(21,'Tanzim yeri','Established in')+'<span class="nb">On / Tarih</span>',es
 ${B(L(19,'Özel anlaşma','Special agreements'),'*Yükleme ve Boşaltmalarda 48 saatten sonra beher gün için 180,-EUR bekleme ücreti alınır.<br>* Delays after 48 hours of arrival (for discharging) or of loading) at final destination are subject to a demorrage of 180,-EUR each trailer per day.','','min-height:74px;font-size:8px')}
 <div class="row"><div class="col" style="flex:1.4">${B(L(20,'Ödeyecek','To be paid by'),'')}${B('Productions<br>Yük','','','min-height:18px')}${B('Supplements<br>Ara Yekün','','','min-height:18px')}${B('Total<br>Toplam','','','min-height:18px')}${B('Reimbursement / cash on delivery<br><b>15</b>Teslimatta ödenecek mebla','','','min-height:30px')}</div><div class="col" style="flex:.8">${B('Senders<br>Gönderen','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div><div class="col" style="flex:.7">${B('Amount<br>Mebla','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div><div class="col" style="flex:.7">${B('Consignee<br>Alacak olan','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div></div>
 </div></div>
-<div class="row">${B(L(22,'Gönderenin imza ve kaşesi','Signature and stamp of the sender'),party(consignor,d.senderAddress,''),'','min-height:78px;flex:1')}${B(L(23,'Taşıyıcının imza ve kaşesi','Signature and stamp of the carrier'),party(d.carrier,'',''),'','min-height:78px;flex:1')}${B(L(24,'Mallar Teslim Alan','Received Goods')+'<span class="nb">On<br>Tarih</span>','<div style="margin-top:34px;font-size:8px;text-align:center">Signature and stamp of the consignee<br>Alıcının imza ve kaşesi</div>','','min-height:78px;flex:1')}</div>
+<div class="row">${B(L(22,'Gönderenin imza ve kaşesi','Signature and stamp of the sender'),party(S.name,S.addr,''),'','min-height:78px;flex:1')}${B(L(23,'Taşıyıcının imza ve kaşesi','Signature and stamp of the carrier'),party(d.carrier,'',''),'','min-height:78px;flex:1')}${B(L(24,'Mallar Teslim Alan','Received Goods')+'<span class="nb">On<br>Tarih</span>','<div style="margin-top:34px;font-size:8px;text-align:center">Signature and stamp of the consignee<br>Alıcının imza ve kaşesi</div>','','min-height:78px;flex:1')}</div>
 <p class="note">CMR taslağıdır; geçerli senet için gönderici ve taşıyıcı imzalı nüshalar gerekir. Referans: ${esc(ref||'')}</p></div>`;
 }
 
