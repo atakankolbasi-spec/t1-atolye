@@ -350,3 +350,9 @@ main{max-width:none!important;padding:16px 22px!important}
 .comboList button:hover strong,.comboList button.on strong{color:#1a1408!important}
 .comboList button:hover small,.comboList button.on small{color:#4a3d16!important}
 .officeResults button:hover strong,.officeResults button.on strong{color:#1a1408!important}.officeResults button:hover small,.officeResults button.on small{color:#4a3d16!important}
+/* Eşya formu: gönderici / alıcı yan yana, GTİP solda – ticari tanım sağda */
+#goodDialog .goodSection .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#goodDialog .goodSection .grid .field:has([name=sender]),#goodDialog .goodSection .grid .field:has([name=receiver]),#goodDialog .goodSection .grid .field:has([name=senderAddress]),#goodDialog .goodSection .grid .field:has([name=receiverAddress]),#goodDialog .goodSection .grid .field:has([name=gtip]),#goodDialog .goodSection .grid .field:has([name=description]),#goodDialog .goodSection .grid .field:has([name=mrn]),#goodDialog .goodSection .grid .field:has([name=partial]){grid-column:span 2}
+#goodDialog .goodSection .grid .field:has(textarea){grid-column:span 2}
+#goodDialog .field textarea[name=description]{min-height:52px!important;height:52px;padding:10px 14px!important}
+@media(max-width:900px){#goodDialog .goodSection .grid{grid-template-columns:1fr!important}#goodDialog .goodSection .grid .field{grid-column:auto!important}}
