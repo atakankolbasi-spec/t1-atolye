@@ -85,3 +85,39 @@ footer{color:#8a97ad!important;border-top-color:var(--pc-line)!important}.bottom
 .brand span:not(.brandmark){color:#fff}
 .sidebar .brand small{color:#7f93bd!important}
 .steppanel{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+
+/* ===== Hepsi kalın yazı ===== */
+body,body *{font-weight:600!important}
+h1,h2,h3,h4,strong,b,th,.eyebrow,.primary,.tag,.aeoBadge,.glxNo,.kpis strong{font-weight:800!important}
+/* ===== Kart şeridi kaldırıldı ===== */
+.kpis{display:none!important}
+/* ===== Bugün şeridi ===== */
+.todayStrip{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.todayStrip[hidden]{display:none}
+.tChip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px!important;border:1px solid #d7dfee!important;background:#fff!important;color:#223a7a!important;font-size:12.5px;letter-spacing:.3px;box-shadow:0 1px 3px #0f1b3310}
+.tChip b{font-size:15px}.tChip.warn{background:#fff7e6!important;border-color:#fbd38d!important;color:#b45309!important}.tChip.warn.on{background:#fde7bd!important}
+.tChip.bad{background:#fff1f1!important;border-color:#fecaca!important;color:#b91c1c!important}
+/* ===== Liste: tek satır, blok satırlar ===== */
+.tablewrap{background:#f3f6fb!important;padding:0 14px 6px}
+#declarationsTable{border-collapse:separate!important;border-spacing:0 10px!important;table-layout:fixed;width:100%}
+#declarationsTable thead th{background:transparent!important;border:0!important;padding:10px 12px 2px!important;font-size:11px!important}
+#declarationsTable tbody td{background:#fff!important;border-top:1px solid #dbe3f2!important;border-bottom:1px solid #dbe3f2!important;padding:12px 12px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+#declarationsTable tbody td:first-child{border-left:4px solid #2f5bea!important;border-top-left-radius:12px;border-bottom-left-radius:12px}
+#declarationsTable tbody td:last-child{border-right:1px solid #dbe3f2!important;border-top-right-radius:12px;border-bottom-right-radius:12px}
+#declarationsTable tbody tr:hover td{background:#f5f8ff!important;border-top-color:#b7c9f2!important;border-bottom-color:#b7c9f2!important}
+#declarationsTable td small,#declarationsTable .cellMain{display:inline!important;font-size:13px!important;margin:0}
+#declarationsTable td small{margin-left:8px!important;color:#7a88a3!important}
+#declarationsTable .stCell{white-space:nowrap!important}
+#declarationsTable .stCell .tag,#declarationsTable .stCell .aeoBadge,#declarationsTable .stCell .dueBadge{display:inline-flex!important;vertical-align:middle;margin-right:4px}
+#declarationsTable .rowactions{display:flex!important;flex-wrap:nowrap!important;gap:4px!important;max-width:none!important}
+#declarationsTable .rowactions button{padding:5px 7px!important;font-size:12px!important}
+.dueBadge{padding:4px 9px;border-radius:999px;background:#fef3c7;color:#b45309;font-size:11px;white-space:nowrap}.dueBadge.late{background:#fee2e2;color:#b91c1c}
+/* ===== Hat bildirimleri: durum özeti ve rozetler ===== */
+.hatSummary{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.hatToday,.hatChip{display:flex;align-items:baseline;gap:10px;padding:12px 18px;border-radius:12px;background:#fff;border:1px solid #dbe3f2;box-shadow:0 1px 3px #0f1b3310}
+.hatToday{background:#2f5bea;border-color:#2f5bea;color:#fff}.hatToday strong{font-size:22px}.hatToday span,.hatChip span{font-size:11px;letter-spacing:.6px}
+.hatChip strong{font-size:18px}.hatChip.hb0{border-left:4px solid #94a3b8}.hatChip.hb1{border-left:4px solid #2f5bea}.hatChip.hb2{border-left:4px solid #f59e0b}.hatChip.hb3{border-left:4px solid #16a34a}.hatChip.hb4{border-left:4px solid #dc2626}
+.hatBadge{display:inline-block;padding:5px 12px;border-radius:999px;font-size:12px;white-space:nowrap}
+.hatBadge.hb0{background:#eef2f7;color:#475569}.hatBadge.hb1{background:#e0ebff;color:#1f43c0}.hatBadge.hb2{background:#fef3c7;color:#b45309}.hatBadge.hb3{background:#dcfce7;color:#15803d}.hatBadge.hb4{background:#fee2e2;color:#b91c1c}
+#declarationsTable td:nth-child(1) small,#declarationsTable td:nth-child(2) small{display:none!important}
+#declarationsTable .stCell .tag{padding:4px 10px!important;font-size:12px}#declarationsTable .stCell .aeoBadge{padding:4px 9px;font-size:11px}
