@@ -1,4 +1,5 @@
 import {attachCombo} from './combo.js';
+import {ensDoc,printHtml} from './documents.js';
 import {findCompanies,normalizeSearch} from './directory.js';
 import {num} from './excel.js';
 import {detectPlate} from './transport.js';
@@ -133,7 +134,7 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
   <section class="card ensCard"><h2>Ek bilgiler</h2><div class="accGrid">${F('lrn','LRN (yetkili sistemden)',{ph:'Varsa yazın'})}${F('mrn','MRN (yetkili sistemden)',{ph:'Varsa yazın'})}${F('transitEnd','Transit bitiş tarihi',{type:'date'})}${F('ferryBooking','Feribot rezervasyonu')}${F('stampDuty','Damga vergisi')}${F('consignmentNote','Konsinye notu',{cls:'span2'})}${F('ncts','Bağlı T1 (NCTS) referansı',{cls:'span2',autocomplete:false})}</div>${linked?`<p class="accNote">Bağlı T1: <a href="#declaration/${esc(linked.id)}">${esc(linked.ref)} ↗</a></p>`:''}</section>
   <section class="card ensCard"><div class="goodstoolbar"><div><h2>Eşya bilgileri</h2><p>Her satır bir eşya kalemidir.</p></div><button type="button" class="primary" id="ensAddGood">＋ Eşya ekle</button></div><div id="ensGoods"></div><div class="goodsTotals" id="ensTotals"></div></section>
   <section class="card ensCard"><h2>Finansal bilgiler</h2><p class="accNote">Fiyat ayarlarındaki ENS ücreti kuralı kendiliğinden eklenir.</p><div id="ensFinance"></div></section>
-  <div class="ensFooter"><button id="ensJson">Hazırlık dosyası (JSON) ↓</button><button id="ensCsv">Eşya listesi (CSV) ↓</button><span class="spacer"></span><button class="primary" id="ensSave2">Kaydet</button></div>`;
+  <div class="ensFooter"><button id="ensPrint">ENS / ICS2 yazdır</button><button id="ensJson">Hazırlık dosyası (JSON) ↓</button><button id="ensCsv">Eşya listesi (CSV) ↓</button><span class="spacer"></span><button class="primary" id="ensSave2">Kaydet</button></div>`;
   renderRoute();renderGoods();updateState();attachEditorCombos();mountFin();
  }
  function mountFin(){
@@ -168,6 +169,7 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
  view.addEventListener('click',e=>{
   if(!cur)return;const b=e.target.closest('button');if(!b)return;
   if(b.id==='ensBack'){if(dirty&&!saved)confirmAction('ENS’den çık','Kaydedilmemiş yeni kayıt silinecek.',()=>{cur=null;navigate(null)});else{if(dirty)save(true);cur=null;navigate(null)}}
+  else if(b.id==='ensPrint')printHtml(cur.ref+' ENS',ensDoc(cur));
   else if(b.id==='ensSave'||b.id==='ensSave2')save();
   else if(b.id==='ensCheck'){save(true);renderProblems()}
   else if(b.id==='ensAddGood'){cur.goods.push(blankGood({consignor:'',consignee:''}));renderGoods();touch();view.querySelector('#ensGoods .ensGood:last-child [data-g=gtip]')?.focus()}

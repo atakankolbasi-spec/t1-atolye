@@ -333,3 +333,4 @@ main{max-width:none!important;padding:16px 22px!important}
 .listcard{margin-bottom:8px}
 #declarationsTable td{padding:8px 8px!important}
 #declarationsTable .rowactions{max-width:112px}
+.rowactions button.danger{background:#fde8e8;color:#b42318}.rowactions button.danger:hover{background:#f8c9c9}
