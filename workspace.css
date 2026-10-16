@@ -356,3 +356,11 @@ main{max-width:none!important;padding:16px 22px!important}
 #goodDialog .goodSection .grid .field:has(textarea){grid-column:span 2}
 #goodDialog .field textarea[name=description]{min-height:52px!important;height:52px;padding:10px 14px!important}
 @media(max-width:900px){#goodDialog .goodSection .grid{grid-template-columns:1fr!important}#goodDialog .goodSection .grid .field{grid-column:auto!important}}
+/* Gönderici / alıcı ayrıntıları: istenince açılır */
+#goodFields:not(.openS) .goodSection .grid .field:has([name^=sender]:not([name=sender])){display:none}
+#goodFields:not(.openR) .goodSection .grid .field:has([name^=receiver]:not([name=receiver])){display:none}
+#goodFields:not(.openS):not(.openR) .goodSection .grid .eoriBtn,#goodFields:not(.openS):not(.openR) .goodSection .grid .eoriMsg{display:none}
+.partyToggle{align-self:flex-start;margin-top:8px;padding:7px 12px;font-size:12.5px;border:1px solid #d9c58f;background:#fbf5e3;color:#7a5a14;border-radius:8px;font-weight:600}
+.partyToggle:hover{background:#f3e4b3}
+.glParty{display:flex;align-items:center;justify-content:space-between;gap:6px}.glPname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.glPname small{display:block;font-size:11.5px;color:#8a7a4a;font-weight:400}
+.glParty .pedit{padding:3px 8px;font-size:13px;border:1px solid #e6dfce;background:#fffdf7;color:#6a5a2a;border-radius:6px;flex:0 0 auto}.glParty .pedit:hover{background:#f0e2b4}
