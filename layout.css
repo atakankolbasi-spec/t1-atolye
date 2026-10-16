@@ -246,3 +246,4 @@ html.dark .dcInc{filter:invert(1) hue-rotate(180deg)}
 .pdfZone strong,.dropzone strong{color:var(--a2)!important}
 .pdfDropZone{background:linear-gradient(135deg,#f5f8ff,#fff)!important;border:2px dashed #b9ccf6!important;border-radius:16px!important;padding:18px 22px!important;transition:all .25s var(--ease)}
 .pdfDropZone strong{color:var(--a2)!important}.pdfDropZone:hover,.pdfDropZone.over{background:linear-gradient(135deg,#e8f0ff,#f5f8ff)!important;border-color:var(--a)!important;transform:translateY(-2px);box-shadow:var(--sh2)}
+html.dark .hero .primary{filter:none!important}
