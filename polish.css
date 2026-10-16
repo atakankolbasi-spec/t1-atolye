@@ -1,0 +1,87 @@
+/* PCS TRANSİT — profesyonel tema katmanı (en son yüklenir) */
+:root{--pc-blue:#2f5bea;--pc-blue-d:#1f43c0;--pc-ink:#17233b;--pc-mut:#66748f;--pc-line:#e3e8f1;--pc-bg:#f3f6fb;--pc-card:#fff;--pc-shadow:0 1px 2px #0f1b3314,0 6px 18px #0f1b3310;--gold:#2f5bea;--gold-d:#1f43c0;--gold-l:#8fa8f7;--bg:var(--pc-bg);--line:var(--pc-line);--ink:var(--pc-ink);--muted:var(--pc-mut)}
+body{background:var(--pc-bg)!important;color:var(--pc-ink);-webkit-font-smoothing:antialiased}
+/* Yan menü */
+.sidebar{background:linear-gradient(180deg,#0f1b33 0%,#13244a 100%)!important;border-right:0!important;box-shadow:none!important}
+.brandmark{background:linear-gradient(135deg,#2f5bea,#1f43c0)!important;color:#fff!important;box-shadow:0 4px 12px #2f5bea55!important}
+.nav{border-radius:10px!important;color:#aebbd8!important}.nav>span:first-child{color:#8fa4d0!important}
+.nav:hover{background:#1b2f5c!important;color:#fff!important}
+.nav.active{background:#2f5bea!important;color:#fff!important;border:0!important;box-shadow:0 6px 16px #2f5bea55!important}.nav.active>span{color:#fff!important}
+.navlabel{color:#6f84b3!important}
+.avatar,.user .avatar{background:#2a4175!important;color:#cfdcff!important}
+.navToggle{border-color:#2a4175!important;color:#9fb6ee!important}
+/* Üst çubuk + başlıklar */
+.topbar{border-bottom:1px solid var(--pc-line)!important;background:#fff!important;box-shadow:none!important}
+.breadcrumb{color:#7a88a3}.private{border-color:#d9e2f2!important;color:#2f5bea!important;background:#f3f7ff!important}
+.pagehead h1,h1{color:var(--pc-ink)!important;letter-spacing:-.4px}h1:after,.pagehead h1+*:before{display:none}
+.pagehead h1:after{display:none!important}.pagehead>div>div:after{display:none}
+.eyebrow{color:#2f5bea!important;letter-spacing:1.4px!important}
+/* Kartlar */
+.card,.glxWrap,.goodSection,.reviewblock{background:var(--pc-card)!important;border:1px solid var(--pc-line)!important;border-radius:14px!important;box-shadow:var(--pc-shadow)!important}
+.card{overflow:hidden}.card:before,.card:after{display:none!important}
+/* KPI kartları: beyaz, solda renkli şerit */
+.kpis{gap:14px!important}
+.kpis>div{background:#fff!important;border:1px solid var(--pc-line)!important;border-left:4px solid #2f5bea!important;border-radius:12px!important;box-shadow:var(--pc-shadow)!important;color:var(--pc-ink)!important;padding:16px 18px!important}
+.kpis>div:nth-child(2){border-left-color:#f59e0b!important}.kpis>div:nth-child(3){border-left-color:#16a34a!important}.kpis>div:nth-child(4){border-left-color:#e11d48!important}.kpis>div:nth-child(5){border-left-color:#0ea5e9!important}.kpis>div:nth-child(6){border-left-color:#7c3aed!important}.kpis>div:nth-child(7){border-left-color:#64748b!important}
+.kpis span{color:#66748f!important;letter-spacing:.8px!important;font-weight:600!important}.kpis strong{color:var(--pc-ink)!important;font-weight:700!important}.kpis small{color:#8a97ad!important}
+.kpis .connectionKpi{background:#fff!important}.connectionKpi button,.connectionKpi a{color:#2f5bea!important}
+/* Butonlar */
+button{border-color:#d7dfee!important;color:#3b4d73;border-radius:9px!important;background:#fff}
+button:hover{background:#f2f6ff!important}
+.primary,#navNew.primary,.pagehead>.primary,#quickAddGood,#newDeclaration,button.primary{background:#2f5bea!important;border-color:#2f5bea!important;color:#fff!important;box-shadow:0 4px 12px #2f5bea40!important}
+.primary:hover,button.primary:hover{background:#1f43c0!important}
+.secondary{background:#eaf0ff!important;color:#2447b5!important;border-color:#d3e0ff!important}
+.quiet{color:#3b4d73!important;border:0!important;background:none!important;box-shadow:none!important}
+/* Giriş alanları */
+input,select,textarea{background:#fff!important;border:1px solid #d3dcec!important;border-radius:9px!important;color:var(--pc-ink)!important}
+input:focus,select:focus,textarea:focus{outline:3px solid #2f5bea26!important;border-color:#2f5bea!important}
+input::placeholder,textarea::placeholder{color:#9aa6bd!important}
+.field{color:#3b4d73;font-weight:600}.field span{letter-spacing:.2px}
+/* Adım çubuğu */
+.stepper button{background:#fff!important;border:1px solid var(--pc-line)!important;color:#66748f!important;border-radius:12px!important;box-shadow:none!important}
+.stepper .current{background:#2f5bea!important;border-color:#2f5bea!important;color:#fff!important;box-shadow:0 6px 16px #2f5bea40!important}
+.stepper .current b{background:#fff!important;color:#2f5bea!important}.stepper b{background:#eef2fa!important;color:#7a88a3!important}
+.stepper .complete b{background:#dcfce7!important;color:#15803d!important}
+.sectionhead{background:#fff!important;border-bottom:1px solid var(--pc-line)!important}.sectionhead h2{color:var(--pc-ink)!important}
+.stepnumber{color:#9aa6bd!important}.wizardfooter{background:#f8faff!important;border-top:1px solid var(--pc-line)!important}
+/* Tablolar */
+.tablewrap{background:#fff}th{background:#f6f8fd!important;color:#66748f!important;font-weight:600!important;border-bottom:1px solid var(--pc-line)!important}
+td{border-bottom:1px solid #eef2f8!important;color:#3b4d73}tbody tr:hover td{background:#f8faff!important}
+.ref,.glx .ref{color:#2f5bea!important}
+.glx th{background:#f6f8fd!important;color:#66748f!important;border-bottom:1px solid var(--pc-line)!important}.glx tfoot td{background:#f6f8fd!important}
+.glxNo{background:#eaf0ff!important;border-color:#cfdcff!important;color:#2447b5!important}
+/* Durum rozetleri */
+.tag{border-radius:999px!important;padding:5px 11px!important;font-weight:600;background:#eef2fa!important;color:#52627f!important}
+.tag.checked{background:#dcfce7!important;color:#15803d!important}.tag.warning{background:#fef3c7!important;color:#b45309!important}.tag.pre{background:#ede9fe!important;color:#6d28d9!important}
+.aeoBadge{background:#fee2e2!important;color:#b91c1c!important;border:0!important;border-radius:999px!important}
+/* Satır eylemleri */
+.rowactions button{background:#f1f5fd!important;color:#3b4d73!important;border:0!important}.rowactions button:hover{background:#e0e9fb!important}.rowactions button.danger{background:#fee2e2!important;color:#b91c1c!important}
+.rowactions .addmrn{background:#eaf0ff!important;color:#2447b5!important;border:0!important}
+/* Açılır / combo */
+.comboPanel{border-color:#d3dcec!important;box-shadow:0 12px 32px #0f1b3322!important}
+.comboList button:hover,.comboList button.on{background:#eaf1ff!important}.comboList button:hover strong,.comboList button.on strong{color:#17233b!important}.comboList button:hover small,.comboList button.on small{color:#4d5f82!important}
+/* Diyaloglar */
+dialog{border:0!important;border-radius:16px!important;box-shadow:0 24px 70px #0f1b3340!important}
+.drawerhead,#goodDialog .drawerhead{background:#0f1b33!important;border-bottom:0!important}.drawerhead h2,#goodDialog .drawerhead h2{color:#fff!important}.drawerhead .eyebrow{color:#8fb0ff!important}.drawerintro{color:#aab8d8!important}
+.drawerfooter{background:#fff!important;border-top:1px solid var(--pc-line)!important}
+/* AEO, tesis, rota */
+.aeoRow>label.check{background:#f3f7ff!important;border-color:#c9d8f5!important;color:#223a7a!important}.aeoRow>label.check:has(input:checked){background:#e0ebff!important;border-color:#2f5bea!important;box-shadow:inset 0 0 0 1px #2f5bea!important}
+.partyToggle{background:#f3f7ff!important;border-color:#c9d8f5!important;color:#2447b5!important}
+.addRow{background:#e5efff!important;color:#2f5bea!important}.repeatitem .rowDel{background:#ffe1e1!important;color:#d33a3a!important}
+.routePanel>.routePreset select{border-color:#bfd3f5!important;color:#2f5bea!important;background:#f4f8ff!important}
+/* Boş durum, bilgi */
+.emptyicon{background:#eef3ff!important;border-color:#dbe6ff!important;color:#2f5bea!important}.empty h3{color:#17233b!important}
+.resume,.info,.errorbox{border-radius:10px!important}
+/* Footer */
+footer{color:#8a97ad!important;border-top-color:var(--pc-line)!important}.bottomnote{color:#7a88a3!important}
+/* Eşya formu bölüm başlıkları */
+.goodSection h3 b,.drawerbody h3 b{background:#eaf0ff!important;color:#2447b5!important}
+.nav{border:0!important;background:transparent!important;box-shadow:none}.nav:hover{background:#1b2f5c!important}.nav.active{background:#2f5bea!important}
+.kpis>div{border-top-color:var(--pc-line)!important;border-right-color:var(--pc-line)!important;border-bottom-color:var(--pc-line)!important}
+.kpis>div:before,.kpis>div:after{display:none!important}
+.search{background:#f6f8fd!important;border:1px solid #e3e8f1!important;border-radius:10px!important}.search input{border:0!important;background:transparent!important;box-shadow:none!important;outline:0!important}
+.upload{background:#fff!important;border:1px solid #d7dfee!important;color:#3b4d73!important;border-radius:9px!important}.upload:hover{background:#f2f6ff!important}
+#detailColumns,#filterButton,.filtercontrols button{color:#2447b5!important}
+.brand span:not(.brandmark){color:#fff}
+.sidebar .brand small{color:#7f93bd!important}
+.steppanel{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
