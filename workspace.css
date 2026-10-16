@@ -345,3 +345,8 @@ main{max-width:none!important;padding:16px 22px!important}
 @media(max-width:900px){#goodDialog .goodSection .grid{grid-template-columns:1fr!important}}
 @media print{#goodDialog{display:none}}
 .cmrPick label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}.cmrPick small{display:block;color:#8a7a4a}
+/* Liste seçimi: seçili/üzerine gelinen satırda yazı koyu kalsın */
+.comboList button:hover,.comboList button.on{background:#f3e4b3!important}
+.comboList button:hover strong,.comboList button.on strong{color:#1a1408!important}
+.comboList button:hover small,.comboList button.on small{color:#4a3d16!important}
+.officeResults button:hover strong,.officeResults button.on strong{color:#1a1408!important}.officeResults button:hover small,.officeResults button.on small{color:#4a3d16!important}
