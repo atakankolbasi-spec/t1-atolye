@@ -139,7 +139,7 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
  function mountFin(){
   cur.fin=cur.fin?normalizeFin(cur.fin):blankFin();
   const host=view.querySelector('#ensFinance');if(!host)return;
-  const panel=mountFinancePanel(host,{getState:()=>({fin:cur.fin,kind:'ens',customerDefault:cur.customer||cur.consignee||'',goods:cur.goods}),commit:fin=>{cur.fin=fin;touch()},getCompanies,toast,confirmAction});
+  const panel=mountFinancePanel(host,{getState:()=>({fin:cur.fin,kind:'ens',customerDefault:cur.customer||cur.consignee||'',goods:cur.goods}),commit:fin=>{cur.fin=fin;touch()},setCustomer:name=>{cur.customer=name;const el=view.querySelector('[data-f=customer]');if(el&&el.value!==name)el.value=name;touch()},getCompanies,toast,confirmAction});
   panel.render();
  }
  function attachEditorCombos(){

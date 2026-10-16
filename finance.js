@@ -6,7 +6,8 @@ export const TRIGGERS=[
  ['t1','T1 yazdığımda (yazım ücreti)'],
  ['ens','ENS yazdığımda (ENS ücreti)'],
  ['permitted','İzinli gönderici seçtiğimde'],
- ['guarantee','Kullanılan teminat aralığına göre (teminat ücreti)']
+ ['guarantee','Kullanılan teminat aralığına göre (teminat ücreti)'],
+ ['always','Her beyannamede (T1 ve ENS) ek kalem']
 ];
 export const TRIGGER_NAME=Object.fromEntries(TRIGGERS);
 export const CURRENCIES=['EUR','USD','TRY','GBP','CHF','PLN','RON','UAH','SEK','NOK','DKK','CZK','HUF'];
@@ -26,6 +27,7 @@ export const defaults=()=>({
   {id:'i-gider',code:'GIDER-GENEL',name:'GENEL GİDER',type:'gider',unit:'Adet',price:0,currency:'EUR',vat:'KDV0'}
  ],
  rules:[],
+ firms:[],           // firma profili: {name, permitted} — izinli gönderici (AEO) firması mı
  vats:[['KDV0',0],['KDV1',1],['KDV10',10],['KDV20',20]],
  rates:{},            // 1 birim döviz = kaç EUR (EUR: 1)
  guaranteeRate:100,   // teminat = toplam fatura değeri (EUR) × oran %
@@ -34,10 +36,11 @@ export const defaults=()=>({
 export function normalize(v){
  const d=defaults(),o=v&&typeof v==='object'?v:{};
  const items=Array.isArray(o.items)?o.items.filter(x=>x&&x.id).map(x=>({id:text(x.id),code:text(x.code),name:text(x.name),type:['gelir','gider','ikisi'].includes(x.type)?x.type:'gelir',unit:text(x.unit)||'Adet',price:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0'})):d.items;
- const rules=Array.isArray(o.rules)?o.rules.filter(x=>x&&x.id&&TRIGGER_NAME[x.trigger]).map(x=>({id:text(x.id),on:x.on!==false,trigger:x.trigger,customer:text(x.customer),itemId:text(x.itemId),price:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0',min:n0(x.min),max:x.max===''||x.max==null?0:n0(x.max),note:text(x.note)})):[];
+ const rules=Array.isArray(o.rules)?o.rules.filter(x=>x&&x.id&&TRIGGER_NAME[x.trigger]).map(x=>({id:text(x.id),on:x.on!==false,trigger:x.trigger,customer:text(x.customer),itemId:text(x.itemId),price:x.price===''||x.price==null?null:n0(x.price),currency:text(x.currency).toUpperCase()||'EUR',vat:text(x.vat)||'KDV0',min:n0(x.min),max:x.max===''||x.max==null?0:n0(x.max),note:text(x.note)})):[];
+ const firms=Array.isArray(o.firms)?o.firms.filter(x=>x&&text(x.name)).map(x=>({name:text(x.name),permitted:!!x.permitted})):[];
  const vats=Array.isArray(o.vats)&&o.vats.length?o.vats.map(x=>[text(x[0]),n0(x[1])]).filter(x=>x[0]):d.vats;
  const rates={};if(o.rates&&typeof o.rates==='object')for(const [k,val] of Object.entries(o.rates)){const n=n0(val);if(n>0)rates[String(k).toUpperCase().slice(0,3)]=n}
- return {items,rules,vats,rates,guaranteeRate:Number.isFinite(Number(o.guaranteeRate))&&o.guaranteeRate!==''&&o.guaranteeRate!=null?Number(o.guaranteeRate):d.guaranteeRate,units:Array.isArray(o.units)&&o.units.length?o.units.map(text).filter(Boolean):d.units};
+ return {items,rules,firms,vats,rates,guaranteeRate:Number.isFinite(Number(o.guaranteeRate))&&o.guaranteeRate!==''&&o.guaranteeRate!=null?Number(o.guaranteeRate):d.guaranteeRate,units:Array.isArray(o.units)&&o.units.length?o.units.map(text).filter(Boolean):d.units};
 }
 export function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)))}catch{return normalize(null)}}
 export function save(f){try{localStorage.setItem(KEY,JSON.stringify(f));return true}catch{return false}}
@@ -64,10 +67,11 @@ export function evaluate(f,ctx){
   const mine=active.filter(r=>r.trigger===trigger&&r.customer&&ruleApplies(r,ctx.customer)&&test(r));
   return mine.length?mine:active.filter(r=>r.trigger===trigger&&!r.customer&&test(r));
  };
- const add=(rule,extra='')=>{const it=itemById(f,rule.itemId);out.push({ruleId:rule.id,itemId:it.id,name:it.name,unit:it.unit,qty:1,price:n0(rule.price)||n0(it.price),currency:rule.currency||it.currency,vat:rule.vat||it.vat,side:'gelir',note:extra||rule.note||''})};
+ const add=(rule,extra='')=>{const it=itemById(f,rule.itemId);out.push({ruleId:rule.id,itemId:it.id,name:it.name,unit:it.unit,qty:1,price:rule.price==null?n0(it.price):n0(rule.price),currency:rule.currency||it.currency,vat:rule.vat||it.vat,side:'gelir',note:extra||rule.note||''})};
  if(ctx.kind==='t1')for(const r of pick('t1'))add(r);
  if(ctx.kind==='ens')for(const r of pick('ens'))add(r);
  if(ctx.permitted)for(const r of pick('permitted'))add(r);
+ for(const r of pick('always'))add(r);
  if(n0(ctx.guaranteeEur)>0){const tiers=pick('guarantee',r=>inRange(r,n0(ctx.guaranteeEur))).sort((a,b)=>n0(a.min)-n0(b.min));if(tiers.length)add(tiers[0],'Teminat '+fmtMoney(ctx.guaranteeEur)+' EUR')}
  return out;
 }
@@ -101,3 +105,14 @@ export function sums(f,lines){
 }
 export const money=(map)=>Object.entries(map).map(([c,v])=>fmtMoney(v.gross)+' '+c).join(' + ')||'—';
 export const newId=uid;
+
+// Firma profili (izinli gönderici varsayılanı vb.)
+export const firmKey=n=>normalizeSearch(n);
+export const firmProfile=(f,name)=>f.firms.find(x=>firmKey(x.name)===firmKey(name))||null;
+export function setFirmProfile(f,name,patch){
+ const i=f.firms.findIndex(x=>firmKey(x.name)===firmKey(name));
+ if(i>=0)f.firms[i]={...f.firms[i],...patch};else f.firms.push({name:text(name),permitted:false,...patch});
+}
+// Bir firmanın (ya da '' = genel) kuralları
+export const rulesOf=(f,name)=>f.rules.filter(r=>(r.customer||'')===(name||'')||(name&&firmKey(r.customer)===firmKey(name)));
+export const rulePrice=(f,r)=>r.price==null?n0(itemById(f,r.itemId)?.price):n0(r.price);

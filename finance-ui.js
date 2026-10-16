@@ -21,14 +21,14 @@ function makeDialog(id,html){
 }
 
 /* ------------------------- Fiyat ayarları sayfası ------------------------- */
-export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,onChange=()=>{}}){
+export function installFinanceSettings({references,getCompanies,toast,confirmAction,anchor,onChange=()=>{}}){
  const btn=document.createElement('button');btn.className='nav';btn.id='navFinance';btn.innerHTML='<span>₺</span>Fiyat ayarları';anchor.before(btn);
  const view=document.createElement('section');view.id='financeView';view.className='view';view.hidden=true;
  view.innerHTML=`<div class="pagehead"><div><div class="eyebrow">FİNANS</div><h1>Fiyat ayarları</h1><p>Kalem adlarını, firmaya özel otomatik fiyatları ve teminat hesabını buradan belirle. Beyanname yazarken Finansal bilgiler adımı bunlara göre kendiliğinden dolar.</p></div></div>
- <div class="finTabs" role="tablist"><button data-tab="rules" class="on">Otomatik fiyat kuralları</button><button data-tab="items">Kalem kataloğu</button><button data-tab="rates">Kur, teminat ve KDV</button><button data-tab="test">Fiyat denemesi</button></div>
- <section class="card finPane" data-pane="rules"></section><section class="card finPane" data-pane="items" hidden></section><section class="card finPane" data-pane="rates" hidden></section><section class="card finPane" data-pane="test" hidden></section>`;
+ <div class="finTabs" role="tablist"><button data-tab="firms" class="on">Firma fiyatları</button><button data-tab="rules">Tüm kurallar (liste)</button><button data-tab="items">Kalem kataloğu</button><button data-tab="rates">Kur, teminat ve KDV</button><button data-tab="test">Fiyat denemesi</button></div>
+ <section class="card finPane" data-pane="firms"></section><section class="card finPane" data-pane="rules" hidden></section><section class="card finPane" data-pane="items" hidden></section><section class="card finPane" data-pane="rates" hidden></section><section class="card finPane" data-pane="test" hidden></section>`;
  document.querySelector('main footer').before(view);
- let tab='rules',ruleQ='',ruleTrig='',itemQ='',test={customer:'',kind:'t1',permitted:false,guarantee:''};
+ let tab='firms',firmSel='*',firmQ='',ruleQ='',ruleTrig='',itemQ='',test={customer:'',kind:'t1',permitted:false,guarantee:''};
  const pane=n=>$(view,'[data-pane='+n+']');
  const f=()=>getFinance();
  const commit=(msg)=>{if(!saveFinance(f()))toast('Ayarlar kaydedilemedi (tarayıcı alanı dolu olabilir).');else if(msg)toast(msg);onChange()};
@@ -63,7 +63,7 @@ export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,
   const nCust=new Set(fin.rules.filter(r=>r.customer).map(r=>r.customer)).size;
   pane('rules').innerHTML=`<div class="finBar"><label class="search"><span>⌕</span><input data-q placeholder="Firma ya da kalem ara…" value="${esc(ruleQ)}"></label><select data-trig><option value="">Tüm tetikleyiciler</option>${opts(F.TRIGGERS,ruleTrig)}</select><button class="primary" data-new>＋ Yeni kural</button></div>
   <div class="finHelp"><b>Nasıl çalışır?</b> Beyannameyi yazarken kurallar kendiliğinden <em>Gelirler</em> kısmına satır ekler. Bir firma için özel kural varsa <b>yalnız o</b> uygulanır; yoksa “Tüm firmalar” kuralı uygulanır. Teminat ücretinde, kullanılan teminat tutarı (EUR) hangi aralıktaysa o satırdaki fiyat yazılır. ${fin.rules.length?`<br><b>${fin.rules.length}</b> kural · <b>${nCust}</b> firmaya özel.`:''}</div>
-  <div class="tablewrap"><table class="lstTable"><thead><tr><th>FİRMA</th><th>NE ZAMAN</th><th>TEMİNAT ARALIĞI (EUR)</th><th>KALEM</th><th class="r">TUTAR</th><th>KDV</th><th>AÇIK</th><th></th></tr></thead><tbody>${list.map(r=>`<tr class="${r.on?'':'off'}"><td>${r.customer?'<strong>'+esc(r.customer)+'</strong>':'<span class="finAll">Tüm firmalar</span>'}</td><td>${esc(F.TRIGGER_NAME[r.trigger])}</td><td>${r.trigger==='guarantee'?fm(r.min)+' – '+(F.n0(r.max)?fm(r.max):'∞'):'—'}</td><td>${esc(itemName(r.itemId))}</td><td class="r">${fm(r.price)} ${esc(r.currency)}</td><td>${esc(r.vat)}</td><td><input type="checkbox" data-on="${esc(r.id)}" ${r.on?'checked':''} aria-label="Kuralı aç/kapat"></td><td><div class="rowactions"><button data-edit="${esc(r.id)}" title="Düzenle">✎</button><button data-copy="${esc(r.id)}" title="Kopyala (başka firma ya da sonraki aralık için)">⧉</button><button data-del="${esc(r.id)}" title="Sil">🗑</button></div></td></tr>`).join('')||`<tr><td colspan="8" class="lstEmpty">${fin.rules.length?'Aramaya uyan kural yok.':'Henüz kural yok. “＋ Yeni kural” ile ilk fiyatını ekle.'}</td></tr>`}</tbody></table></div>`;
+  <div class="tablewrap"><table class="lstTable"><thead><tr><th>FİRMA</th><th>NE ZAMAN</th><th>TEMİNAT ARALIĞI (EUR)</th><th>KALEM</th><th class="r">TUTAR</th><th>KDV</th><th>AÇIK</th><th></th></tr></thead><tbody>${list.map(r=>`<tr class="${r.on?'':'off'}"><td>${r.customer?'<strong>'+esc(r.customer)+'</strong>':'<span class="finAll">Tüm firmalar</span>'}</td><td>${esc(F.TRIGGER_NAME[r.trigger])}</td><td>${r.trigger==='guarantee'?fm(r.min)+' – '+(F.n0(r.max)?fm(r.max):'∞'):'—'}</td><td>${esc(itemName(r.itemId))}</td><td class="r">${fm(F.rulePrice(fin,r))} ${esc(r.currency)}${r.price==null?' <small>(kalem fiyatı)</small>':''}</td><td>${esc(r.vat)}</td><td><input type="checkbox" data-on="${esc(r.id)}" ${r.on?'checked':''} aria-label="Kuralı aç/kapat"></td><td><div class="rowactions"><button data-edit="${esc(r.id)}" title="Düzenle">✎</button><button data-copy="${esc(r.id)}" title="Kopyala (başka firma ya da sonraki aralık için)">⧉</button><button data-del="${esc(r.id)}" title="Sil">🗑</button></div></td></tr>`).join('')||`<tr><td colspan="8" class="lstEmpty">${fin.rules.length?'Aramaya uyan kural yok.':'Henüz kural yok. “＋ Yeni kural” ile ilk fiyatını ekle.'}</td></tr>`}</tbody></table></div>`;
  }
  const ruleDlg=makeDialog('finRuleDialog',`<h2></h2><form class="grid" novalidate><label class="field full"><span>Ne zaman uygulansın?</span><select name="trigger"></select></label><label class="field full"><span>Firma <small>(boş bırakırsan tüm firmalara uygulanır)</small></span><input name="customer" placeholder="Firma ünvanı — rehberden seç"></label><div class="field full" data-guar hidden><span>Kullanılan teminat aralığı (EUR)</span><div class="finRange"><input name="min" inputmode="decimal" placeholder="Alt sınır (0)"><b>–</b><input name="max" inputmode="decimal" placeholder="Üst sınır (boş = sınırsız)"></div><small>Örn. 0 – 100.000 arası için bir kural, 100.000,01 ve üstü için ikinci kural ekle.</small></div><label class="field full"><span>Kalem <em>*</em></span><select name="itemId"></select></label><label class="field"><span>Tutar</span><input name="price" inputmode="decimal" placeholder="Kalemin varsayılan fiyatı"></label><label class="field"><span>Döviz</span><select name="currency"></select></label><label class="field"><span>KDV tipi</span><select name="vat"></select></label><label class="field full"><span>Not</span><input name="note" placeholder="İsteğe bağlı"></label><label class="check full"><input type="checkbox" name="on" checked> Kural açık</label><div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kaydet</button></div></form>`);
  let editRule=null;
@@ -73,7 +73,7 @@ export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,
   fm_.elements.trigger.innerHTML=opts(F.TRIGGERS,seed?.trigger||'t1');
   const items=f().items.filter(i=>i.type!=='gider');fm_.elements.itemId.innerHTML=opts(items.map(i=>[i.id,i.name]),seed?.itemId||items[0]?.id);
   fm_.elements.currency.innerHTML=opts(F.CURRENCIES,seed?.currency||'EUR');fm_.elements.vat.innerHTML=opts(f().vats.map(v=>[v[0],v[0]+' (%'+v[1]+')']),seed?.vat||'KDV0');
-  fm_.elements.customer.value=seed?.customer||'';fm_.elements.min.value=numStr(seed?.min||'');fm_.elements.max.value=numStr(seed?.max||'');fm_.elements.price.value=seed?numStr(seed.price):'';fm_.elements.note.value=seed?.note||'';fm_.elements.on.checked=seed?seed.on!==false:true;
+  fm_.elements.customer.value=seed?.customer||'';fm_.elements.min.value=numStr(seed?.min||'');fm_.elements.max.value=numStr(seed?.max||'');fm_.elements.price.value=seed&&seed.price!=null?numStr(seed.price):'';fm_.elements.note.value=seed?.note||'';fm_.elements.on.checked=seed?seed.on!==false:true;
   syncGuar();ruleDlg.showModal();
  };
  $(ruleDlg,'[data-cancel]').onclick=()=>ruleDlg.close();$(ruleDlg,'[name=trigger]').onchange=syncGuar;
@@ -82,11 +82,66 @@ export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,
  $(ruleDlg,'form').onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target)),fin=f();
   if(!d.itemId){toast('Önce Kalem kataloğunda bir gelir kalemi ekle.');return}
   const it=F.itemById(fin,d.itemId);
-  const rec={id:editRule?.id||F.newId(),on:!!d.on,trigger:d.trigger,customer:d.customer.trim(),itemId:d.itemId,price:F.n0(d.price)||F.n0(it?.price),currency:d.currency,vat:d.vat,min:d.trigger==='guarantee'?F.n0(d.min):0,max:d.trigger==='guarantee'?F.n0(d.max):0,note:d.note.trim()};
+  const rec={id:editRule?.id||F.newId(),on:!!d.on,trigger:d.trigger,customer:d.customer.trim(),itemId:d.itemId,price:String(d.price||'').trim()===''?null:F.n0(d.price),currency:d.currency,vat:d.vat,min:d.trigger==='guarantee'?F.n0(d.min):0,max:d.trigger==='guarantee'?F.n0(d.max):0,note:d.note.trim()};
   if(rec.trigger==='guarantee'&&rec.max&&rec.max<rec.min){toast('Üst sınır, alt sınırdan küçük olamaz.');return}
   if(rec.trigger==='guarantee'){const clash=fin.rules.find(r=>r.id!==rec.id&&r.on&&rec.on&&r.trigger==='guarantee'&&(r.customer||'')===rec.customer&&F.n0(r.min)<=(rec.max||Infinity)&&rec.min<=(F.n0(r.max)||Infinity));if(clash)toast('Uyarı: bu aralık aynı firmadaki başka bir teminat kuralıyla çakışıyor; alt sınırı küçük olan kural uygulanır.')}
   fin.rules=editRule?fin.rules.map(x=>x.id===editRule.id?rec:x):[...fin.rules,rec];ruleDlg.close();commit(editRule?'Kural güncellendi.':'Kural eklendi.');renderRules()};
 
+
+ /* --- Firma fiyatları: bir firmanın bütün bilgileri ve fiyatları tek ekranda --- */
+ const SECTIONS=[['t1','T1 yazım ücreti','Her T1 yazdığımda eklenir.'],['ens','ENS yazım ücreti','Her ENS yazdığımda eklenir.'],['permitted','İzinli gönderici (AEO) ücreti','Beyanname izinli gönderici (AEO) ise eklenir.'],['guarantee','Teminat ücreti','Kullanılan teminat tutarı hangi aralıktaysa o satırdaki fiyat yazılır (alt ve üst sınır EUR).'],['always','Ek kalemler','Her beyannamede (T1 ve ENS) eklenir; örn. döküman ücreti.']];
+ const DEFAULT_ITEM={t1:'i-t1',ens:'i-ens',permitted:'i-izinli',guarantee:'i-teminat',always:'i-dokuman'};
+ const rehber=()=>(references&&references.listCompanies?references.listCompanies():[]);
+ const findRehber=name=>rehber().find(c=>F.firmKey(c.name)===F.firmKey(name))||null;
+ const firmNames=()=>{const fin=f(),m=new Map();for(const r of fin.rules)if(r.customer)m.set(F.firmKey(r.customer),r.customer);for(const x of fin.firms)m.set(F.firmKey(x.name),x.name);return [...m.values()].sort((a,b)=>a.localeCompare(b,'tr'))};
+ const countOf=name=>F.rulesOf(f(),name).length;
+ function renderFirms(){
+  const fin=f(),general=firmSel==='*',name=general?'':firmSel,q=firmQ.toLowerCase();
+  const names=firmNames().filter(n=>!q||n.toLowerCase().includes(q));
+  const rules=F.rulesOf(fin,name),prof=general?null:F.firmProfile(fin,name),rec=general?null:findRehber(name);
+  const gelirItems=fin.items.filter(i=>i.type!=='gider').map(i=>[i.id,i.name]);
+  const row=(r,g)=>`<tr class="${r.on?'':'off'}" data-rid="${esc(r.id)}"><td><select data-k="itemId">${opts(gelirItems,r.itemId)}</select></td>${g?`<td><input data-k="min" inputmode="decimal" value="${esc(numStr(r.min))}" aria-label="Alt sınır"></td><td><input data-k="max" inputmode="decimal" value="${r.max?esc(numStr(r.max)):''}" placeholder="sınırsız" aria-label="Üst sınır"></td>`:''}<td><input data-k="price" inputmode="decimal" value="${r.price==null?'':esc(numStr(r.price))}" placeholder="${esc(numStr(F.n0(F.itemById(fin,r.itemId)?.price)))}" aria-label="Tutar"></td><td><select data-k="currency">${opts(F.CURRENCIES,r.currency)}</select></td><td><select data-k="vat">${opts(fin.vats.map(v=>[v[0],v[0]]),r.vat)}</select></td><td><input type="checkbox" data-k="on" ${r.on?'checked':''} aria-label="Açık"></td><td><button type="button" data-rdel="${esc(r.id)}" title="Sil">🗑</button></td></tr>`;
+  const section=([trig,title,help])=>{
+   const g=trig==='guarantee',list=rules.filter(r=>r.trigger===trig).sort((a,b)=>F.n0(a.min)-F.n0(b.min));
+   return `<div class="firmSec"><div class="firmSecHead"><h3>${title}</h3><small>${help}</small></div><div class="tablewrap"><table class="lstTable firmTbl"><thead><tr><th>KALEM</th>${g?'<th>ALT SINIR</th><th>ÜST SINIR</th>':''}<th>TUTAR</th><th>DÖVİZ</th><th>KDV</th><th>AÇIK</th><th></th></tr></thead><tbody>${list.map(r=>row(r,g)).join('')||`<tr><td colspan="${g?8:6}" class="lstEmpty">${general?'Genel fiyat yok.':'Bu firmaya özel fiyat yok'+(F.rulesOf(fin,'').some(r=>r.trigger===trig)?' — genel fiyat uygulanır.':'.')}</td></tr>`}</tbody></table></div><button type="button" class="quiet" data-radd="${trig}">＋ ${g?'Basamak':'Kalem'} ekle</button></div>`};
+  const info=general?`<div class="finHelp"><b>Genel fiyatlar</b> — özel fiyatı olmayan her firmaya uygulanır. Bir firmanın özel fiyatı varsa o bölümde yalnız onun fiyatı geçerlidir.</div>`:`<div class="firmInfo"><div class="grid"><label class="field full"><span>Firma unvanı</span><input data-fi="name" value="${esc(name)}"></label><label class="field"><span>Vergi no</span><input data-fi="taxNo" value="${esc(rec?.taxNo||'')}"></label><label class="field"><span>EORI</span><input data-fi="eori" value="${esc(rec?.eori||'')}"></label><label class="field"><span>Ülke kodu</span><input data-fi="country" maxlength="2" value="${esc(rec?.country||'')}"></label><label class="field"><span>Şehir</span><input data-fi="city" value="${esc(rec?.city||'')}"></label><label class="field full"><span>Adres</span><input data-fi="address" value="${esc(rec?.address||'')}"></label></div><label class="check"><input type="checkbox" data-fi="permitted" ${prof?.permitted?'checked':''}> <b>İzinli gönderici (AEO) firması</b> — bu firmayı müşteri seçtiğimde beyannamede izinli gönderici otomatik işaretlensin</label>${rec?'':'<p class="finHelp">Bu firma Firmalar rehberinde yok; “Bilgileri kaydet” deyince rehbere de eklenir.</p>'}<div class="finBar"><button type="button" class="primary" data-fsave>Bilgileri kaydet</button><button type="button" data-fcopy>Başka firmadan fiyat kopyala</button><button type="button" data-fdel>Bu firmanın özel fiyatlarını sil</button></div></div>`;
+  pane('firms').innerHTML=`<div class="firmLayout"><aside class="firmList"><label class="search"><span>⌕</span><input data-fq placeholder="Firma ara…" value="${esc(firmQ)}"></label><div class="firmAdd"><input data-fadd placeholder="＋ Firma ekle — rehberden seç ya da yaz"><button type="button" class="primary" data-faddbtn>Ekle</button></div><button type="button" data-fsel="*" class="${general?'on':''}"><strong>Tüm firmalar</strong><small>genel fiyatlar · ${countOf('')} kalem</small></button>${names.map(n=>`<button type="button" data-fsel="${esc(n)}" class="${F.firmKey(n)===F.firmKey(firmSel)?'on':''}"><strong>${esc(n)}</strong><small>${countOf(n)} kalem${F.firmProfile(fin,n)?.permitted?' · AEO':''}</small></button>`).join('')||'<p class="lstEmpty">Henüz firmaya özel fiyat yok.</p>'}</aside><section class="firmDetail"><h2>${general?'Tüm firmalar (genel fiyatlar)':esc(name)}</h2>${info}${SECTIONS.map(section).join('')}</section></div>`;
+  const add=pane('firms').querySelector('[data-fadd]');if(add)companyCombo(add,getCompanies,c=>{addFirm(c.name)});
+ }
+ function addFirm(name){const n=String(name||'').trim();if(!n)return;const fin=f();if(!F.firmProfile(fin,n)&&!fin.rules.some(r=>F.firmKey(r.customer)===F.firmKey(n)))F.setFirmProfile(fin,n,{});firmSel=(firmNames().find(x=>F.firmKey(x)===F.firmKey(n))||n);commit();renderFirms()}
+ const copyDlg=makeDialog('finCopyDialog',`<h2>Fiyatları kopyala</h2><form class="grid" novalidate><label class="field full"><span>Kaynak</span><select name="src"></select></label><label class="check full"><input type="radio" name="mode" value="append" checked> Mevcut fiyatlara ekle</label><label class="check full"><input type="radio" name="mode" value="replace"> Bu firmanın fiyatlarını silip yerine yaz</label><div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kopyala</button></div></form>`);
+ $(copyDlg,'[data-cancel]').onclick=()=>copyDlg.close();
+ $(copyDlg,'form').onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target)),fin=f(),target=firmSel==='*'?'':firmSel,src=d.src==='*'?'':d.src;
+  if(F.firmKey(src)===F.firmKey(target)){toast('Kaynak ve hedef aynı.');return}
+  const copy=F.rulesOf(fin,src).map(r=>({...r,id:F.newId(),customer:target}));
+  if(d.mode==='replace')fin.rules=fin.rules.filter(r=>!F.rulesOf(fin,target).includes(r));
+  fin.rules.push(...copy);copyDlg.close();commit(copy.length+' kalem kopyalandı.');renderFirms()};
+ function overlapWarn(rule){const fin=f();if(rule.trigger!=='guarantee'||!rule.on)return;const clash=fin.rules.find(r=>r.id!==rule.id&&r.on&&r.trigger==='guarantee'&&(r.customer||'')===(rule.customer||'')&&F.n0(r.min)<=(rule.max||Infinity)&&rule.min<=(F.n0(r.max)||Infinity));if(clash)toast('Uyarı: bu teminat aralığı aynı firmadaki başka bir aralıkla çakışıyor; alt sınırı küçük olan uygulanır.')}
+ const firmPane=()=>pane('firms');
+ firmPane().addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const fin=f(),name=firmSel==='*'?'':firmSel;
+  if(b.dataset.fsel!==undefined){firmSel=b.dataset.fsel;renderFirms();return}
+  if(b.hasAttribute('data-faddbtn')){addFirm(firmPane().querySelector('[data-fadd]').value);return}
+  if(b.dataset.radd){const trig=b.dataset.radd,mine=F.rulesOf(fin,name).filter(r=>r.trigger===trig),item=F.itemById(fin,DEFAULT_ITEM[trig])||fin.items.find(i=>i.type!=='gider');if(!item){toast('Önce Kalem kataloğuna bir gelir kalemi ekle.');return}
+   const last=mine.sort((a,b)=>F.n0(a.max)-F.n0(b.max)).pop();
+   fin.rules.push({id:F.newId(),on:true,trigger:trig,customer:name,itemId:item.id,price:null,currency:item.currency,vat:item.vat,min:trig==='guarantee'&&last&&F.n0(last.max)?F.r2(F.n0(last.max)+0.01):0,max:0,note:''});commit();renderFirms();return}
+  if(b.dataset.rdel){fin.rules=fin.rules.filter(r=>r.id!==b.dataset.rdel);commit();renderFirms();return}
+  if(b.hasAttribute('data-fdel')){confirmAction('Fiyatları sil',name+' için tanımlı özel fiyatların hepsi silinecek (firma rehberden silinmez).',()=>{fin.rules=fin.rules.filter(r=>!F.rulesOf(fin,name).includes(r));commit('Özel fiyatlar silindi.');renderFirms()});return}
+  if(b.hasAttribute('data-fcopy')){const srcs=['*',...firmNames().filter(n=>F.firmKey(n)!==F.firmKey(name))];$(copyDlg,'[name=src]').innerHTML=srcs.map(n=>'<option value="'+esc(n)+'">'+(n==='*'?'Tüm firmalar (genel fiyatlar)':esc(n))+' · '+countOf(n==='*'?'':n)+' kalem</option>').join('');copyDlg.showModal();return}
+  if(b.hasAttribute('data-fsave')){
+   const g=k=>firmPane().querySelector('[data-fi='+k+']'),newName=g('name').value.trim();if(!newName){toast('Firma unvanı gerekli.');return}
+   const country=g('country').value.trim().toUpperCase();if(country&&!/^[A-Z]{2}$/.test(country)){toast('Ülke kodu iki harf olmalı (TR, RO…).');return}
+   const old=findRehber(name);
+   (async()=>{try{
+     if(references&&references.saveCompany)await references.saveCompany({...(old||{}),name:newName,taxNo:g('taxNo').value.trim(),eori:g('eori').value.trim(),country,city:g('city').value.trim(),address:g('address').value.trim(),source:old?.source||'Fiyat ayarları'});
+     if(F.firmKey(newName)!==F.firmKey(name)){for(const r of fin.rules)if(F.firmKey(r.customer)===F.firmKey(name))r.customer=newName;const pr=F.firmProfile(fin,name);if(pr)pr.name=newName}
+     F.setFirmProfile(fin,newName,{permitted:g('permitted').checked});firmSel=newName;commit('Firma bilgileri kaydedildi.');renderFirms()}catch(err){toast(err.message)}})()}});
+ firmPane().addEventListener('change',e=>{const t=e.target,tr=t.closest('[data-rid]');if(!tr||!t.dataset.k)return;const fin=f(),r=fin.rules.find(x=>x.id===tr.dataset.rid);if(!r)return;
+  const k=t.dataset.k;
+  if(k==='on')r.on=t.checked;else if(k==='price')r.price=t.value.trim()===''?null:F.n0(t.value);else if(k==='min'||k==='max')r[k]=F.n0(t.value);else r[k]=t.value;
+  if(k==='itemId'){const it=F.itemById(fin,r.itemId);if(it){r.currency=it.currency;r.vat=it.vat}}
+  if(r.trigger==='guarantee'&&r.max&&r.max<r.min){toast('Üst sınır, alt sınırdan küçük olamaz.');r.max=0}
+  commit();overlapWarn(r);if(k==='itemId'||k==='on'||k==='min'||k==='max'||k==='price')renderFirms()});
+ firmPane().addEventListener('input',e=>{const t=e.target;if(t.matches('[data-fq]')){firmQ=t.value;const pos=t.selectionStart;renderFirms();const n=firmPane().querySelector('[data-fq]');n.focus();n.setSelectionRange(pos,pos)}});
  /* --- Kur, teminat, KDV --- */
  function renderRates(){
   const fin=f(),cur=F.CURRENCIES.filter(c=>c!=='EUR');
@@ -104,7 +159,7 @@ export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,
   <div class="tablewrap"><table class="lstTable"><thead><tr><th>KALEM</th><th>AÇIKLAMA</th><th class="r">TUTAR</th><th>KDV</th></tr></thead><tbody>${res.map(r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.note)}</td><td class="r">${fm(r.price)} ${esc(r.currency)}</td><td>${esc(r.vat)}</td></tr>`).join('')||'<tr><td colspan="4" class="lstEmpty">Bu koşullarda otomatik satır oluşmuyor.</td></tr>'}</tbody></table></div><div class="finSum"><span>Toplam (KDV dahil)</span><b>${esc(F.money(sum.gelir))}</b></div>`;
  }
 
- function show(){const t=tab;view.querySelectorAll('.finTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));view.querySelectorAll('.finPane').forEach(p=>p.hidden=p.dataset.pane!==t);({rules:renderRules,items:renderItems,rates:renderRates,test:renderTest})[t]()}
+ function show(){const t=tab;view.querySelectorAll('.finTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));view.querySelectorAll('.finPane').forEach(p=>p.hidden=p.dataset.pane!==t);({firms:renderFirms,rules:renderRules,items:renderItems,rates:renderRates,test:renderTest})[t]()}
  view.querySelector('.finTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){tab=b.dataset.tab;show()}};
  view.addEventListener('input',e=>{const t=e.target;
   if(t.matches('[data-pane=rules] [data-q]')){ruleQ=t.value;const pos=t.selectionStart;renderRules();const n=$(pane('rules'),'[data-q]');n.focus();n.setSelectionRange(pos,pos)}
@@ -134,14 +189,14 @@ export function installFinanceSettings({getCompanies,toast,confirmAction,anchor,
 /* ----------------------- Finansal bilgiler paneli (T1 / ENS) ----------------------- */
 const lineDlgHtml=`<h2>Kalem</h2><form class="grid" novalidate><label class="field full"><span>Fatura firması <em>*</em></span><input name="company" placeholder="Firma ünvanı — rehberden seç"></label><label class="field"><span>Gelir / Gider</span><select name="side"><option value="gelir">Gelir</option><option value="gider">Gider</option></select></label><label class="field"><span>Kalem</span><select name="itemId"></select></label><label class="field full"><span>Faturada çıkacak kalem adı <em>*</em></span><input name="name"></label><label class="field"><span>Miktar</span><input name="qty" inputmode="decimal"></label><label class="field"><span>Birim</span><input name="unit" list="finUnits2"></label><label class="field"><span>Birim fiyatı</span><input name="price" inputmode="decimal" placeholder="0,00"></label><label class="field"><span>Döviz</span><select name="currency"></select></label><label class="field"><span>KDV tipi</span><select name="vat"></select></label><label class="field"><span>KDV dahil toplam</span><input name="gross" readonly></label><label class="field full"><span>Not</span><input name="note"></label><div class="dialogactions full"><button type="button" data-cancel>Vazgeç</button><button type="submit" class="primary">Kaydet</button></div></form><datalist id="finUnits2"></datalist>`;
 // getState() → {fin, kind:'t1'|'ens', customerDefault, goods}; commit(fin) kaydeder; ctxExtra: ek bilgi
-export function mountFinancePanel(host,{getState,commit,getCompanies,toast,confirmAction,onGuarantee}){
+export function mountFinancePanel(host,{getState,commit,getCompanies,toast,confirmAction,onGuarantee,setCustomer}){
  const dlg=makeDialog('finLineDialog',lineDlgHtml);
  let editing=null,side='gelir';
  const fin0=()=>getFinance();
  function context(){
-  const s=getState(),f=fin0(),fin=s.fin,customer=fin.customer||s.customerDefault||'';
+  const s=getState(),f=fin0(),fin=s.fin,customer=s.customerDefault||'';
   const g=s.kind==='t1'?F.guaranteeOf(f,s.goods):{base:0,eur:0,missing:[],rate:0};
-  return {s,f,fin,customer,g,ctx:{kind:s.kind,customer,permitted:fin.permitted,guaranteeEur:g.eur}};
+  return {s,f,fin,customer,g,ctx:{kind:s.kind,customer,permitted:!!s.permitted,guaranteeEur:g.eur}};
  }
  function render({sync=true}={}){
   const {s,f,fin,customer,g,ctx}=context();
@@ -150,7 +205,7 @@ export function mountFinancePanel(host,{getState,commit,getCompanies,toast,confi
   const sum=F.sums(f,fin.lines),rows=sd=>fin.lines.filter(l=>l.side===sd).map(l=>{const t=F.lineTotals(f,l);return `<tr><td>${esc(l.company||customer||'—')}</td><td><strong>${esc(l.name)}</strong>${l.auto?'<span class="finAuto" title="Fiyat kuralından otomatik eklendi">otomatik</span>':''}${l.note?'<small>'+esc(l.note)+'</small>':''}</td><td class="r">${esc(F.n0(l.qty))} ${esc(l.unit)}</td><td class="r">${fm(l.price)} ${esc(l.currency)}</td><td>${esc(l.vat)}</td><td class="r"><b>${fm(t.gross)}</b> ${esc(l.currency)}</td><td><div class="rowactions"><button type="button" data-edit="${esc(l.id)}" title="Düzenle">✎</button><button type="button" data-del="${esc(l.id)}" title="Sil">✕</button></div></td></tr>`}).join('');
   const table=(sd,title,btn)=>`<section class="finSide ${sd}"><div class="finSideHead"><h3>${title}</h3><button type="button" class="${sd==='gider'?'finBtnRed':'finBtnBlue'}" data-add="${sd}">${btn}</button></div><div class="tablewrap"><table class="lstTable"><thead><tr><th>FATURA FİRMASI</th><th>KALEM</th><th class="r">MİKTAR</th><th class="r">BİRİM FİYAT</th><th>KDV</th><th class="r">TOPLAM</th><th></th></tr></thead><tbody>${rows(sd)||'<tr><td colspan="7" class="lstEmpty">'+(sd==='gelir'?'Henüz gelir kalemi yok.':'Henüz gider kalemi yok.')+'</td></tr>'}</tbody></table></div></section>`;
   const diff={};for(const c of new Set([...Object.keys(sum.gelir),...Object.keys(sum.gider)]))diff[c]={gross:F.r2((sum.gelir[c]?.gross||0)-(sum.gider[c]?.gross||0))};
-  host.innerHTML=`<div class="finTop"><label class="field"><span>Müşteri / fatura firması</span><input data-f="customer" value="${esc(fin.customer||s.customerDefault||'')}" placeholder="Firma ünvanı — rehberden seç"></label>${s.kind==='t1'?`<label class="check"><input type="checkbox" data-f="permitted" ${fin.permitted?'checked':''}> İzinli gönderici</label>`:''}<div class="finTopBtns"><button type="button" data-refresh title="Fiyat kurallarına göre otomatik satırları yeniden yaz (elle yaptığın değişiklikler sıfırlanır)">↻ Kural kalemlerini yenile</button><a href="#finance" class="finLink">Fiyat ayarları →</a></div></div>
+  host.innerHTML=`<div class="finTop"><label class="field"><span>Müşteri / fatura firması</span><input data-f="customer" value="${esc(s.customerDefault||'')}" placeholder="Firma ünvanı — rehberden seç"></label>${s.kind==='t1'?`<div class="finPerm"><span>İzinli gönderici (AEO)</span><b>${s.permitted?'Evet':'Hayır'}</b><small>Taşıyıcı &amp; plakalar adımında seçilir</small></div>`:''}<div class="finTopBtns"><button type="button" data-refresh title="Fiyat kurallarına göre otomatik satırları yeniden yaz (elle yaptığın değişiklikler sıfırlanır)">↻ Kural kalemlerini yenile</button><a href="#finance" class="finLink">Fiyat ayarları →</a></div></div>
   ${s.kind==='t1'?`<div class="finGuar"><span>Kullanılan teminat (hesaplanan)</span><strong>${fm(g.eur)} EUR</strong><small>Eşya fatura toplamı ${fm(g.base)} EUR × %${esc(F.n0(g.rate))}${g.missing.length?' · <b class="warn">Kuru girilmemiş döviz: '+esc(g.missing.join(', '))+' (Fiyat ayarları → Kurlar)</b>':''}</small></div>`:''}
   ${table('gider','Giderler','Gider kalemi ekle')}${table('gelir','Gelirler','Gelir kalemi ekle')}
   <div class="finSum"><span>Gelir <b>${esc(F.money(sum.gelir))}</b></span><span>Gider <b>${esc(F.money(sum.gider))}</b></span><span>Fark <b>${esc(F.money(diff))}</b></span></div>
@@ -184,8 +239,8 @@ export function mountFinancePanel(host,{getState,commit,getCompanies,toast,confi
   if(b.dataset.edit){const l=fin.lines.find(x=>x.id===b.dataset.edit);if(l)openLine(l);return}
   if(b.dataset.del){const l=fin.lines.find(x=>x.id===b.dataset.del);if(l){fin.lines=fin.lines.filter(x=>x.id!==l.id);if(l.auto&&!fin.dismissed.includes(l.auto))fin.dismissed.push(l.auto);commit(fin);render({sync:false})}return}
   if(b.hasAttribute('data-refresh')){const c=context();F.syncLines(c.f,c.fin,c.ctx,{force:true});commit(c.fin);render({sync:false});toast('Kural kalemleri yenilendi.')}});
- host.addEventListener('input',e=>{const t=e.target;if(t.dataset.f==='customer'){const {fin}=context();fin.customer=t.value.trim();commit(fin)}});
+ host.addEventListener('input',e=>{const t=e.target;if(t.dataset.f==='customer'&&setCustomer)setCustomer(t.value.trim())});
  host.addEventListener('change',e=>{const t=e.target;
-  if(t.dataset.f==='customer'||t.dataset.f==='permitted'){const {fin}=context();if(t.dataset.f==='permitted')fin.permitted=t.checked;else fin.customer=t.value.trim();commit(fin);render()}});
+  if(t.dataset.f==='customer'){if(setCustomer)setCustomer(t.value.trim());render()}});
  return {render};
 }

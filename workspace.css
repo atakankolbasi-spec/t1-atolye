@@ -267,3 +267,16 @@ dialog.pdfDialog{max-width:1100px;width:96vw;padding:0}.pdfHead{display:flex;jus
 .finBtnRed{background:#e0455b;color:#fff;border-color:#e0455b}.finBtnBlue{background:#2f80ed;color:#fff;border-color:#2f80ed}
 .finAuto{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;background:#fbf0d2;color:#7a5a14;font-size:11px;font-weight:700;letter-spacing:.3px;vertical-align:middle}
 .finSum{display:flex;gap:26px;flex-wrap:wrap;justify-content:flex-end;padding:14px 18px;border:1px solid #ecdcae;border-radius:12px;background:#fffaf0;font-size:15px}.finSum b{margin-left:6px;color:#6a5316}
+.firmLayout{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start}@media(max-width:1100px){.firmLayout{grid-template-columns:1fr}}
+.firmList{display:flex;flex-direction:column;gap:6px;max-height:75vh;overflow:auto;padding-right:4px}
+.firmList .search{max-width:none}
+.firmAdd{display:flex;gap:6px;margin:4px 0 8px}.firmAdd input{flex:1}.firmAdd button{padding:8px 12px}
+.firmList>button[data-fsel]{display:block;text-align:left;border:1px solid var(--line);border-left:4px solid transparent;background:#fff;border-radius:9px;padding:10px 12px}
+.firmList>button[data-fsel] strong{display:block;font-size:14px;color:#26262c}.firmList>button[data-fsel] small{display:block;color:#8a8a94;font-size:12px;margin-top:3px}
+.firmList>button[data-fsel].on{background:#fffaf0;border-left-color:var(--gold);border-color:#ecdcae}
+.firmDetail h2{margin:0 0 12px;font-size:22px}
+.firmInfo{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 18px;background:#fffefb}.firmInfo .check{margin:12px 0}
+.firmSec{margin:0 0 18px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+.firmSecHead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}.firmSecHead h3{margin:0;font-size:16px}.firmSecHead small{color:#8a7436;font-size:13px}
+.firmTbl input,.firmTbl select{padding:7px 8px;font-size:14px;min-width:0}.firmTbl td{padding:8px 8px;white-space:normal}
+.finPerm{display:flex;flex-direction:column;gap:2px;font-size:13px;color:#6a5316}.finPerm b{font-size:16px}.finPerm small{color:#8a7436}
