@@ -4,7 +4,8 @@ import {findCompanies,normalizeSearch} from './directory.js';
 import {num} from './excel.js';
 import {detectPlate} from './transport.js';
 import {mountFinancePanel,getFinance} from './finance-ui.js';
-import {normalizeFin,blankFin,syncLines} from './finance.js';
+import {normalizeFin,blankFin,syncLines,sums as finSums,money as finMoney} from './finance.js';
+import {dc,bars,donut,lastDays,daysLeft,dueText,esc as cesc} from './charts.js';
 
 const KEY='t1-ens-v1';
 const uid=()=>crypto.randomUUID();
@@ -65,11 +66,15 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
  const view=document.createElement('section');view.id='ensView';view.className='view';view.hidden=true;document.querySelector('main footer').before(view);
 
  // ---- liste ----
+ function ensDash(){const act=db.records.filter(r=>!r.archived);if(!act.length)return '';const st=[['Taslak',act.filter(r=>r.status==='Taslak').length,'#94a3b8'],['Kontrol edildi',act.filter(r=>r.status==='Kontrol edildi').length,'#16a34a']].map(x=>({label:x[0],n:x[1],color:x[2]}));
+  const arr=act.map(r=>({r,n:r.arrivalDate?daysLeft(r.arrivalDate):null})).filter(x=>x.n!==null).sort((a,b)=>a.n-b.n).slice(0,4);
+  let inc='—';try{const lines=act.flatMap(r=>(r.fin&&r.fin.lines)||[]).filter(l=>l.side==='gelir');if(lines.length)inc=finMoney(finSums(getFinance(),lines).gelir)}catch{}
+  return '<div class="dash"><div class="dashGrid">'+dc('SON 14 GÜN',bars(lastDays(act,r=>r.createdAt||r.updatedAt)),{small:act.length+' kayıt'})+dc('DURUM DAĞILIMI',donut(st,'ENS'))+dc('YAKLAŞAN VARIŞLAR',arr.length?'<ul class="dueL">'+arr.map(x=>'<li><button type="button" data-ensopen="'+cesc(x.r.id)+'"><b>'+cesc(x.r.ref)+'</b><span>'+cesc([x.r.vehicle,x.r.carrier].filter(Boolean).join(' · '))+'</span><em class="'+(x.n<0?'late':x.n<=1?'soon':'')+'">'+dueText(x.n)+'</em></button></li>').join('')+'</ul>':'<p class="dcEmpty">Varış tarihi girilmiş ENS yok.</p>')+'<section class="dc dcInc"><h3>ENS GELİRİ</h3><strong>'+cesc(inc)+'</strong><small>ENS yazım ücretleri</small></section></div></div>'}
  function renderList(){
   const q=normalizeSearch(filter),list=db.records.filter(r=>!r.archived&&(!q||normalizeSearch([r.ref,r.entryOffice,r.carrier,r.vehicle,r.trailer,r.customer,r.lrn,r.mrn,r.ncts,r.goods.map(g=>g.exportMrn).join(' ')].join(' ')).includes(q))).sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
   view.innerHTML=`<div class="pagehead"><div><div class="eyebrow">ENS</div><h1>ENS beyannameleri</h1><p>Giriş özet beyanını (ENS / ICS2) hazırla, T1 ile aynı bilgileri tekrar yazmadan taşı.</p></div><div class="ensHeadBtns"><button id="ensFromT1">T1’den ENS oluştur</button><button class="primary" id="ensNew">＋ Yeni ENS</button></div></div>
   <div class="info"><b>Resmî gönderim yok.</b> Burada hazırlanan ENS kaydı alan kontrolünden geçirilip dışa aktarılabilir; AB/İngiltere sistemine gönderim ayrıca yapılmalıdır. LRN ve MRN’yi yetkili sistemden aldıktan sonra buraya yazabilirsiniz.</div>
-  <section class="card listcard"><div class="listcontrols"><div class="search"><span>⌕</span><input id="ensSearch" aria-label="ENS ara" placeholder="Referans, giriş gümrüğü, plaka, taşıyıcı, müşteri, MRN ara" value="${esc(filter)}"></div></div>
+  ${ensDash()}<section class="card listcard"><div class="listcontrols"><div class="search"><span>⌕</span><input id="ensSearch" aria-label="ENS ara" placeholder="Referans, giriş gümrüğü, plaka, taşıyıcı, müşteri, MRN ara" value="${esc(filter)}"></div></div>
   <div class="tablewrap"><table class="accTable"><thead><tr><th>REFERANS</th><th>DURUM</th><th>GİRİŞ GÜMRÜĞÜ</th><th>ROTA</th><th>VARIŞ</th><th>ÇEKİCİ / TREYLER</th><th>MÜŞTERİ / TAŞIYICI</th><th>LRN / MRN</th><th></th></tr></thead><tbody>${list.map(r=>{const t=goodsTotals(r);return `<tr><td><button class="ref" data-ens="${r.id}">${esc(r.ref)}</button><small>${esc(fdate(r.updatedAt))} · ${t.count} eşya${r.ncts?' · T1: '+esc(r.ncts):''}</small></td><td><span class="accState ${r.status==='Kontrol edildi'?'ok':'muted'}">${esc(r.status)}</span></td><td>${esc(r.entryOffice||'—')}</td><td>${esc(r.routeCountries.join('-')||[r.dispatchCountry,r.destinationCountry].filter(Boolean).join('-')||'—')}</td><td>${esc(fdate(r.arrivalDate))}</td><td>${esc(r.vehicle||'—')}<small>${esc(r.trailer||'')}</small></td><td>${esc(r.customer||'—')}<small>${esc(r.carrier||'')}</small></td><td>${esc(r.lrn||'—')}<small>${esc(r.mrn||'')}</small></td><td><div class="rowactions"><button data-ensact="invoice" data-id="${r.id}">₺ Fatura</button><button data-ensact="copy" data-id="${r.id}" title="Kopyala" aria-label="ENS kaydını kopyala">⧉</button><button data-ensact="del" data-id="${r.id}" aria-label="Sil">✕</button></div></td></tr>`}).join('')}</tbody></table>${list.length?'':`<div class="empty compact"><h3>${db.records.length?'Aramaya uyan ENS yok.':'Henüz ENS kaydı yok.'}</h3><p>“＋ Yeni ENS” ile başlayın ya da mevcut bir T1 beyannamesinden “T1’den ENS oluştur” ile alınan bilgileri taşıyın.</p></div>`}</div></section>`;
  }
  view.addEventListener('input',e=>{if(e.target.id==='ensSearch'){filter=e.target.value;const pos=e.target.selectionStart;renderList();const f=view.querySelector('#ensSearch');f.focus();f.setSelectionRange(pos,pos)}});
@@ -96,6 +101,7 @@ export function installEns({lookupPlate,attachPlate,navigate,toast,confirmAction
   if(b.id==='ensNew'){const x=blank();x.ref=nextRef();x.createdAt=x.updatedAt=stamp();openEditor(x,false);return}
   if(b.id==='ensFromT1'){pickT1();return}
   if(b.dataset.ens){navigate(b.dataset.ens);return}
+  if(b.dataset.ensopen){navigate(b.dataset.ensopen);return}
   const id=b.dataset.id,rec=db.records.find(r=>r.id===id);
   if(b.dataset.ensact==='del'&&rec)confirmAction('ENS kaydını sil',rec.ref+' silinecek. Bu işlem geri alınamaz.',()=>{db.records=db.records.filter(r=>r.id!==id);persist();renderList();toast('ENS silindi.')});
   else if(b.dataset.ensact==='copy'&&rec){const c=normalize(JSON.parse(JSON.stringify(rec)));c.id=uid();c.ref=nextRef();db.counter++;c.status='Taslak';c.lrn='';c.mrn='';c.createdAt=c.updatedAt=stamp();c.goods=c.goods.map(g=>({...g,id:uid()}));db.records.push(c);persist();toast('Kopya oluşturuldu: '+c.ref);navigate(c.id)}

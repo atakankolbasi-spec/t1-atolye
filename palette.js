@@ -4,7 +4,7 @@ const norm=s=>String(s??'').toLocaleLowerCase('tr').normalize('NFD').replace(/[�
 const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'')??d}catch{return d}};
 const PAGES=[['＋ Yeni T1 yaz','navNew'],['▦ Beyannameler','navList'],['⚑ Hat bildirimleri','navHat'],['⚓ ENS beyannameleri','navEns'],['₺ Fiyat ayarları','navFinance'],['≣ Muhasebe','navAccounting'],['⛟ Araçlar','navVehicles'],['▤ Firmalar','navCompanies'],['↓ Yedekleme','navBackup']];
 function data(){const db=read('t1-ncts-v2',{declarations:[]}),out=[];
- for(const d of db.declarations||[]){const goods=read('t1-goods-'+d.id,{records:[]}).records||[];const hay=norm([d.ref,d.vehicle,d.trailer,d.customer,d.carrier,d.lrn,d.mrn,...goods.map(g=>g.mrn+' '+g.sender+' '+g.receiver)].join(' '));
+ for(const d of db.declarations||[]){const goods=read('t1-goods-'+d.id,{records:[]}).records||[];const hay=norm([d.ref,d.vehicle,d.trailer,d.customer,d.carrier,d.lrn,d.mrn,d.tags,d.notes,...goods.map(g=>g.mrn+' '+g.sender+' '+g.receiver)].join(' '));
   out.push({kind:'Beyanname',title:d.ref+' · '+(d.customer||'Müşteri yok'),sub:[d.vehicle,d.trailer].filter(Boolean).join(' / ')+(goods.length?' · '+goods.length+' kalem':''),hay,go:()=>{location.hash='edit/'+d.id}})}
  for(const h of read('t1-hat-v1',[])){out.push({kind:'Hat',title:h.mrn,sub:h.status+(h.vehicle?' · '+h.vehicle:''),hay:norm([h.mrn,h.vehicle,h.trailer,h.declarationRef].join(' ')),go:()=>document.getElementById('navHat')?.click()})}
  for(const [label,id] of PAGES)if(document.getElementById(id))out.push({kind:'Sayfa',title:label,sub:'',hay:norm(label),go:()=>document.getElementById(id).click()});

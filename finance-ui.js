@@ -3,6 +3,7 @@ import {attachCombo} from './combo.js';
 import {findCompanies} from './directory.js';
 import * as F from './finance.js';
 import {fetchEurRates} from './rates.js';
+import {dc,bars,donut,hbars,spark} from './charts.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=(root,s)=>root.querySelector(s);
 const fm=F.fmtMoney;
@@ -15,7 +16,7 @@ export async function autoUpdateRates({force=false}={}){const fin=getFinance(),c
  if(!force&&fresh&&!missing)return false;
  const r=await fetchEurRates(codes.filter(c=>!manual.has(c)));
  for(const [c,v] of Object.entries(r.rates))fin.rates[c]=v;
- fin.ratesAt=new Date().toISOString();fin.ratesInfo=(r.source+(r.date?' · '+r.date:'')).trim();saveFinance(fin);return true}
+ fin.ratesAt=new Date().toISOString();fin.ratesInfo=(r.source+(r.date?' · '+r.date:'')).trim();{const day=fin.ratesAt.slice(0,10),h=(fin.ratesHist||[]).filter(x=>x.at!==day);h.push({at:day,rates:{...fin.rates}});fin.ratesHist=h.slice(-30)}saveFinance(fin);return true}
 const TYPE_NAME={gelir:'Gelir',gider:'Gider',ikisi:'Gelir / Gider'};
 const opts=(list,sel)=>list.map(x=>{const [v,l]=Array.isArray(x)?x:[x,x];return '<option value="'+esc(v)+'"'+(String(v)===String(sel)?' selected':'')+'>'+esc(l)+'</option>'}).join('');
 const numStr=v=>v||v===0?String(v).replace('.',','):'';
@@ -29,10 +30,11 @@ function makeDialog(id,html){
 }
 
 /* ------------------------- Fiyat ayarları sayfası ------------------------- */
-export function installFinanceSettings({references,getCompanies,toast,confirmAction,anchor,onChange=()=>{}}){
+export function installFinanceSettings({references,getCompanies,toast,confirmAction,anchor,onChange=()=>{},getStats=()=>null}){
  const btn=document.createElement('button');btn.className='nav';btn.id='navFinance';btn.innerHTML='<span>₺</span>Fiyat ayarları';anchor.before(btn);
  const view=document.createElement('section');view.id='financeView';view.className='view';view.hidden=true;
  view.innerHTML=`<div class="pagehead"><div><div class="eyebrow">FİNANS</div><h1>Fiyat ayarları</h1><p>Kalem adlarını, firmaya özel otomatik fiyatları ve teminat hesabını buradan belirle. Beyanname yazarken Finansal bilgiler adımı bunlara göre kendiliğinden dolar.</p></div></div>
+ <div id="finDash" class="dash"></div>
  <div class="finTabs" role="tablist"><button data-tab="firms" class="on">Firma fiyatları</button><button data-tab="rules">Tüm kurallar (liste)</button><button data-tab="items">Kalem kataloğu</button><button data-tab="rates">Kur, teminat ve KDV</button><button data-tab="test">Fiyat denemesi</button></div>
  <section class="card finPane" data-pane="firms"></section><section class="card finPane" data-pane="rules" hidden></section><section class="card finPane" data-pane="items" hidden></section><section class="card finPane" data-pane="rates" hidden></section><section class="card finPane" data-pane="test" hidden></section>`;
  document.querySelector('main footer').before(view);
@@ -156,7 +158,7 @@ export function installFinanceSettings({references,getCompanies,toast,confirmAct
   pane('rates').innerHTML=`<div class="finCols"><div><h3>Otomatik teminat hesabı</h3><p class="finHelp">Teminat tutarı = beyannamedeki tüm eşyaların fatura tutarı (EUR’ya çevrilmiş) × aşağıdaki oran. T1’in Teminat adımına ve teminat ücreti kurallarına bu tutar yazılır.</p><label class="field"><span>Teminat oranı (%)</span><input data-gr inputmode="decimal" value="${esc(numStr(fin.guaranteeRate))}"></label><small>Örn. %100: teminat = fatura değeri. Farklı bir oran kullanıyorsan buraya yaz.</small>
   <h3>KDV tipleri</h3><p class="finHelp">Kod ve oran (%). Her satır: KDV0:0</p><textarea data-vats rows="5">${esc(fin.vats.map(v=>v[0]+':'+v[1]).join('\n'))}</textarea>
   <h3>Birimler</h3><input data-units value="${esc(fin.units.join(', '))}" aria-label="Birimler"></div>
-  <div><h3>Kurlar (1 birim = kaç EUR)</h3><p class="finHelp finRateInfo">${fin.ratesAt?'Otomatik güncellendi: '+esc(new Date(fin.ratesAt).toLocaleString('tr-TR'))+' · '+esc(fin.ratesInfo||''):'Kurlar internetten alınıyor…'}</p><div class="finRateBtns"><button type="button" data-rates-now>↻ ŞİMDİ GÜNCELLE</button><button type="button" data-rates-auto>OTOMATİĞE DÖNDÜR</button></div><div class="finRates">${cur.map(c=>`<label><span>1 ${c} =</span><input data-rate="${c}" inputmode="decimal" value="${esc(numStr(fin.rates[c]||''))}" placeholder="—"><b>EUR</b>${(fin.ratesManual||[]).includes(c)?'<i class="manualTag" title="Elle girildi; otomatik güncellenmez">ELLE</i>':''}</label>`).join('')}</div></div></div><div class="finSave"><button class="primary" data-save>Kaydet</button></div>`;
+  <div><h3>Kurlar (1 birim = kaç EUR)</h3><p class="finHelp finRateInfo">${fin.ratesAt?'Otomatik güncellendi: '+esc(new Date(fin.ratesAt).toLocaleString('tr-TR'))+' · '+esc(fin.ratesInfo||''):'Kurlar internetten alınıyor…'}</p><div class="finRateBtns"><button type="button" data-rates-now>↻ ŞİMDİ GÜNCELLE</button><button type="button" data-rates-auto>OTOMATİĞE DÖNDÜR</button></div><div class="finRates">${cur.map(c=>`<label><span>1 ${c} =</span><input data-rate="${c}" inputmode="decimal" value="${esc(numStr(fin.rates[c]||''))}" placeholder="—"><b>EUR</b>${spark((fin.ratesHist||[]).map(h=>h.rates[c]).filter(Boolean))}${(fin.ratesManual||[]).includes(c)?'<i class="manualTag" title="Elle girildi; otomatik güncellenmez">ELLE</i>':''}</label>`).join('')}</div></div></div><div class="finSave"><button class="primary" data-save>Kaydet</button></div>`;
  }
 
  /* --- Fiyat denemesi --- */
@@ -167,7 +169,13 @@ export function installFinanceSettings({references,getCompanies,toast,confirmAct
   <div class="tablewrap"><table class="lstTable"><thead><tr><th>KALEM</th><th>AÇIKLAMA</th><th class="r">TUTAR</th><th>KDV</th></tr></thead><tbody>${res.map(r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.note)}</td><td class="r">${fm(r.price)} ${esc(r.currency)}</td><td>${esc(r.vat)}</td></tr>`).join('')||'<tr><td colspan="4" class="lstEmpty">Bu koşullarda otomatik satır oluşmuyor.</td></tr>'}</tbody></table></div><div class="finSum"><span>Toplam (KDV dahil)</span><b>${esc(F.money(sum.gelir))}</b></div>`;
  }
 
- function show(){const t=tab;view.querySelectorAll('.finTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));view.querySelectorAll('.finPane').forEach(p=>p.hidden=p.dataset.pane!==t);({firms:renderFirms,rules:renderRules,items:renderItems,rates:renderRates,test:renderTest})[t]()}
+ function renderDash(){const el=view.querySelector('#finDash');if(!el)return;const fin=f(),st=getStats()||{monthly:[]};
+  const trig={t1:'T1',ens:'ENS',permitted:'AEO',guarantee:'Teminat',always:'Her zaman'},cols={t1:'#2f5bea',ens:'#0ea5e9',permitted:'#e11d48',guarantee:'#8b5cf6',always:'#16a34a'};
+  const items=Object.keys(trig).map(k=>({label:trig[k],n:fin.rules.filter(r=>r.trigger===k).length,color:cols[k]})).filter(x=>x.n);
+  const top=['USD','GBP','CHF','PLN','RON','TRY'].filter(c=>fin.rates[c]>0).map(c=>({label:c,value:fin.rates[c],text:String(Math.round(fin.rates[c]*10000)/10000).replace('.',',')+' €'}));
+  const tot=(st.monthly||[]).reduce((s,x)=>s+x.n,0);
+  el.innerHTML='<div class="dashGrid">'+dc('AYLIK GELİR · SON 6 AY',bars((st.monthly||[]).map(x=>({n:Math.round(x.n),label:x.label+': '+Math.round(x.n)+' EUR'})),{h:92}),{small:Math.round(tot).toLocaleString('tr-TR')+' EUR'})+dc('KURAL DAĞILIMI',items.length?donut(items,'KURAL'):'<p class="dcEmpty">Henüz kural yok.</p>')+dc('KURLAR (1 BİRİM = ? EUR)',top.length?hbars(top):'<p class="dcEmpty">Kurlar yükleniyor…</p>')+'<section class="dc dcInc"><h3>KATALOG</h3><strong>'+fin.items.length+'</strong><small>kalem · '+fin.rules.length+' kural · '+fin.firms.length+' firma profili</small></section></div>'}
+ function show(){renderDash();const t=tab;view.querySelectorAll('.finTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));view.querySelectorAll('.finPane').forEach(p=>p.hidden=p.dataset.pane!==t);({firms:renderFirms,rules:renderRules,items:renderItems,rates:renderRates,test:renderTest})[t]()}
  view.querySelector('.finTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){tab=b.dataset.tab;show()}};
  view.addEventListener('input',e=>{const t=e.target;
   if(t.matches('[data-pane=rules] [data-q]')){ruleQ=t.value;const pos=t.selectionStart;renderRules();const n=$(pane('rules'),'[data-q]');n.focus();n.setSelectionRange(pos,pos)}

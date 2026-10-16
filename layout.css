@@ -267,3 +267,39 @@ html.dark .dcard .route em{background:transparent}
 .steppanel:not([hidden]){animation:stepin .45s var(--ease)}@keyframes stepin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 #kbdHelp{width:min(440px,92vw);padding:26px 28px!important}#kbdHelp h2{margin:0 0 16px;font-size:20px}
 .kbdL{list-style:none;margin:0;padding:0;display:grid;gap:10px}.kbdL li{display:flex;align-items:center;gap:6px;font-size:13px}.kbdL kbd{font:700 11px var(--font);padding:5px 9px;border-radius:8px;background:#f1f5fb;border:1px solid #d7dfee;color:var(--ink2)}.kbdL span{margin-left:auto;color:var(--ink2);font-weight:600}
+
+/* ---------- ENS / Hat panelleri ---------- */
+.hatSummary.dash{display:block!important;margin:0 0 16px}.hatSummary .dashGrid,.hatGrid{display:grid;grid-template-columns:1.4fr 1.1fr 1.5fr .8fr;gap:14px}
+.view>.dash:not(#homeDash) .dashGrid{grid-template-columns:1.4fr 1.1fr 1.5fr .8fr}
+.dcInc strong{font-size:30px!important}
+.hb{display:grid;gap:10px}.hbRow{display:grid;grid-template-columns:54px 1fr 70px;align-items:center;gap:10px;font-size:11px;color:var(--ink2);letter-spacing:.4px}.hbTrack{height:10px;border-radius:6px;background:#eef2f9;overflow:hidden}.hbTrack i{display:block;height:100%;border-radius:6px;transition:width .8s var(--ease)}.hbRow b{text-align:right;color:var(--ink);font-size:12px}
+.spark2{width:90px;height:26px;flex:0 0 90px}
+@media(max-width:1300px){.hatSummary .dashGrid,.view>.dash:not(#homeDash) .dashGrid{grid-template-columns:1fr 1fr}}
+
+/* ---------- Etiket ve not ---------- */
+.tagBtn{height:42px;padding:0 14px!important;background:#fff7e6!important;color:#b45309!important;border:1px solid #fde1a8!important;font-size:12px}
+.tg{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.4px;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 35%,#fff);white-space:nowrap}
+.tdots{display:inline-flex;gap:3px;margin-left:8px;vertical-align:middle}.tdots i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px #fff}.noteI{margin-left:6px;font-size:12px;cursor:help}
+.cTags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 12px}.cNote{font-size:11px;color:var(--mut);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tagDialog{width:min(520px,94vw);padding:26px 28px!important}#tagDialog h2{margin:0 0 6px;font-size:20px}.tgHint{margin:0 0 14px;font-size:12px;color:var(--mut)}
+.tgPick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.tgBtn{padding:8px 14px!important;border-radius:999px!important;font-size:11.5px;font-weight:800;letter-spacing:.3px;border:1.5px solid color-mix(in srgb,var(--c) 40%,#fff)!important;background:#fff!important;color:var(--c)!important;box-shadow:none!important}
+.tgBtn.on{background:var(--c)!important;color:#fff!important;border-color:var(--c)!important;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent)!important}
+.tgAdd{display:flex;gap:8px;margin-bottom:14px}.tgAdd input{flex:1}.tgAdd button{border-radius:12px!important}
+.cx .tg{margin:0}
+
+/* ---------- Toplu seçim ---------- */
+.sel{width:18px!important;height:18px!important;min-height:0!important;margin:0 10px 0 0!important;padding:0!important;vertical-align:middle;accent-color:var(--a);cursor:pointer;border-radius:5px!important;flex:0 0 18px}
+#declarationsTable tr.isSel td{background:#eef3ff!important;border-color:#b7c9f2!important}.dcard.isSel{box-shadow:0 0 0 3px #2f5bea55,var(--sh2)}
+.dcard header .sel{margin-right:0!important}
+.bulkBar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;padding:10px 12px 10px 20px;border-radius:20px;background:#0b1530ee;backdrop-filter:blur(14px);box-shadow:0 20px 60px #0b153077;border:1px solid #ffffff22;animation:tin .35s var(--ease)}
+.bulkBar[hidden]{display:none}.bulkBar b{color:#fff;font-size:12px;letter-spacing:.8px;margin-right:8px}
+.bulkBar button{height:40px;padding:0 14px!important;border:0!important;border-radius:12px!important;background:#ffffff1a!important;color:#fff!important;font-size:11.5px;letter-spacing:.4px;box-shadow:none!important}.bulkBar button:hover{background:#ffffff33!important}.bulkBar .danger{background:#e11d48!important}
+.tagDlgS{width:min(480px,94vw);padding:24px 26px!important}.tagDlgS h2{margin:0 0 6px;font-size:19px}
+@media(max-width:760px){.bulkBar{bottom:84px;flex-wrap:wrap;width:calc(100% - 20px);justify-content:center}}
+.firmList>button[data-fsel]{border-radius:14px!important;border:1px solid var(--line)!important;border-left:5px solid transparent!important;background:#fff!important;padding:12px 14px!important;transition:all .2s var(--ease)}
+.firmList>button[data-fsel]:hover{transform:translateX(3px);border-color:#b7c9f2!important}
+.firmList>button[data-fsel].on,.firmList>button[data-fsel].active,.firmList>button[data-fsel][aria-selected=true]{background:linear-gradient(135deg,#eef3ff,#fff)!important;border-left-color:var(--a)!important;box-shadow:var(--sh1)!important}
+.firmList>button[data-fsel] strong{color:var(--ink)!important}.firmList>button[data-fsel] small{color:var(--mut)!important}
+.finHelp:not(.finRateInfo){display:none!important}
+#declarationsTable .rowactions{gap:2px!important}#declarationsTable .rowactions button{padding:5px 5px!important;min-width:23px;font-size:11px!important}
+#declarationsTable td .sel{margin-right:8px!important}
