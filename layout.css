@@ -580,3 +580,12 @@ html.dark dialog.pdfDialog,html.dark dialog.pdDialog{background:#fff}
 html.dark .goodsDock .gdAdd{filter:invert(1) hue-rotate(180deg)}
 
 .langBtn{width:auto!important;min-width:42px;padding:0 12px!important;font-size:12.5px!important;font-weight:800;letter-spacing:.04em;margin-right:6px;color:#2447b5!important}
+
+/* Beyanname ekle: tablo bloğunun sağ üst köşesine sıfır boşlukla yapışık sekme */
+.goodsDock{margin-bottom:0!important}
+.goodsDock .gdAdd{margin-right:-48px;margin-bottom:0;align-self:flex-end;border-radius:16px 16px 0 0!important;padding:12px 24px 12px 14px!important;box-shadow:none!important;transform:none!important;background:linear-gradient(135deg,#3b6cff,#2447b5)!important}
+.goodsDock .gdAdd::before{display:none!important}
+.goodsDock .gdAdd:hover{filter:brightness(1.08)}
+.goodsDock+#goodsCards,#goodsCards{margin-top:0!important}
+@media(max-width:900px){.goodsDock .gdAdd{margin-right:0;border-radius:16px}}
+.goodsDock .gdPdf,.goodsDock .gdDocs{margin-bottom:16px}
