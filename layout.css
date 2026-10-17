@@ -313,3 +313,15 @@ html.dark .dcard .route em{background:transparent}
 .calcBadge{font-style:normal;margin-left:8px;padding:2px 8px;border-radius:6px;background:#fef3c7;color:#b45309;font-size:9.5px;letter-spacing:.6px;vertical-align:middle}
 .finGuar{margin-bottom:16px}
 @media(max-width:1000px){.steppanel[data-panel="4"]>.grid{grid-template-columns:1fr 1fr!important}}
+
+/* ---------- Mühür stoğu ---------- */
+.sealBtn{align-self:flex-start;margin-top:8px;padding:9px 14px!important;background:#eef3ff!important;color:var(--a2)!important;border:1px solid #cfdcfb!important;font-size:12px;font-weight:800;letter-spacing:.4px}
+#sealPicker,#sealMgr{width:min(720px,94vw);padding:26px 28px!important}#sealPicker h2,#sealMgr h2{margin:0 0 6px;font-size:20px}
+.spTools{display:flex;gap:8px;margin:12px 0}.spTools input{flex:1;min-width:0}.spTools input[type=number]{flex:0 0 76px}.spTools button{white-space:nowrap}
+.spGrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:4px 2px}
+.spChip{padding:8px 12px!important;border-radius:10px!important;font-size:12px;font-weight:700;letter-spacing:.3px;background:#f4f7fc!important;border:1px solid #dbe3f2!important;color:var(--ink2)!important;box-shadow:none!important}
+.spChip.on{background:var(--a)!important;color:#fff!important;border-color:var(--a)!important;box-shadow:0 6px 14px #2f5bea44!important}
+.spCount{margin-right:auto;font-size:12px;font-weight:800;color:var(--a2);align-self:center}
+.smBig{display:flex;align-items:baseline;gap:12px;margin:8px 0}.smBig strong{font:800 44px var(--head);color:var(--a2);letter-spacing:-1px}.smBig span{font-size:12px;letter-spacing:1.2px;color:var(--mut)}
+.smRange{font-size:12.5px;color:var(--ink2);background:#f4f7fc;border-radius:12px;padding:12px 14px;word-break:break-word}
+#sealMgr .danger{background:#fee2e2!important;color:#b91c1c!important}
