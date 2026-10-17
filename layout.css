@@ -589,3 +589,10 @@ html.dark .goodsDock .gdAdd{filter:invert(1) hue-rotate(180deg)}
 .goodsDock+#goodsCards,#goodsCards{margin-top:0!important}
 @media(max-width:900px){.goodsDock .gdAdd{margin-right:0;border-radius:16px}}
 .goodsDock .gdPdf,.goodsDock .gdDocs{margin-bottom:16px}
+
+/* Beyanname ekle sekmesi: şeffaf iç, belirgin kenarlık */
+.goodsDock .gdAdd{background:linear-gradient(160deg,rgba(243,247,255,.85),rgba(255,255,255,.6))!important;color:#17233b!important;border:2px solid #3b6cff!important;border-bottom:0!important;box-shadow:0 -6px 18px -10px rgba(47,91,234,.5)!important}
+.goodsDock .gdAdd .gdAddTx b{color:#17233b!important}
+.goodsDock .gdAdd .gdPlus{background:linear-gradient(135deg,#3b6cff,#22a7ee)!important;color:#fff}
+.goodsDock .gdAdd:hover{filter:none;background:linear-gradient(160deg,rgba(228,238,255,.95),rgba(243,247,255,.8))!important}
+html.dark .goodsDock .gdAdd{filter:none!important}
