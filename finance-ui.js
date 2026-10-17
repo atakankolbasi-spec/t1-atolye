@@ -3,6 +3,7 @@ import {attachCombo} from './combo.js';
 import {findCompanies} from './directory.js';
 import * as F from './finance.js';
 import {fetchEurRates} from './rates.js';
+import {get as setting} from './settings.js';
 import {dc,bars,donut,hbars,spark} from './charts.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=(root,s)=>root.querySelector(s);
@@ -12,7 +13,7 @@ export const getFinance=()=>store??=F.load();
 export function saveFinance(f){store=f;return F.save(f)}
 // Kurları otomatik güncelle: 12 saatten eskiyse veya eksik kur varsa internetten çeker; elle girilen kurlara dokunmaz.
 export async function autoUpdateRates({force=false}={}){const fin=getFinance(),codes=F.CURRENCIES.filter(c=>c!=='EUR'),manual=new Set(fin.ratesManual||[]);
- const fresh=fin.ratesAt&&Date.now()-Date.parse(fin.ratesAt)<12*36e5,missing=codes.some(c=>!manual.has(c)&&!(fin.rates[c]>0));
+ if(!force&&!setting('ratesAuto'))return false;const fresh=fin.ratesAt&&Date.now()-Date.parse(fin.ratesAt)<setting('ratesHours')*36e5,missing=codes.some(c=>!manual.has(c)&&!(fin.rates[c]>0));
  if(!force&&fresh&&!missing)return false;
  const r=await fetchEurRates(codes.filter(c=>!manual.has(c)));
  for(const [c,v] of Object.entries(r.rates))fin.rates[c]=v;

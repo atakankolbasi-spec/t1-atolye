@@ -1,3 +1,4 @@
+import {get as setting} from './settings.js';
 // Yazdırılabilir belgeler: Transit Refakat Belgesi (T1 taslak), CMR, ICS2 ENS beyanı.
 // Düzenler, gerçek örnek belgelere (NCTS refakat belgesi, CMR, ICS2 ENS özeti) göre hazırlandı.
 // Bunlar hazırlık çıktısıdır; resmî tescil yerine geçmez.
@@ -13,6 +14,7 @@ const dmy=()=>new Date().toLocaleDateString('tr-TR').replace(/\./g,'.');
 const code=s=>String(s||'').split(/\s*[-–]\s*/)[0].trim();
 // Code 128-B barkod (SVG)
 export function barcode(text,h=44){
+ if(!setting('docBarcode'))return '';
  const t=String(text||'').replace(/[^\x20-\x7e]/g,'');if(!t)return '';
  const vals=[104];let sumv=104;[...t].forEach((ch,i)=>{const v=ch.charCodeAt(0)-32;vals.push(v);sumv+=v*(i+1)});vals.push(sumv%103);
  let bits=vals.map(v=>C128[v]).join('')+'1100011101011';let x=0,out='';
@@ -154,7 +156,7 @@ ${B(L(13,'Gönderenin Talimatı','Sender\'s instructions'),d.aeo?'İZİNLİ GÖN
 ${B(L(14,'Navlunun Ödeme şekli','Instructions as to payment for carriage'),'','','min-height:60px')}
 ${B(L(21,'Tanzim yeri','Established in')+'<span class="nb">On / Tarih</span>',esc(d.loadPlace||'')+'<span class="nb" style="margin-left:70px">'+date+'</span>','','min-height:44px')}
 </div><div class="col" style="flex:1.35">
-${B(L(19,'Özel anlaşma','Special agreements'),'*Yükleme ve Boşaltmalarda 48 saatten sonra beher gün için 180,-EUR bekleme ücreti alınır.<br>* Delays after 48 hours of arrival (for discharging) or of loading) at final destination are subject to a demorrage of 180,-EUR each trailer per day.','','min-height:74px;font-size:8px')}
+${B(L(19,'Özel anlaşma','Special agreements'),nl(setting('cmrAgreement')),'','min-height:74px;font-size:8px')}
 <div class="row"><div class="col" style="flex:1.4">${B(L(20,'Ödeyecek','To be paid by'),'')}${B('Productions<br>Yük','','','min-height:18px')}${B('Supplements<br>Ara Yekün','','','min-height:18px')}${B('Total<br>Toplam','','','min-height:18px')}${B('Reimbursement / cash on delivery<br><b>15</b>Teslimatta ödenecek mebla','','','min-height:30px')}</div><div class="col" style="flex:.8">${B('Senders<br>Gönderen','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div><div class="col" style="flex:.7">${B('Amount<br>Mebla','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div><div class="col" style="flex:.7">${B('Consignee<br>Alacak olan','')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}${B('','','','min-height:18px')}</div></div>
 </div></div>
 <div class="row">${B(L(22,'Gönderenin imza ve kaşesi','Signature and stamp of the sender'),party(S.name,flat(S),''),'','min-height:78px;flex:1')}${B(L(23,'Taşıyıcının imza ve kaşesi','Signature and stamp of the carrier'),party(d.carrier,'',''),'','min-height:78px;flex:1')}${B(L(24,'Mallar Teslim Alan','Received Goods')+'<span class="nb">On<br>Tarih</span>','<div style="margin-top:34px;font-size:8px;text-align:center">Signature and stamp of the consignee<br>Alıcının imza ve kaşesi</div>','','min-height:78px;flex:1')}</div>
@@ -169,7 +171,7 @@ export function ensDoc(e){
  const goods=e.goods||[];
  const d=new Date(),p=v=>String(v).padStart(2,'0'),date=p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
  const plate=[e.vehicle,e.trailer].filter(Boolean).join(' / ');
- return `<div class="pg ens"><div class="logo"><span>P</span><b>C</b><span>S</span><small>TRANSİT GÜMRÜKLEME</small></div>
+ return `<div class="pg ens"><div class="logo"><span>${esc(setting('docHeader'))}</span></div>
 <h2>ICS2 ENS Declaration</h2>
 <dl class="kv"><dt>Date</dt><dd>${esc(date)}</dd><dt>Plate Number</dt><dd>${esc(plate)}</dd><dt>Carrier Name</dt><dd>${esc(e.carrier)}</dd><dt>Carrier EORI</dt><dd>${esc(e.carrierEori)}</dd><dt>ICS2 ENS MRN</dt><dd>${esc(e.mrn)}</dd><dt>REFERENCE</dt><dd>${esc(e.commercialRef||e.agentRef||e.lrn||e.ref)}</dd></dl>
 ${e.mrn?`<div class="ensBc"><b>MRN</b> ${esc(e.mrn)}${barcode(e.mrn,50)}</div>`:''}

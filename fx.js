@@ -1,5 +1,6 @@
+import {get as setting} from './settings.js';
 // Görsel efektler: açılış ekranı, konfeti, tamamlanma halkası
-export function installSplash(){if(sessionStorage.getItem('t1-splash'))return;try{sessionStorage.setItem('t1-splash','1')}catch{}
+export function installSplash(){if(!setting('splash')||!setting('motion')||sessionStorage.getItem('t1-splash'))return;try{sessionStorage.setItem('t1-splash','1')}catch{}
  const s=document.createElement('div');s.id='splash';s.innerHTML='<div class="spIn"><div class="spLogo">PCS</div><div class="spTxt">TRANSİT</div><div class="spBar"><i></i></div></div>';document.body.append(s);
  setTimeout(()=>s.classList.add('out'),950);setTimeout(()=>s.remove(),1500)}
 export function confetti(){const c=document.createElement('canvas');c.className='confetti';document.body.append(c);const x=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;

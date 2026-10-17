@@ -6,11 +6,12 @@ const split=s=>{const m=norm(s).match(/^(.*?)(\d+)$/);return m?{p:m[1],n:m[2]}:n
 export function expand(a,b){const x=split(a),y=split(b||a);if(!x||!y||x.p!==y.p)return null;const w=Math.max(x.n.length,y.n.length),lo=Number(x.n),hi=Number(y.n);if(!(hi>=lo)||hi-lo>20000)return null;const out=[];for(let i=lo;i<=hi;i++)out.push(x.p+String(i).padStart(w,'0'));return out}
 const cmp=(a,b)=>a.localeCompare(b,'tr',{numeric:true});
 let st;
-function load(){if(st)return st;try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.avail)){st={avail:[...new Set(v.avail.map(norm))].sort(cmp),seeded:true};return st}}catch{}st={avail:(expand(SEED_FROM,SEED_TO)||[]),seeded:true};save();return st}
+function load(){if(st)return st;try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.avail)){st={avail:[...new Set(v.avail.map(norm))].sort(cmp),seeded:true,total:Number(v.total)||0};st.total=Math.max(st.total,st.avail.length);return st}}catch{}st={avail:(expand(SEED_FROM,SEED_TO)||[]),seeded:true};st.total=st.avail.length;save();return st}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch{}}
 export const available=()=>load().avail.slice();
 export const count=()=>load().avail.length;
-export function add(a,b){const r=expand(a,b);if(!r)return 0;const s=load(),set=new Set(s.avail);let n=0;for(const x of r)if(!set.has(x)){set.add(x);n++}s.avail=[...set].sort(cmp);save();return n}
+export const total=()=>Math.max(load().total||0,load().avail.length);
+export function add(a,b){const r=expand(a,b);if(!r)return 0;const s=load(),set=new Set(s.avail);let n=0;for(const x of r)if(!set.has(x)){set.add(x);n++}s.avail=[...set].sort(cmp);s.total=(s.total||0)+n;save();return n}
 export function take(list){const s=load(),t=new Set(list.map(norm));s.avail=s.avail.filter(x=>!t.has(x));save()}
 export function giveBack(list){const s=load(),set=new Set(s.avail);for(const x of list)set.add(norm(x));s.avail=[...set].filter(Boolean).sort(cmp);save()}
 export function clearAll(){load().avail=[];save()}
