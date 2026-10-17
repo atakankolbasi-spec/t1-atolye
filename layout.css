@@ -435,9 +435,9 @@ dialog.pdfDialog::backdrop{background:rgba(8,16,40,.55);backdrop-filter:blur(6px
 .pdfFile.ok .pdfFileState{background:#e0f5ea;color:#16794c}.pdfFile.bad .pdfFileState{background:#fde6ea;color:#c0233b}
 .pdfFile.busy{border-color:#f1d48f;background:linear-gradient(90deg,#fffaf0,#fff)}
 @keyframes pdfPulse{50%{transform:scale(1.7);opacity:.3}}
-.pdfDialog>#pdfStatus.info{margin:12px 28px 0;padding:14px 18px;border-radius:14px;border:1px solid #d6e0f7;border-left:4px solid #3b6cff;background:#f6f9ff;color:#2a3a63;font-size:13.5px;line-height:1.6}
-.pdfDialog>#pdfStatus.info:empty{display:none}
-.pdfDialog>#pdfStatus small{color:#7a86a1;display:block;margin-top:4px}
+.pdfDialog #pdfStatus.info{margin:12px 28px 0;padding:14px 18px;border-radius:14px;border:1px solid #d6e0f7;border-left:4px solid #3b6cff;background:#f6f9ff;color:#2a3a63;font-size:13.5px;line-height:1.6}
+.pdfDialog #pdfStatus.info:empty{display:none}
+.pdfDialog #pdfStatus small{color:#7a86a1;display:block;margin-top:4px}
 .pdfDialog .pdfAiRow{display:flex;align-items:center;gap:14px;margin:12px 28px 0;padding:14px 18px;border-radius:14px;background:#fff;border:1px solid #e1e8f7;cursor:pointer;color:#17233b}
 .pdfAiRow input{position:absolute;opacity:0;pointer-events:none}
 .pdfAiRow .sw{width:44px;height:26px;border-radius:99px;background:#c9d2e6;position:relative;flex:none;transition:background .2s}
@@ -455,3 +455,12 @@ dialog.pdfDialog::backdrop{background:rgba(8,16,40,.55);backdrop-filter:blur(6px
 .pdfDialog .dialogactions .primary:disabled{background:#d5dcec;color:#8793ae;box-shadow:none;cursor:not-allowed}
 @media(max-width:700px){.pdfSteps li:not(.on){font-size:0}.pdfSteps li:not(.on) i{font-size:12px}.pdfHeadTxt p{display:none}}
 html.dark dialog.pdfDialog,[data-theme=dark] dialog.pdfDialog{background:#111a30}
+
+/* Pencereler her yakınlaştırmada ekrana sığar; içerik kendi içinde kayar */
+dialog{max-height:calc(100dvh - 24px);max-width:calc(100vw - 24px)}
+dialog.pdfDialog{overflow:hidden;display:none;flex-direction:column;width:min(1100px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog.pdfDialog[open]{display:flex}
+.pdfDialog .pdfHead,.pdfDialog .pdfSteps,.pdfDialog .dialogactions{flex:none}
+.pdfDialog .pdfBody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
+.pdfDialog .pdfBody #pdfResults{max-height:none;overflow:visible}
+.pdfDialog .dialogactions{flex-wrap:wrap}
