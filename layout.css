@@ -487,3 +487,39 @@ dialog.pdDialog[open]{display:flex;flex-direction:column}dialog.pdDialog::backdr
 .pdEmpty{text-align:center;padding:34px 10px;color:#7a86a1}.pdEmpty span{display:block;font-size:34px}.pdEmpty b{display:block;color:#17233b;margin-top:6px}.pdEmpty small{display:block;margin-top:4px}
 .pdLine{display:flex;flex-direction:column}.pdEv{display:grid;grid-template-columns:78px 18px 1fr;gap:10px;align-items:start;padding:10px 0}.pdEv time{font-size:11px;color:#8a96b0;text-align:right;line-height:1.35}.pdEv i{width:10px;height:10px;border-radius:50%;background:#2f5bea;margin-top:4px;box-shadow:0 0 0 4px #e1eaff}.pdEv div{font-size:13.5px;color:#17233b}
 .pdBody textarea{width:100%;min-height:200px;padding:14px;border:1px solid #d6e0f7;border-radius:14px;font:inherit;resize:vertical}.pdBody section>small{color:#7a86a1}
+
+/* ===== Editör başlığı: sade ve düzenli ===== */
+.editorhead{align-items:center!important;gap:24px!important}
+.editorhead .ehLeft{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.editorhead .back{align-self:flex-start;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;font-size:12px!important;font-weight:700;color:#6b7896!important}.editorhead .back:hover{color:#2447b5!important}
+.ehTitle{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ehTitle h1{margin:0!important;font-size:30px!important;letter-spacing:-.5px}
+.ehStat{display:flex;align-items:center;gap:10px}
+.ehStat #editorStatus{padding:5px 12px!important;border-radius:99px;background:#eef2fb!important;color:#46567a!important;font-weight:800;font-size:11.5px}
+.ehStat .aeoBadge{margin:0!important}
+.editorhead .ctxChips{gap:0 6px;margin-top:4px;align-items:center}
+.editorhead .cx{background:none!important;border:0!important;border-radius:0;padding:2px 12px 2px 0!important;margin-right:6px;font-size:12.5px;font-weight:600;color:#46567a;border-right:1px solid #dde4f2!important;max-width:280px}
+.editorhead .cx:last-child{border-right:0!important}
+.editorhead .cx i{font-style:normal;opacity:.8;margin-right:6px;filter:grayscale(.2)}
+.editorhead .cx.tg2{background:#fff4dc!important;color:#8a5a00;border:0!important;border-radius:99px;padding:3px 10px!important;font-size:11px;font-weight:800;margin:3px 6px 3px 0}
+.editorhead .cx.tg2 i{display:none}
+.editorhead .headtools{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto}
+.editorhead .htGhost,.editorhead .htMain{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+.editorhead .htGhost button{padding:8px 14px!important;border-radius:11px!important;background:#f4f7fd!important;border:1px solid #e1e8f7!important;color:#2a3a63!important;font-size:12.5px!important;font-weight:700;box-shadow:none!important}
+.editorhead .htGhost button:hover{background:#e8efff!important}
+.editorhead .htGhost button b{background:#2f5bea;color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:4px}
+.editorhead .htMain button{padding:11px 18px!important;border-radius:12px!important;font-size:13.5px!important;font-weight:800}
+@media(max-width:1100px){.editorhead{flex-direction:column!important;align-items:stretch!important}.editorhead .headtools{align-items:flex-start}.editorhead .htGhost,.editorhead .htMain{flex-wrap:wrap}}
+
+/* ===== Gömülü evrak paneli (Beyanname & Eşya adımı) ===== */
+.pdEmbed{margin-top:18px;padding:18px 20px 20px;border:1px solid #dfe7f6;border-radius:18px;background:linear-gradient(180deg,#fbfcff,#f5f8ff)}
+.pdEmbedHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.pdEmbedHead>div{display:flex;align-items:center;gap:12px}
+.pdEmbedIco{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#3b6cff,#22a7ee);color:#fff;font-size:17px}
+.pdEmbedHead b{display:block;font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:15px;color:#17233b}.pdEmbedHead small{display:block;color:#7a86a1;font-size:12px;margin-top:1px}
+.pdMore{padding:7px 13px!important;border-radius:10px!important;background:#fff!important;border:1px solid #d6e0f7!important;color:#2447b5!important;font-size:12px!important;font-weight:700;cursor:pointer}
+.pdEmbed .pdDrop{margin-bottom:12px;padding:12px 14px}.pdEmbed.noRef .pdDrop,.pdEmbed.noRef .pdList{opacity:.5;pointer-events:none}
+.pdEmbed .pdList{max-height:300px;overflow-y:auto}
+
+.pdNoRef{display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;background:#fff7e6;color:#8a5a00;font-size:12.5px;font-weight:600;margin-bottom:12px}.pdEmbed.noRef .pdNoRef{display:flex}
+.pdNoRef button{padding:8px 14px!important;border-radius:10px!important;background:#2f5bea!important;color:#fff!important;border:0!important;font-weight:800;font-size:12.5px!important;cursor:pointer}
+.ehStat #editorStatus:before{display:none!important}
