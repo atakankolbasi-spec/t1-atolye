@@ -46,17 +46,17 @@ export function installPlates({toast}){
   if(!c.length)return null;
   return new Set(c.map(r=>r.country)).size===1?c[0]:null;
  }
- function search(q,{kind=null,limit=30}={}){
-  const key=plateKey(q),name=normalizeSearch(q);if(!key&&!name)return list.filter(r=>kindOk(r,kind)).slice(0,limit);
+ function search(q,{kind=null,limit=30,owner=''}={}){
+  const key=plateKey(q),name=normalizeSearch(q),own=normalizeSearch(owner||'');const ownOk=r=>!own||!r.owner||normalizeSearch(r.owner).includes(own)||own.includes(normalizeSearch(r.owner));if(!key&&!name)return list.filter(r=>kindOk(r,kind)&&ownOk(r)).slice(0,limit);
   const out=[],rest=[];
-  for(const r of list){if(!kindOk(r,kind))continue;
+  for(const r of list){if(!kindOk(r,kind)||!ownOk(r))continue;
    if(key&&r.key.startsWith(key))out.push(r);
    else if(key&&r.key.includes(key))rest.push(r);
    else if(name.length>=3&&normalizeSearch(r.owner).includes(name))rest.push(r)}
   return out.concat(rest).slice(0,limit);
  }
- function attachField(input,{kind=null,onPick}){
-  attachCombo(input,{minChars:2,emptyText:'Plaka rehberinde yok. Plakayı elle yazabilirsiniz.',search:async(q,limit)=>{await ready;return search(q,{kind,limit})},item:r=>({title:r.plate,sub:[r.type,r.country,r.ownership,r.owner].filter(Boolean).join(' · ')}),onPick});
+ function attachField(input,{kind=null,onPick,owner}){
+  attachCombo(input,{minChars:2,emptyText:'Plaka rehberinde yok. Plakayı elle yazabilirsiniz.',search:async(q,limit)=>{await ready;return search(q,{kind,limit,owner:owner?owner():''})},item:r=>({title:r.plate,sub:[r.type,r.country,r.ownership,r.owner].filter(Boolean).join(' · ')}),onPick});
  }
  function merge(incoming){
   const map=new Map(list.map(r=>[idOf(r),r]));let added=0,updated=0,skipped=0;

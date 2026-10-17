@@ -404,3 +404,54 @@ html[data-radius=round]{--r:28px}
 html.noBold body,html.noBold body *{font-weight:500!important}html.noBold body h1,html.noBold body h2,html.noBold body h3,html.noBold body strong,html.noBold body b,html.noBold body th,html.noBold body .primary{font-weight:800!important}
 html.noMotion *,html.noMotion *:before,html.noMotion *:after{animation:none!important;transition:none!important}html.noMotion #splash{display:none}
 html.noHero #homeHero,html.noDash #homeDash,html.noToday #todayStrip{display:none!important}
+
+/* ===== PDF OKUMA penceresi — profesyonel görünüm ===== */
+dialog.pdfDialog{border:0;border-radius:24px;overflow:hidden;box-shadow:0 40px 100px -20px rgba(8,18,50,.55);background:var(--surface,#fff)}
+dialog.pdfDialog::backdrop{background:rgba(8,16,40,.55);backdrop-filter:blur(6px)}
+.pdfDialog .pdfHead{display:flex;align-items:center;gap:16px;padding:22px 28px;background:linear-gradient(135deg,#0b1530 0%,#1b3a8f 60%,#2f5bea 100%);border:0;position:relative}
+.pdfHeadIcon{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:24px;flex:none}
+.pdfHeadTxt{flex:1;min-width:0}.pdfHead .eyebrow{color:#9fc0ff;letter-spacing:.14em;font-size:11px;font-weight:800}
+.pdfHead h2{font-family:'Plus Jakarta Sans',Inter,sans-serif;margin:2px 0 0;font-size:22px;font-weight:800;color:#fff}
+.pdfHeadTxt p{margin:4px 0 0;color:#c7d6ff;font-size:13px;font-weight:500}
+.pdfHead button{width:36px;height:36px;padding:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:15px;display:grid;place-items:center;border:0;cursor:pointer}.pdfHead button:hover{background:rgba(255,255,255,.28)}
+.pdfSteps{display:flex;gap:0;list-style:none;margin:0;padding:14px 28px;background:#f4f7ff;border-bottom:1px solid #e1e8f7}
+.pdfSteps li{flex:1;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#8793ae;position:relative}
+.pdfSteps li i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;background:#e3e9f6;color:#6b7896;flex:none}
+.pdfSteps li:not(:last-child)::after{content:"";flex:1;height:2px;margin:0 12px;background:#dbe3f3;border-radius:2px}
+.pdfSteps li.on{color:#1d3fb0}.pdfSteps li.on i{background:linear-gradient(135deg,#3b6cff,#22a7ee);color:#fff;box-shadow:0 4px 12px rgba(47,91,234,.4)}
+.pdfSteps li.done{color:#1d7a4d}.pdfSteps li.done i{background:#1fa971;color:#fff;font-size:0}.pdfSteps li.done i::before{content:"✓";font-size:13px}.pdfSteps li.done::after{background:#1fa971}
+.pdfDialog #pdfFiles{padding:18px 28px 0;margin:0;border:0;background:none}
+.pdfFiles .pdfFilesHead{padding:0 0 8px;background:none;display:flex;justify-content:space-between;align-items:baseline;color:#17233b}
+.pdfFilesHead b{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:15px;font-weight:800}.pdfFilesHead .pdfCount{font-size:12.5px;font-weight:700;color:#5b6a8c;background:#eef2fb;padding:3px 10px;border-radius:99px}
+.pdfBar{height:6px;border-radius:99px;background:#e6ecf8;overflow:hidden;margin-bottom:12px}.pdfBar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#3b6cff,#22d3ee);transition:width .4s}
+.pdfFiles .pdfFile{border:1px solid #e1e8f7;border-radius:14px;margin-bottom:8px;padding:12px 16px;background:#fff;transition:box-shadow .15s,border-color .15s}
+.pdfFiles .pdfFile:hover{box-shadow:0 8px 22px -12px rgba(30,60,140,.35);border-color:#c5d3f2}
+.pdfFileIcon{width:40px;height:46px;border-radius:9px;background:linear-gradient(160deg,#ff6b6b,#d63d4a);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;display:grid;place-items:end center;padding-bottom:6px;flex:none;position:relative;box-shadow:0 4px 10px -3px rgba(214,61,74,.5)}
+.pdfFileIcon::before{content:"";position:absolute;top:0;right:0;border-width:0 11px 11px 0;border-style:solid;border-color:transparent #fff transparent rgba(0,0,0,.18);border-top-right-radius:9px}
+.pdfFileMain strong{font-size:14px;font-weight:700;color:#17233b}.pdfFileMain small{font-size:12.5px;color:#7a86a1}
+.pdfFileState{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;font-size:12px;font-weight:800;letter-spacing:.02em;border-radius:99px;background:#eef1f7;color:#5b6a8c}
+.pdfFileState .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.7}
+.pdfFile.busy .pdfFileState{background:#fff3d6;color:#a8650a}.pdfFile.busy .dot{opacity:1;animation:pdfPulse 1s infinite}
+.pdfFile.ok .pdfFileState{background:#e0f5ea;color:#16794c}.pdfFile.bad .pdfFileState{background:#fde6ea;color:#c0233b}
+.pdfFile.busy{border-color:#f1d48f;background:linear-gradient(90deg,#fffaf0,#fff)}
+@keyframes pdfPulse{50%{transform:scale(1.7);opacity:.3}}
+.pdfDialog>#pdfStatus.info{margin:12px 28px 0;padding:14px 18px;border-radius:14px;border:1px solid #d6e0f7;border-left:4px solid #3b6cff;background:#f6f9ff;color:#2a3a63;font-size:13.5px;line-height:1.6}
+.pdfDialog>#pdfStatus.info:empty{display:none}
+.pdfDialog>#pdfStatus small{color:#7a86a1;display:block;margin-top:4px}
+.pdfDialog .pdfAiRow{display:flex;align-items:center;gap:14px;margin:12px 28px 0;padding:14px 18px;border-radius:14px;background:#fff;border:1px solid #e1e8f7;cursor:pointer;color:#17233b}
+.pdfAiRow input{position:absolute;opacity:0;pointer-events:none}
+.pdfAiRow .sw{width:44px;height:26px;border-radius:99px;background:#c9d2e6;position:relative;flex:none;transition:background .2s}
+.pdfAiRow .sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .2s}
+.pdfAiRow input:checked~.sw{background:linear-gradient(135deg,#3b6cff,#22a7ee)}.pdfAiRow input:checked~.sw::after{transform:translateX(18px)}
+.pdfAiRow input:focus-visible~.sw{outline:3px solid #9fc0ff}
+.pdfAiTxt b{display:block;font-size:14px;font-weight:700}.pdfAiTxt em{font-style:normal;font-size:11px;font-weight:800;color:#16794c;background:#e0f5ea;padding:2px 8px;border-radius:99px;margin-left:6px}
+.pdfAiTxt small{display:block;color:#7a86a1;font-size:12.5px;margin-top:2px}
+.pdfDialog #pdfResults{padding:6px 28px 4px}
+.pdfDialog .pdfCard{border:1px solid #e1e8f7;border-left:4px solid #3b6cff;border-radius:16px;background:#fff;box-shadow:0 10px 28px -18px rgba(30,60,140,.4)}
+.pdfDialog .pdfSrc{background:#eef2fb;color:#46567a}
+.pdfDialog .dialogactions{padding:16px 28px 20px;gap:10px;border-top:1px solid #e1e8f7;background:#f8faff}
+.pdfDialog .dialogactions .pdfMore{padding:9px 16px;border-radius:12px;border:1.5px dashed #9fb4e6;background:#fff;color:#2447b5;font-weight:700;cursor:pointer}
+.pdfDialog .dialogactions .primary{padding:11px 22px;border-radius:12px;font-weight:800;background:linear-gradient(135deg,#3b6cff,#2447b5);color:#fff;border:0;box-shadow:0 8px 20px -8px rgba(47,91,234,.7)}
+.pdfDialog .dialogactions .primary:disabled{background:#d5dcec;color:#8793ae;box-shadow:none;cursor:not-allowed}
+@media(max-width:700px){.pdfSteps li:not(.on){font-size:0}.pdfSteps li:not(.on) i{font-size:12px}.pdfHeadTxt p{display:none}}
+html.dark dialog.pdfDialog,[data-theme=dark] dialog.pdfDialog{background:#111a30}
