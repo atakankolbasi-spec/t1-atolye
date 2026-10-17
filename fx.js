@@ -1,0 +1,8 @@
+// Görsel efektler: açılış ekranı, konfeti, tamamlanma halkası
+export function installSplash(){if(sessionStorage.getItem('t1-splash'))return;try{sessionStorage.setItem('t1-splash','1')}catch{}
+ const s=document.createElement('div');s.id='splash';s.innerHTML='<div class="spIn"><div class="spLogo">PCS</div><div class="spTxt">TRANSİT</div><div class="spBar"><i></i></div></div>';document.body.append(s);
+ setTimeout(()=>s.classList.add('out'),950);setTimeout(()=>s.remove(),1500)}
+export function confetti(){const c=document.createElement('canvas');c.className='confetti';document.body.append(c);const x=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;
+ const cols=['#2f5bea','#22d3ee','#16a34a','#f59e0b','#e11d48','#8b5cf6'],P=[...Array(120)].map(()=>({x:W/2+(Math.random()-.5)*200,y:H*.7,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,s:Math.random()*8+4,c:cols[Math.floor(Math.random()*cols.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4}));
+ let t=0;const step=()=>{x.clearRect(0,0,W,H);t++;for(const p of P){p.vy+=.45;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.globalAlpha=Math.max(0,1-t/110);x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()}if(t<115)requestAnimationFrame(step);else c.remove()};step()}
+export function ring(pct,label){const R=26,C=2*Math.PI*R,col=pct>=100?'#16a34a':pct>=60?'#2f5bea':'#f59e0b';return '<div class="ringW" title="'+label+'"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="'+R+'" fill="none" stroke="#e3e8f1" stroke-width="7"/><circle cx="32" cy="32" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+(pct/100*C).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 32 32)"/></svg><b>'+pct+'%</b></div>'}

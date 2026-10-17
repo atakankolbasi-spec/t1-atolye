@@ -325,3 +325,28 @@ html.dark .dcard .route em{background:transparent}
 .smBig{display:flex;align-items:baseline;gap:12px;margin:8px 0}.smBig strong{font:800 44px var(--head);color:var(--a2);letter-spacing:-1px}.smBig span{font-size:12px;letter-spacing:1.2px;color:var(--mut)}
 .smRange{font-size:12.5px;color:var(--ink2);background:#f4f7fc;border-radius:12px;padding:12px 14px;word-break:break-word}
 #sealMgr .danger{background:#fee2e2!important;color:#b91c1c!important}
+
+/* ---------- Açılış ekranı, efektler ---------- */
+#splash{position:fixed;inset:0;z-index:999;display:grid;place-items:center;background:radial-gradient(700px 400px at 50% 40%,#1b3a8a,#0b1530);transition:opacity .55s var(--ease),transform .55s var(--ease)}
+#splash.out{opacity:0;transform:scale(1.04);pointer-events:none}
+.spIn{text-align:center}.spLogo{display:inline-grid;place-items:center;width:92px;height:92px;border-radius:28px;background:linear-gradient(135deg,#3b6cff,#22d3ee);font:800 30px var(--head);color:#fff;box-shadow:0 20px 60px #2f5bea88,inset 0 1px 0 #ffffff66;animation:spPop .8s var(--ease)}
+.spTxt{margin-top:18px;font:800 20px var(--head);letter-spacing:8px;color:#dbe6ff;animation:spFade 1s .2s both}
+.spBar{width:160px;height:4px;border-radius:4px;background:#ffffff1f;margin:20px auto 0;overflow:hidden}.spBar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22d3ee,#3b6cff);transform:translateX(-100%);animation:spLoad .9s .1s var(--ease) forwards}
+@keyframes spPop{from{opacity:0;transform:scale(.6) rotate(-8deg)}to{opacity:1;transform:none}}@keyframes spFade{from{opacity:0;letter-spacing:2px}to{opacity:1;letter-spacing:8px}}@keyframes spLoad{to{transform:none}}
+.confetti{position:fixed;inset:0;z-index:998;pointer-events:none}
+.heroRoute{position:absolute;right:360px;top:14px;width:300px;opacity:.75;pointer-events:none}
+@media(max-width:1500px){.heroRoute{display:none}}
+.hero{background-size:140% 140%;animation:meshMove 14s ease-in-out infinite alternate}@keyframes meshMove{from{background-position:0% 50%}to{background-position:100% 50%}}
+.ringW{position:relative;width:54px;height:54px;flex:0 0 54px}.ringW svg{width:100%;height:100%}.ringW b{position:absolute;inset:0;display:grid;place-items:center;font:800 12px var(--head);color:var(--ink)}
+#compRing{display:inline-flex;align-items:center}
+.editorhead .headtools{align-items:center}
+/* Düğmelerde ışıltı */
+.primary:not(.heroBtn){position:relative;overflow:hidden}.primary:not(.heroBtn):after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,#ffffff55,transparent);transform:skewX(-20deg);transition:left .6s var(--ease)}.primary:not(.heroBtn):hover:after{left:130%}
+/* Kartlarda üstten ışık */
+.dc,.dcard,.card{background-image:linear-gradient(180deg,#ffffff,#fbfcff)}
+.dcInc{background-image:radial-gradient(260px 160px at 90% 0%,#22d3ee33,transparent 70%),linear-gradient(150deg,#0b1530,#1b3a8a)!important}
+/* Sol menü nabız */
+.nav.active>span:first-child{animation:navPulse 2.8s ease-in-out infinite}@keyframes navPulse{0%,100%{box-shadow:0 0 0 0 #ffffff44}50%{box-shadow:0 0 0 7px #ffffff00}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#splash{display:none}}
+.heroRoute{right:auto!important;left:440px;top:30px;width:300px}
+@media(max-width:1700px){.heroRoute{display:none}}
