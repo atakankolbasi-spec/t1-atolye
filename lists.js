@@ -46,7 +46,7 @@ export function listPage({combos={},extraActions=[],navAfter=null,id,nav,navIcon
  $('[data-act=export]').onclick=()=>download(exportData(),exportFile);
  return {nav:btn,view,refresh};
 }
-export function installLists({references,plates,toast,confirmAction,show,plateDocs}){
+export function installLists({references,plates,toast,confirmAction,show}){
  const anchor=document.querySelector('#navReferences');
  const sorted=(()=>{let src=null,n=-1,out=[];return()=>{const cur=references.listCompanies();if(cur!==src||cur.length!==n){src=cur;n=cur.length;out=[...cur].sort((a,b)=>a.name.localeCompare(b.name,'tr'))}return out}})();
  const companies=listPage({id:'companies',nav:'navCompanies',navIcon:'▤',navLabel:'Firmalar',eyebrow:'KAYITLI BİLGİLER',title:'Firmalar',intro:'Gönderici, alıcı ve taşıyıcı firmalar. T1 formlarında firma yazarken buradan önerilir.',newLabel:'＋ Yeni firma',importLabel:'Firma listesi içe aktar',accept:'.json,.csv,.tsv,.xlsx',noun:'firma',
@@ -61,7 +61,7 @@ export function installLists({references,plates,toast,confirmAction,show,plateDo
   exportFile:'T1_Firma_Rehberi.json',exportData:()=>references.exportJson()});
  const vehicles=listPage({combos:{owner:{search:async(q,limit)=>findCompanies(await references.getCompanies(),q,limit),item:c=>({title:c.name,sub:[c.eori||c.taxNo,c.country].filter(Boolean).join(' · ')}),value:c=>c.name}},id:'vehicles',nav:'navVehicles',navIcon:'⛟',navLabel:'Araçlar',eyebrow:'KAYITLI BİLGİLER',title:'Araçlar',intro:'Çekici ve treyler plakaları. Modaltrans’tan aldığın araç Excel’ini buraya yükle; T1 ve ENS formlarında plaka yazınca ülke ve araç sahibi otomatik gelir.',newLabel:'＋ Yeni araç',importLabel:'Araç listesi içe aktar (Excel)',accept:'.xlsx,.csv,.tsv,.json',noun:'araç',
   anchor,toast,confirmAction,
-  columns:[{label:'PLAKA',html:r=>'<strong>'+esc(r.plate)+'</strong>'},{label:'ARAÇ SINIFI',get:r=>r.type},{label:'ÜLKE',get:r=>r.country},{label:'ARAÇ SAHİBİ FİRMA',get:r=>r.owner},{label:'ÖZMAL / KİRALIK',get:r=>r.ownership},{label:'EVRAK',html:r=>'<button type="button" class="pdCount'+(plateDocs&&plateDocs.count(r.plate)?' has':'')+'" data-pd="'+esc(r.plate)+'" title="Evrak arşivi">📎 '+(plateDocs?plateDocs.count(r.plate):0)+'</button>'}],
+  columns:[{label:'PLAKA',html:r=>'<strong>'+esc(r.plate)+'</strong>'},{label:'ARAÇ SINIFI',get:r=>r.type},{label:'ÜLKE',get:r=>r.country},{label:'ARAÇ SAHİBİ FİRMA',get:r=>r.owner},{label:'ÖZMAL / KİRALIK',get:r=>r.ownership}],
   fields:[{name:'plate',label:'Plaka',required:true},{name:'type',label:'Araç sınıfı',options:['Çekici','Kamyon','Kamyonet','Minivan','Traktör','Treyler','Römork','Swapbody']},{name:'country',label:'Ülke kodu',max:2,placeholder:'TR'},{name:'ownership',label:'Özmal / Kiralık',options:['Özmal','Kiralık']},{name:'owner',label:'Araç sahibi firma',full:true}],
   filters:[{key:'type',label:'Sınıf',get:r=>r.type},{key:'country',label:'Ülke',get:r=>r.country}],
   rows:()=>plates.all(),rowId:r=>plates.idOf(r),match:(r,q)=>[r.key,r.owner,r.type].some(v=>normalizeSearch(v).includes(q)),
@@ -70,6 +70,6 @@ export function installLists({references,plates,toast,confirmAction,show,plateDo
   async onImport(f){const r=await plates.importFile(f);return r.added.toLocaleString('tr-TR')+' araç eklendi'+(r.updated?', '+r.updated+' güncellendi':'')+'; '+r.skipped.toLocaleString('tr-TR')+' tekrar/boş kayıt atlandı.'},
   exportFile:'T1_Arac_Rehberi.json',exportData:()=>plates.exportJson()});
  companies.nav.onclick=()=>show('companies');vehicles.nav.onclick=()=>show('vehicles');
- references.onChange(()=>{if(!companies.view.hidden)companies.refresh(true)});plates.onChange(()=>{if(!vehicles.view.hidden)vehicles.refresh(true)});if(plateDocs)plateDocs.onChange(()=>{if(!vehicles.view.hidden)vehicles.refresh(true)});
+ references.onChange(()=>{if(!companies.view.hidden)companies.refresh(true)});plates.onChange(()=>{if(!vehicles.view.hidden)vehicles.refresh(true)});
  return {render:name=>(name==='companies'?companies:vehicles).refresh()};
 }
