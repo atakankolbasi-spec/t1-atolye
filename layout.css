@@ -566,3 +566,17 @@ dialog.pdDialog[open]{display:flex;flex-direction:column}dialog.pdDialog::backdr
 @media(prefers-reduced-motion:reduce){.gdCard::before,.gdPlus{animation:none}}
 html.noMotion .gdCard::before,html.noMotion .gdPlus{animation:none}
 @media(max-width:900px){.goodsDock{padding-right:0;padding-top:44px}.gdPdf,.gdDocs,.gdAdd{flex:1 1 100%}}
+
+/* ===== Karanlık mod: açılır pencereler (üst katmanda oldukları için ayrıca koyulaştırılır) ===== */
+html.dark dialog{filter:invert(.92) hue-rotate(180deg)}
+html.dark dialog .drawerhead,html.dark dialog .pdHead,html.dark dialog .pdfHead,html.dark dialog .primary,html.dark dialog .pdBtn,html.dark dialog .pdIco,html.dark dialog .gdIco,html.dark dialog img,html.dark dialog .pdfFileIcon,html.dark dialog .pdSteps li.on i,html.dark dialog .pdfSteps li.on i,html.dark dialog .pdfSteps li.done i,html.dark dialog .aeoBadge,html.dark dialog .sw,html.dark dialog .pdBar i,html.dark dialog .pdfBar i{filter:invert(1) hue-rotate(180deg)}
+html.dark dialog.pdfDialog,html.dark dialog.pdDialog{background:#fff}
+
+/* Beyanname ekle: kartların sağ altında düğme */
+.goodsDock .gdAdd{flex:0 0 auto;margin-left:auto;align-self:flex-end;flex-direction:row!important;align-items:center!important;gap:12px;padding:10px 20px 10px 10px!important;border-radius:16px;background:linear-gradient(135deg,#3b6cff,#2447b5)!important;color:#fff!important;box-shadow:0 14px 28px -12px rgba(47,91,234,.8)}
+.goodsDock .gdAdd::before{opacity:.9}
+.goodsDock .gdAdd .gdPlus{background:rgba(255,255,255,.2);box-shadow:none;width:34px;height:34px;font-size:20px}
+.goodsDock .gdAdd .gdAddTx b{color:#fff;font-size:14px}.goodsDock .gdAdd .gdAddTx small{display:none}
+html.dark .goodsDock .gdAdd{filter:invert(1) hue-rotate(180deg)}
+
+.langBtn{width:auto!important;min-width:42px;padding:0 12px!important;font-size:12.5px!important;font-weight:800;letter-spacing:.04em;margin-right:6px;color:#2447b5!important}

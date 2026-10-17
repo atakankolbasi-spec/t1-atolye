@@ -15,6 +15,7 @@ import {installLists} from './lists.js';
 import {installHat} from './hat.js';
 import {installPalette} from './palette.js';
 import {installChrome} from './chrome.js';
+import {installI18n} from './i18n.js';
 import * as Seals from './seals.js';
 import * as SET from './settings.js';
 import {installSettings} from './settings-ui.js';
@@ -282,7 +283,7 @@ $('#todayStrip').onclick=e=>{const b=e.target.closest('[data-today]');if(!b)retu
 // Kurlar: uygulama açılışında (12 saatte bir) internetten otomatik güncellenir
 autoUpdateRates().then(ch=>{if(ch&&work)refreshGuarantee()}).catch(()=>{});
 
-installPalette();installChrome();
+installPalette();installChrome();installI18n();
 
 {const tw=document.querySelector('.tablewrap');if(tw&&!document.getElementById('declarationCards')){const box=document.createElement('div');box.id='declarationCards';box.className='dcards';box.hidden=true;tw.after(box);box.onclick=e=>$('#declarationRows').onclick(e);
  const host=document.querySelector('.filtercontrols'),btn=document.createElement('button');btn.type='button';btn.id='viewToggle';btn.className='viewToggle';btn.title='Tablo / kart görünümü';btn.onclick=()=>{cardMode=!cardMode;try{localStorage.setItem(VIEW_KEY,cardMode?'cards':'table')}catch{}applyView()};host?.prepend(btn);applyView();try{renderList()}catch{}}}
