@@ -21,7 +21,7 @@ const HUE={blue:0,teal:-50,orange:165,purple:50,rose:125};
 export const ACCENTS=[['blue','Mavi','#2f5bea'],['teal','Turkuaz','#0f9d8a'],['orange','Turuncu','#f26a1b'],['purple','Mor','#7c3aed'],['rose','Gül','#e11d48']];
 export function apply(){const c=read(),h=document.documentElement;
  const dark=c.theme==='dark'||(c.theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);h.classList.toggle('dark',dark);try{localStorage.setItem('t1-theme',dark?'dark':'light')}catch{}
- h.dataset.accent=c.accent;h.style.setProperty('--hue',(HUE[c.accent]||0)+'deg');h.dataset.density=c.density;h.dataset.radius=c.radius;h.style.zoom=c.fontScale===100?'':String(c.fontScale/100);
+ h.dataset.accent=c.accent;h.style.setProperty('--hue',(HUE[c.accent]||0)+'deg');h.dataset.density=c.density;h.dataset.radius=c.radius;h.style.zoom=c.fontScale===100?'':String(c.fontScale/100);h.style.setProperty('--z',String(c.fontScale/100));
  h.classList.toggle('noBold',!c.bold);h.classList.toggle('noMotion',!c.motion);h.classList.toggle('noHero',!c.heroOn);h.classList.toggle('noDash',!c.dashOn);h.classList.toggle('noToday',!c.todayOn);
  try{localStorage.setItem('t1-nav-wide',c.navDefault==='wide'?'1':'0');document.body?.classList.toggle('navWide',c.navDefault==='wide')}catch{}
  const q=s=>document.querySelector(s);

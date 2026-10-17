@@ -457,8 +457,8 @@ dialog.pdfDialog::backdrop{background:rgba(8,16,40,.55);backdrop-filter:blur(6px
 html.dark dialog.pdfDialog,[data-theme=dark] dialog.pdfDialog{background:#111a30}
 
 /* Pencereler her yakınlaştırmada ekrana sığar; içerik kendi içinde kayar */
-dialog{max-height:calc(100dvh - 24px);max-width:calc(100vw - 24px)}
-dialog.pdfDialog{overflow:hidden;display:none;flex-direction:column;width:min(1100px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog{max-height:calc((100dvh - 24px) / var(--z,1));max-width:calc((100vw - 24px) / var(--z,1))}
+dialog.pdfDialog{overflow:hidden;display:none;flex-direction:column;width:min(1100px,calc((100vw - 24px) / var(--z,1)));max-height:calc((100dvh - 24px) / var(--z,1))}
 dialog.pdfDialog[open]{display:flex}
 .pdfDialog .pdfHead,.pdfDialog .pdfSteps,.pdfDialog .dialogactions{flex:none}
 .pdfDialog .pdfBody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
