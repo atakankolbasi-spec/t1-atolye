@@ -252,11 +252,11 @@ function buildGoodsDock(){const step=document.getElementById('goodsStep'),tb=ste
  const c1=document.createElement('section');c1.className='gdCard gdPdf';c1.innerHTML='<div class="gdHead"><span class="gdIco">📄</span><div><b>PDF’den oku</b><small>Yapay zekâ ile otomatik · beyanname ve fatura</small></div></div>';c1.append(zone);
  const c2=document.createElement('section');c2.className='gdCard gdDocs';c2.append(host);
  const menu=document.createElement('div');menu.className='gdMenuWrap';menu.innerHTML='<button type="button" class="gdMenuBtn" aria-label="Diğer işlemler" title="Diğer işlemler">⋮</button><div class="gdMenu" hidden></div>';
- const mi=menu.querySelector('.gdMenu');for(const el of [...tb.querySelectorAll('label.upload,#addGood')])mi.append(el);
+ const mi=menu.querySelector('.gdMenu');for(const el of [...tb.querySelectorAll('label.upload')])mi.append(el);const add=tb.querySelector('#addGood');if(add){add.className='gdCard gdAdd';add.type='button';add.innerHTML='<span class="gdPlus">＋</span><span class="gdAddTx"><b>Beyanname bilgisi ekle</b><small>MRN · GTİP · firma · fatura</small></span>'}
  menu.querySelector('.gdMenuBtn').onclick=e=>{e.stopPropagation();mi.hidden=!mi.hidden};
  document.addEventListener('click',e=>{if(!menu.contains(e.target))mi.hidden=true});
  mi.addEventListener('click',e=>{if(e.target.closest('button,label'))setTimeout(()=>{mi.hidden=true},0)});
- dock.append(c1,c2,menu);tb.before(dock);tb.hidden=true}
+ dock.append(c1,c2);if(add)dock.append(add);dock.append(menu);tb.before(dock);tb.hidden=true}
 buildGoodsDock();
 const lists=installLists({references,plates,toast,confirmAction,show:showList2});
 for(const [name,kind] of [['vehicle','motor'],['trailer','trailer'],['borderVehicle',null]]){const input=form.elements[name];if(input)plates.attachField(input,{kind,owner:()=>form.elements.carrier?.value||'',onPick:r=>{input.value=r.plate;const c=form.elements[name+'Country'];if(c&&r.country)c.value=r.country;if(name==='vehicle'&&r.owner&&form.elements.carrier)references.pickCarrier(r.owner);queueDraft()}})}
