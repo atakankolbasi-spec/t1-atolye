@@ -303,3 +303,13 @@ html.dark .dcard .route em{background:transparent}
 .finHelp:not(.finRateInfo){display:none!important}
 #declarationsTable .rowactions{gap:2px!important}#declarationsTable .rowactions button{padding:5px 5px!important;min-width:23px;font-size:11px!important}
 #declarationsTable td .sel{margin-right:8px!important}
+
+/* ---------- Teminat bilgileri kartı ---------- */
+.steppanel[data-panel="4"]>.grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px 20px!important;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:0 24px 24px!important;box-shadow:var(--sh1);position:relative;margin-top:0}
+.steppanel[data-panel="4"]>.grid:before{content:'Teminat Bilgileri';grid-column:1/-1;margin:0 -24px 6px;padding:16px 24px;font:800 16px var(--head);color:var(--ink);background:linear-gradient(90deg,#eef3ff,#fff 70%);border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--line)}
+.steppanel[data-panel="4"]>.grid>.field{grid-column:span 1}
+.steppanel[data-panel="4"] .field:has([name=principal]){grid-column:span 2}.steppanel[data-panel="4"] .field:has([name=guarantor]){grid-column:span 2}
+.steppanel[data-panel="4"] .field:has([name=guaranteeRef]){grid-column:span 2}.steppanel[data-panel="4"] .field:has([name=guaranteeAmount]){grid-column:span 1}
+.calcBadge{font-style:normal;margin-left:8px;padding:2px 8px;border-radius:6px;background:#fef3c7;color:#b45309;font-size:9.5px;letter-spacing:.6px;vertical-align:middle}
+.finGuar{margin-bottom:16px}
+@media(max-width:1000px){.steppanel[data-panel="4"]>.grid{grid-template-columns:1fr 1fr!important}}
