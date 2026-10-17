@@ -56,7 +56,7 @@ const SECTIONS=[
 ];
 export function installSettings({anchor,toast,confirmAction,actions={}}){
  const btn=document.createElement('button');btn.className='nav';btn.id='navSettings';btn.innerHTML='<span>⚙</span>Ayarlar';anchor.before(btn);
- const view=document.createElement('section');view.id='settingsView';view.className='view';view.hidden=true;document.querySelector('main footer').before(view);
+ const view=document.createElement('section');view.id='settingsView';view.className='view';view.hidden=true;(document.querySelector('main>footer')||document.querySelector('main')).before(view);
  let cur='look',q='';
  const val=k=>S.get(k);
  const ctl=it=>{const v=val(it.k);switch(it.t){
