@@ -261,6 +261,7 @@ function buildGoodsDock(){const step=document.getElementById('goodsStep'),tb=ste
  mi.addEventListener('click',e=>{if(e.target.closest('button,label'))setTimeout(()=>{mi.hidden=true},0)});
  dock.append(c1,c2);if(add)dock.append(add);dock.append(menu);tb.before(dock);tb.hidden=true}
 buildGoodsDock();
+{const row=document.getElementById('listTabRow'),nb=document.getElementById('newDeclaration');if(row&&nb){nb.className='tabNew';nb.innerHTML='<span class="tnPlus">＋</span><span class="tnTx"><b>Yeni T1 beyannamesi</b><small>Yeni bir beyanname başlat</small></span>';row.append(nb)}}
 const lists=installLists({references,plates,toast,confirmAction,show:showList2});
 for(const [name,kind] of [['vehicle','motor'],['trailer','trailer'],['borderVehicle',null]]){const input=form.elements[name];if(input)plates.attachField(input,{kind,owner:()=>form.elements.carrier?.value||'',onPick:r=>{input.value=r.plate;const c=form.elements[name+'Country'];if(c&&r.country)c.value=r.country;if(name==='vehicle'&&r.owner&&form.elements.carrier)references.pickCarrier(r.owner);queueDraft()}})}
 const ens=installEns({lookupPlate:plates.lookup,attachPlate:plates.attachField,navigate:showEns,toast,confirmAction,getCompanies:()=>references.getCompanies(),getDeclarations:()=>db.declarations,getGoods:id=>readGoods(id).records,knownPlates:()=>operations.getPlateCountries()});
