@@ -668,3 +668,14 @@ html.dark .tabNew{filter:none}
 @media(max-width:1100px){.listcard .listcontrols{grid-template-columns:1fr}.lcLeft,.listcard .filtercontrols{justify-self:stretch}.fpGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.filterPanel{width:calc(100vw - 80px)}}
 html.noMotion .listcard .lcSearch::before,html.noMotion .filterToggle::before{animation:none}
 @media(prefers-reduced-motion:reduce){.listcard .lcSearch::before,.filterToggle::before{animation:none}}
+
+/* Tek satır: FİLTRE — ARAMA — YENİ T1 */
+#listTabRow{display:none!important}
+.listcard .filtercontrols{justify-self:end}
+.listcard .filtercontrols #newDeclaration.tabNew{border-radius:14px!important;padding:8px 20px 8px 8px!important;box-shadow:0 10px 24px -16px rgba(47,91,234,.55)!important}
+.listcard .filtercontrols #newDeclaration.tabNew::before{padding:2px!important;opacity:.85}
+.listcard .filtercontrols #newDeclaration .tnTx small{display:none}
+.listcard .filtercontrols #newDeclaration .tnPlus{width:32px;height:32px;font-size:19px}
+.fpTools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border-radius:14px;background:#f4f7fd;border:1px solid #e1e8f7}
+.fpTools>span{font-size:10.5px;font-weight:800;letter-spacing:.06em;color:#7a86a1;text-transform:uppercase;margin-right:auto}
+.fpTools .viewToggle,.fpTools #detailColumns,.fpTools label.upload{margin:0!important;padding:8px 14px!important;border-radius:10px!important;font-size:12.5px!important}

@@ -229,7 +229,7 @@ function listFilterOk(d){
 function buildFilterUi(){
  const lc=document.querySelector('.listcontrols'),fc=lc?.querySelector('.filtercontrols'),search=lc?.querySelector('.search');if(!lc||!fc||!search||document.getElementById('filterToggle'))return;
  const left=document.createElement('div');left.className='lcLeft';
- left.innerHTML='<button type="button" id="filterToggle" class="filterToggle" aria-expanded="false"><span class="ftIco">⚙</span><b>Filtrele</b><em id="filterCount" hidden>0</em><i class="ftCaret">▾</i></button><div id="filterPanel" class="filterPanel" hidden><div class="fpHead"><b>Filtreler</b><div><button type="button" id="fpClear" class="fpGhost">Temizle</button><button type="button" id="fpClose" class="fpClose" aria-label="Kapat">✕</button></div></div><div class="fpGrid" id="fpGrid"></div></div>';
+ left.innerHTML='<button type="button" id="filterToggle" class="filterToggle" aria-expanded="false"><span class="ftIco">⚙</span><b>Filtrele</b><em id="filterCount" hidden>0</em><i class="ftCaret">▾</i></button><div id="filterPanel" class="filterPanel" hidden><div class="fpHead"><b>Filtreler</b><div><button type="button" id="fpClear" class="fpGhost">Temizle</button><button type="button" id="fpClose" class="fpClose" aria-label="Kapat">✕</button></div></div><div class="fpTools" id="fpTools"><span>Görünüm ve işlemler</span></div><div class="fpGrid" id="fpGrid"></div></div>';
  lc.prepend(left);search.classList.add('lcSearch');
  const grid=left.querySelector('#fpGrid');
  const slot=(label,el)=>{const l=document.createElement('label');l.className='xf';l.innerHTML='<span>'+label+'</span>';l.append(el);grid.append(l);return l};
@@ -239,6 +239,7 @@ function buildFilterUi(){
  {const s=document.createElement('select');s.dataset.xf='transit';s.innerHTML='<option value="">Tümü</option><option>Var</option><option>Yok</option>';slot('Transit bitiş tarihi',s)}
  for(const [k,label] of XTXT){const i=document.createElement('input');i.type='text';i.dataset.xf=k;i.placeholder='Yaz…';slot(label,i)}
  const from=document.getElementById('dateFrom'),to=document.getElementById('dateTo');if(from)slot('Oluşturma tarihi · başlangıç',from);if(to)slot('Oluşturma tarihi · bitiş',to);
+ {const tools=left.querySelector('#fpTools');for(const el of [document.getElementById('detailColumns'),fc.querySelector('label.upload')])if(el)tools.append(el);const nb=document.getElementById('newDeclaration');if(nb){fc.append(nb);const tr=document.getElementById('listTabRow');if(tr)tr.hidden=true}}
  const df=document.getElementById('dateFilters');if(df)df.hidden=true;const fb=document.getElementById('filterButton');if(fb)fb.hidden=true;
  const panel=left.querySelector('#filterPanel'),tog=left.querySelector('#filterToggle');
  const fill=()=>{for(const [k,,get] of XSEL){const s=grid.querySelector('[data-xf="'+k+'"]');if(!s)continue;const vals=new Set();for(const d of db.declarations){if(k==='tag')tagList(d.tags).forEach(t=>vals.add(t));else{const v=get(d);if(v)vals.add(String(v))}}const cur=XF[k]||'';s.innerHTML='<option value="">Tümü</option>'+[...vals].sort((a,b)=>a.localeCompare(b,'tr')).map(v=>'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join('')}};
@@ -305,7 +306,7 @@ function buildGoodsDock(){const step=document.getElementById('goodsStep'),tb=ste
  dock.append(c1,c2);if(add)dock.append(add);dock.append(menu);tb.before(dock);tb.hidden=true}
 buildGoodsDock();
 try{buildFilterUi()}catch(e){console.error(e)}
-{const row=document.getElementById('listTabRow'),nb=document.getElementById('newDeclaration');if(row&&nb){nb.className='tabNew';nb.innerHTML='<span class="tnPlus">＋</span><span class="tnTx"><b>Yeni T1 beyannamesi</b><small>Yeni bir beyanname başlat</small></span>';row.append(nb)}}
+{const row=document.getElementById('listTabRow'),nb=document.getElementById('newDeclaration');if(row&&nb){nb.className='tabNew';nb.innerHTML='<span class="tnPlus">＋</span><span class="tnTx"><b>Yeni T1 beyannamesi</b><small>Yeni bir beyanname başlat</small></span>';(document.querySelector('.listcontrols .filtercontrols')||row).append(nb)}}
 const lists=installLists({references,plates,toast,confirmAction,show:showList2});
 for(const [name,kind] of [['vehicle','motor'],['trailer','trailer'],['borderVehicle',null]]){const input=form.elements[name];if(input)plates.attachField(input,{kind,owner:()=>form.elements.carrier?.value||'',onPick:r=>{input.value=r.plate;const c=form.elements[name+'Country'];if(c&&r.country)c.value=r.country;if(name==='vehicle'&&r.owner&&form.elements.carrier)references.pickCarrier(r.owner);queueDraft()}})}
 const ens=installEns({lookupPlate:plates.lookup,attachPlate:plates.attachField,navigate:showEns,toast,confirmAction,getCompanies:()=>references.getCompanies(),getDeclarations:()=>db.declarations,getGoods:id=>readGoods(id).records,knownPlates:()=>operations.getPlateCountries()});
@@ -333,7 +334,7 @@ autoUpdateRates().then(ch=>{if(ch&&work)refreshGuarantee()}).catch(()=>{});
 installPalette();installChrome();installI18n();
 
 {const tw=document.querySelector('.tablewrap');if(tw&&!document.getElementById('declarationCards')){const box=document.createElement('div');box.id='declarationCards';box.className='dcards';box.hidden=true;tw.after(box);box.onclick=e=>$('#declarationRows').onclick(e);
- const host=document.querySelector('.filtercontrols'),btn=document.createElement('button');btn.type='button';btn.id='viewToggle';btn.className='viewToggle';btn.title='Tablo / kart görünümü';btn.onclick=()=>{cardMode=!cardMode;try{localStorage.setItem(VIEW_KEY,cardMode?'cards':'table')}catch{}applyView()};host?.prepend(btn);applyView();try{renderList()}catch{}}}
+ const host=document.getElementById('fpTools')||document.querySelector('.filtercontrols'),btn=document.createElement('button');btn.type='button';btn.id='viewToggle';btn.className='viewToggle';btn.title='Tablo / kart görünümü';btn.onclick=()=>{cardMode=!cardMode;try{localStorage.setItem(VIEW_KEY,cardMode?'cards':'table')}catch{}applyView()};host?.prepend(btn);applyView();try{renderList()}catch{}}}
 
 installSealUi();
 
