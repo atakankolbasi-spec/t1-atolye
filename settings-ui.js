@@ -29,6 +29,11 @@ const SECTIONS=[
   {k:'aeoAutoHat',t:'sw',l:'AEO’da otomatik hat bildirimi',h:'AEO işaretli beyanname kaydedilince hat kaydı açılır'},
   {k:'dueDays',t:'seg',l:'Süre uyarısı',h:'Transit bitişine kaç gün kala uyarı çıksın',o:[[1,'1 gün'],[2,'2 gün'],[3,'3 gün'],[5,'5 gün'],[7,'7 gün']]},
   {k:'backupDays',t:'seg',l:'Yedek hatırlatma',h:'Son yedekten kaç gün sonra uyarı çıksın',o:[[3,'3 gün'],[7,'7 gün'],[14,'14 gün'],[30,'30 gün']]}]},
+ {id:'wa',icon:'💬',title:'WhatsApp',desc:'Hat bildirimi mesajı',items:[
+  {k:'waAuto',t:'sw',l:'Hat düşünce mesaj hazırla',h:'Hat kaydına Mavi / Sarı / Kırmızı seçilince WhatsApp mesajı hazırlanır'},
+  {k:'waNumbers',t:'text',l:'Mesaj gidecek numara(lar)',h:'Ülke koduyla yaz, birden fazla için virgülle ayır. Örn. 905321234567',ph:'905321234567'},
+  {k:'waTemplate',t:'area',l:'Mesaj metni',h:'{ref} beyanname no, {hat} hat rengi, {mrn} MRN, {plaka} çekici / treyler yazılabilir',ph:'{ref} Hat bildirimi yapılmıştır. {hat} Hattan işlem görecektir.'},
+  {k:'waProxy',t:'text',l:'Otomatik gönderim servisi (isteğe bağlı)',h:'Boşsa mesaj WhatsApp’ta hazır açılır, sen “Gönder”e basarsın. Servis adresi yazılırsa arka planda kendiliğinden gider.',ph:'https://…workers.dev/'}]},
  {id:'seal',icon:'🔒',title:'Mühür',desc:'Mühür stoğu ve uyarılar',items:[
   {k:'sealLow',t:'num',l:'Düşük stok uyarısı',h:'Stok bu sayının altına inince ana sayfa kartı kırmızı olur',min:0,max:1000},
   {t:'act',l:'Mühür stoğunu yönet',h:'Aralık ekle, kalan mühürleri gör',a:[['seals','STOĞU AÇ']]}]},
