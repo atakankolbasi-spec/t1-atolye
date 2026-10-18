@@ -642,3 +642,29 @@ html.dark .tabNew{filter:none}
 #newDeclaration.tabNew{background:linear-gradient(160deg,rgba(243,247,255,.85),rgba(255,255,255,.55))!important;color:#17233b!important;border:0!important;box-shadow:0 -8px 22px -12px rgba(47,91,234,.5)!important;height:auto!important;font-size:13px!important}
 #newDeclaration.tabNew:hover{background:linear-gradient(160deg,rgba(228,238,255,.95),rgba(243,247,255,.8))!important;transform:translateY(-2px)}
 #newDeclaration.tabNew .tnTx b{color:#17233b!important}
+
+/* ===== Liste araç çubuğu: [Filtrele] — ortada arama — [KART · EK SÜTUNLAR · İÇE AKTAR] ===== */
+.listcard .listcontrols{display:grid!important;grid-template-columns:minmax(150px,1fr) minmax(300px,560px) minmax(150px,1fr);align-items:center;gap:16px}
+.lcLeft{position:relative;justify-self:start}
+.listcard .lcSearch{justify-self:center;width:100%;margin:0!important;position:relative;isolation:isolate;border:0!important;border-radius:16px!important;background:linear-gradient(160deg,rgba(243,247,255,.85),rgba(255,255,255,.55))!important;box-shadow:0 10px 24px -16px rgba(47,91,234,.55)}
+.listcard .lcSearch::before,.filterToggle::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;padding:2px;background:conic-gradient(from var(--gdA),#3b6cff,#22d3ee,#a78bfa,#f59e0b,#3b6cff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:gdSpin 7s linear infinite;opacity:.8}
+.listcard .lcSearch input{background:transparent!important;border:0!important;box-shadow:none!important}
+.listcard .filtercontrols{justify-self:end;display:flex;gap:10px;align-items:center}
+.filterToggle{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:9px;padding:11px 16px!important;border:0!important;border-radius:14px!important;background:linear-gradient(160deg,rgba(243,247,255,.85),rgba(255,255,255,.55))!important;color:#17233b!important;font-weight:800;cursor:pointer;box-shadow:0 10px 24px -16px rgba(47,91,234,.55)!important;transition:transform .2s}
+.filterToggle:hover{transform:translateY(-2px)}
+.filterToggle b{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:13.5px}
+.ftIco{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#3b6cff,#22a7ee);color:#fff;font-size:13px}
+.filterToggle em{font-style:normal;min-width:20px;height:20px;border-radius:99px;display:grid;place-items:center;background:#2f5bea;color:#fff;font-size:11px;font-weight:800;padding:0 5px}
+.ftCaret{font-style:normal;font-size:11px;color:#6b7896;transition:transform .2s}.filterToggle.open .ftCaret{transform:rotate(180deg)}
+.filterPanel{position:absolute;left:0;top:calc(100% + 10px);z-index:60;width:min(860px,calc(100vw - 160px));max-height:min(520px,70vh);overflow:auto;padding:16px 18px 18px;border-radius:18px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 30px 70px -20px rgba(8,18,50,.45)}
+.filterPanel[hidden]{display:none}
+.fpHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.fpHead b{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:15px;color:#17233b}.fpHead>div{display:flex;gap:8px;align-items:center}
+.fpGhost{padding:7px 12px!important;border-radius:10px!important;background:#eef2fb!important;border:0!important;color:#2447b5!important;font-weight:800;font-size:12px!important;cursor:pointer}
+.fpClose{width:30px;height:30px;padding:0!important;border-radius:50%!important;background:#f1f4fa!important;border:0!important;cursor:pointer}
+.fpGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.xf{display:flex;flex-direction:column;gap:4px;margin:0}.xf span{font-size:10.5px;font-weight:800;letter-spacing:.04em;color:#7a86a1;text-transform:uppercase}
+.xf select,.xf input{width:100%;height:36px;padding:0 10px;border:1px solid #d6e0f7;border-radius:10px;background:#fbfcff;font-size:12.5px;color:#17233b}
+.xf select:focus,.xf input:focus{outline:2px solid #9fc0ff;border-color:#3b6cff}
+@media(max-width:1100px){.listcard .listcontrols{grid-template-columns:1fr}.lcLeft,.listcard .filtercontrols{justify-self:stretch}.fpGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.filterPanel{width:calc(100vw - 80px)}}
+html.noMotion .listcard .lcSearch::before,html.noMotion .filterToggle::before{animation:none}
+@media(prefers-reduced-motion:reduce){.listcard .lcSearch::before,.filterToggle::before{animation:none}}
