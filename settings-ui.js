@@ -31,7 +31,7 @@ const SECTIONS=[
   {k:'backupDays',t:'seg',l:'Yedek hatırlatma',h:'Son yedekten kaç gün sonra uyarı çıksın',o:[[3,'3 gün'],[7,'7 gün'],[14,'14 gün'],[30,'30 gün']]}]},
  {id:'wa',icon:'💬',title:'WhatsApp',desc:'Hat bildirimi mesajı',items:[
   {k:'waAuto',t:'sw',l:'Hat düşünce mesaj hazırla',h:'Hat kaydına Mavi / Sarı / Kırmızı seçilince WhatsApp mesajı hazırlanır'},
-  {k:'waNumbers',t:'text',l:'Mesaj gidecek numara(lar)',h:'Ülke koduyla yaz, birden fazla için virgülle ayır. Örn. 905321234567',ph:'905321234567'},
+  {k:'waNumbers',t:'text',l:'Varsayılan numara(lar)',h:'Müşterinin kendi numarası yoksa buraya gider. Müşteri numarasını Firmalar sayfasında yaz. Ülke koduyla, virgülle ayır.',ph:'905321234567'},
   {k:'waTemplate',t:'area',l:'Mesaj metni',h:'{ref} beyanname no, {hat} hat rengi, {mrn} MRN, {plaka} çekici / treyler yazılabilir',ph:'{ref} Hat bildirimi yapılmıştır. {hat} Hattan işlem görecektir.'},
   {k:'waProxy',t:'text',l:'Otomatik gönderim servisi (isteğe bağlı)',h:'Boşsa mesaj WhatsApp’ta hazır açılır, sen “Gönder”e basarsın. Servis adresi yazılırsa arka planda kendiliğinden gider.',ph:'https://…workers.dev/'}]},
  {id:'seal',icon:'🔒',title:'Mühür',desc:'Mühür stoğu ve uyarılar',items:[

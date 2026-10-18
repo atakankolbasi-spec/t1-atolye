@@ -6,7 +6,7 @@ const WA_COLORS=['Mavi','Sarı','Kırmızı'];
 const clean=v=>String(v??'').trim().slice(0,500);
 const norm=r=>({id:typeof r.id==='string'&&/^[A-Za-z0-9-]+$/.test(r.id)?r.id:crypto.randomUUID(),kind:KINDS.includes(r.kind)?r.kind:KINDS[0],mrn:clean(r.mrn).toUpperCase().replace(/\s/g,''),status:STATUS.includes(r.status)?r.status:STATUS[0],priority:PRIORITY.includes(r.priority)?r.priority:'',message:clean(r.message),location:clean(r.location),trailer:clean(r.trailer).toUpperCase(),vehicle:clean(r.vehicle).toUpperCase(),office:clean(r.office),readyAt:clean(r.readyAt),approvedAt:clean(r.approvedAt),guid:clean(r.guid),ighb:clean(r.ighb),user:clean(r.user),declarationRef:clean(r.declarationRef),wa:clean(r.wa),createdAt:clean(r.createdAt)||new Date().toISOString()});
 const stamp=()=>new Date().toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-export function installHat({toast,confirmAction,show,settings}){
+export function installHat({toast,confirmAction,show,settings,customerOf,saveCustomerPhone}){
  let list=[];try{list=(JSON.parse(localStorage.getItem(KEY)||'[]')||[]).map(norm)}catch{}
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(list))}catch{toast('Hat bildirimi kaydedilemedi: tarayıcı alanı dolu olabilir.')}};
  const defaultLocation=()=>{try{return localStorage.getItem('t1-hat-location')||''}catch{return ''}};
@@ -14,12 +14,19 @@ export function installHat({toast,confirmAction,show,settings}){
 
  // ---- WhatsApp: hat rengi (Mavi / Sarı / Kırmızı) seçilince mesaj ----
  const S=k=>{try{return settings?.get(k)}catch{return ''}};
- const waNums=()=>String(S('waNumbers')||'').split(/[,;\n]+/).map(x=>x.replace(/\D/g,'')).filter(x=>x.length>=10).map(x=>x.length===11&&x[0]==='0'?'90'+x.slice(1):x.length===10&&x[0]==='5'?'90'+x:x);
+ const parseNums=s=>String(s||'').split(/[,;\n]+/).map(x=>x.replace(/\D/g,'')).filter(x=>x.length>=10).map(x=>x.length===11&&x[0]==='0'?'90'+x.slice(1):x.length===10&&x[0]==='5'?'90'+x:x);
+ const cust=r=>{try{return customerOf?customerOf(r):null}catch{return null}};
+ const waNums=r=>{const c=cust(r),own=parseNums(c?.numbers);return own.length?own:parseNums(S('waNumbers'))};
  const waText=r=>String(S('waTemplate')||'{ref} Hat bildirimi yapılmıştır. {hat} Hattan işlem görecektir.').replace(/\{ref\}/g,r.declarationRef||r.mrn).replace(/\{mrn\}/g,r.mrn).replace(/\{hat\}/g,r.priority).replace(/\{plaka\}/g,[r.vehicle,r.trailer].filter(Boolean).join(' / '));
  const waMark=(r,c)=>{r.wa=c;save()};
  async function waSend(r){
-  const nums=waNums(),text=waText(r),proxy=String(S('waProxy')||'').trim();
-  if(!nums.length){toast('Önce Ayarlar › WhatsApp bölümüne mesaj gidecek numarayı yaz.');return}
+  const nums=waNums(r),text=waText(r),proxy=String(S('waProxy')||'').trim();
+  if(!nums.length){
+   const c=cust(r);let d0=document.getElementById('waDialog');if(!d0){d0=document.createElement('dialog');d0.id='waDialog';d0.className='waDlg';document.body.append(d0)}
+   const e0=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+   d0.innerHTML='<div class="waHead"><span>💬</span><div><b>WhatsApp numarası yok</b><small>'+e0(c?.name||'Müşteri bilinmiyor')+'</small></div><button type="button" data-w="close" aria-label="Kapat">✕</button></div><div class="waBody">'+(c?.company?'<small class="waNote">Bu müşteri için numara yaz; Firmalar sayfasındaki kaydına işlenir ve bir daha sorulmaz.</small><input class="waIn" id="waNew" placeholder="905321234567" inputmode="tel"><button type="button" class="waGo" data-w="add"><span>Numarayı kaydet ve mesajı hazırla</span></button>':'<small class="waNote">'+(c?.name?'“'+e0(c.name)+'” Firmalar listesinde bulunamadı. Önce firmayı kaydet, sonra numarasını yaz; ya da Ayarlar › WhatsApp bölümüne varsayılan numara gir.':'Bu hat kaydı bir beyannameye bağlı değil. Ayarlar › WhatsApp bölümüne varsayılan numara yaz.')+'</small>')+'</div>';
+   d0.onclick=async ev=>{const b=ev.target.closest('[data-w]');if(!b)return;if(b.dataset.w==='close')d0.close();if(b.dataset.w==='add'){const v=document.getElementById('waNew').value;if(!parseNums(v).length){toast('Geçerli bir numara yaz (ülke koduyla, örn. 905321234567).');return}try{await saveCustomerPhone(c.company,v);d0.close();toast('Numara '+c.name+' firmasına kaydedildi.');waSend(r)}catch(err){toast(err.message)}}};
+   if(!d0.open)d0.showModal();return}
   if(proxy){
    let ok=0,fail='';
    for(const to of nums){try{const res=await fetch(proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,ref:r.declarationRef||r.mrn,hat:r.priority,mrn:r.mrn,plate:[r.vehicle,r.trailer].filter(Boolean).join(' / ')})});if(res.ok)ok++;else fail=(await res.text()).slice(0,120)}catch(err){fail=err.message}}
@@ -28,7 +35,7 @@ export function installHat({toast,confirmAction,show,settings}){
   }
   let d=document.getElementById('waDialog');if(!d){d=document.createElement('dialog');d.id='waDialog';d.className='waDlg';document.body.append(d)}
   const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  d.innerHTML='<div class="waHead"><span>💬</span><div><b>WhatsApp mesajı hazır</b><small>'+e(r.priority)+' hat · '+e(r.declarationRef||r.mrn)+'</small></div><button type="button" data-w="close" aria-label="Kapat">✕</button></div><div class="waBody"><div class="waBubble">'+e(waText(r))+'</div>'+nums.map(n=>'<a class="waGo" target="_blank" rel="noopener" data-w="go" href="https://wa.me/'+n+'?text='+encodeURIComponent(waText(r))+'"><span>WhatsApp’ta aç</span><b>+'+n+'</b></a>').join('')+'<button type="button" class="waCopy" data-w="copy">Mesajı kopyala</button><small class="waNote">WhatsApp açılınca yalnızca “Gönder”e bas.</small></div>';
+  d.innerHTML='<div class="waHead"><span>💬</span><div><b>WhatsApp mesajı hazır</b><small>'+e(r.priority)+' hat · '+e(r.declarationRef||r.mrn)+(cust(r)?.name?' · '+e(cust(r).name):'')+'</small></div><button type="button" data-w="close" aria-label="Kapat">✕</button></div><div class="waBody"><div class="waBubble">'+e(waText(r))+'</div>'+nums.map(n=>'<a class="waGo" target="_blank" rel="noopener" data-w="go" href="https://wa.me/'+n+'?text='+encodeURIComponent(waText(r))+'"><span>WhatsApp’ta aç</span><b>+'+n+'</b></a>').join('')+'<button type="button" class="waCopy" data-w="copy">Mesajı kopyala</button><small class="waNote">WhatsApp açılınca yalnızca “Gönder”e bas.</small></div>';
   d.onclick=ev=>{const b=ev.target.closest('[data-w]');if(!b)return;if(b.dataset.w==='close')d.close();if(b.dataset.w==='go'){waMark(r,r.priority);page.refresh(true)}if(b.dataset.w==='copy'){navigator.clipboard?.writeText(waText(r)).then(()=>toast('Mesaj kopyalandı.'),()=>toast(waText(r)))}};
   if(!d.open)d.showModal();
  }

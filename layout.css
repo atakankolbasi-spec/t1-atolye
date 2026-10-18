@@ -689,3 +689,6 @@ dialog.waDlg::backdrop{background:rgba(8,16,40,.55);backdrop-filter:blur(5px)}
 .waGo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-radius:14px;background:#25d366;color:#fff!important;text-decoration:none;font-weight:800}.waGo b{font-weight:700;opacity:.95}.waGo:hover{filter:brightness(1.06)}
 .waCopy{padding:9px 14px!important;border-radius:12px!important;border:1px solid #cfd8dc!important;background:#fff!important;color:#2a3a63!important;font-weight:700;cursor:pointer}.waNote{color:#667781;text-align:center;font-size:12px}
 .waBubble{text-transform:none!important}
+
+.waIn{width:100%;height:42px;padding:0 12px;border:1px solid #cfd8dc;border-radius:12px;font-size:14px;background:#fff}
+button.waGo{border:0;cursor:pointer;font:inherit}
