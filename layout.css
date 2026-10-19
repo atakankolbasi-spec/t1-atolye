@@ -915,3 +915,5 @@ html.dark .ehIcon,html.dark #saveDraft,html.dark .gdUpd{filter:invert(1) hue-rot
 #metadataFields[inert]{opacity:.93}
 #metadataFields[inert] input,#metadataFields[inert] select,#metadataFields[inert] textarea{background:#f4f6fb!important;color:#33415f!important}
 #metadataFields[inert] .mergedPanel::before{animation:none;opacity:.35}
+
+.wizardfooter{justify-content:flex-end!important;gap:14px}.wizardfooter #stepFooter{margin-right:auto}.wizardfooter #nextStep{margin-left:auto}
