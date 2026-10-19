@@ -25,7 +25,7 @@ export function installRefDocs({toast,confirmAction}){
  function uniqueName(base,taken){let n=base,i=2;const set=new Set(taken.map(x=>x.toLowerCase()));while(set.has(n.toLowerCase()))n=base+' '+(i++);return n}
 
 
- const paneHtml='<div class="pdDrop" data-r="drop"><div><b>Evrakları buraya sürükleyip bırak</b><small>ya da tıklayıp dosya seç · çoklu seçilebilir · en fazla 25 MB</small></div><div class="pdUp"><label class="pdName" title="Yüklenen her dosyaya bu isim verilir; sonra değiştirebilirsin">Yeni evrak adı <input data-r="defname" maxlength="40"></label><label class="upload primary pdBtn">＋ Yeni evrak<input type="file" data-r="file" multiple hidden></label></div></div><div data-r="list" class="pdList"></div>';
+ const paneHtml='<div class="pdDrop" data-r="drop"><div><span class="pdDropIco">📄</span><b>Dosyayı buraya sürükleyip bırakın</b><small>ya da tıklayıp dosya seç · çoklu seçilebilir · en fazla 25 MB</small></div><div class="pdUp"><label class="pdName" title="Yüklenen her dosyaya bu isim verilir; sonra değiştirebilirsin">Yeni evrak adı <input data-r="defname" maxlength="40"></label><label class="upload primary pdBtn">＋ Yeni evrak<input type="file" data-r="file" multiple hidden></label></div></div><div data-r="list" class="pdList"></div>';
  const urlOf=d=>URL.createObjectURL(d.blob.type||!d.type?d.blob:new Blob([d.blob],{type:d.type}));
  // Evrak listesi + yükleme: hem pencerede hem sayfaya gömülü panelde kullanılır
  function makePane(root,getCur,after=()=>{}){
@@ -101,7 +101,7 @@ export function installRefDocs({toast,confirmAction}){
  // ---- Sayfaya gömülü, hep açık panel ----
  function embed(host,getRef,onMore,onEnsure){
   host.classList.add('pdEmbed');
-  host.innerHTML='<div class="pdEmbedHead"><div><span class="pdEmbedIco">📎</span><div><b>Referans evrakları</b><small data-r="sub"></small></div></div><button type="button" class="pdMore" data-more>Aktiviteler ve notlar →</button></div><div class="pdNoRef"><span>Evrak yüklemek için önce taslağa referans numarası verilmeli.</span><button type="button" data-first>Taslağı kaydet ve evrak ekle</button></div><div data-r="body"></div>';
+  host.innerHTML='<div class="pdEmbedHead"><div><span class="pdEmbedIco">📎</span><div><b>Referans evrakları</b><small data-r="sub"></small></div></div><button type="button" class="pdMore" data-more title="Aktiviteler ve notlar">Notlar →</button></div><div class="pdNoRef"><span>Evrak yüklemek için önce taslağa referans numarası verilmeli.</span><button type="button" data-first>Taslağı kaydet ve evrak ekle</button></div><div data-r="body"></div>';
   const body=host.querySelector('[data-r="body"]');let emb=null;
   const pane=makePane(body,()=>emb,()=>refresh());
   host.querySelector('[data-more]').onclick=()=>onMore&&onMore();host.querySelector('[data-first]').onclick=async()=>{if(onEnsure)await onEnsure();await refresh()};

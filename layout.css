@@ -931,3 +931,29 @@ html.dark .ehIcon,html.dark #saveDraft,html.dark .gdUpd{filter:invert(1) hue-rot
 .goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{height:348px!important;max-height:none!important;overflow:hidden}
 .gdDocs .pdEmbed{overflow:auto}
 .ggRows{display:flex;flex-direction:column;gap:8px}.ggRows>div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 2px;border-bottom:1px dashed #e3e9f6}.ggRows small{font-size:11px;color:#7a86a1;white-space:nowrap}.ggRows b{font-size:12.5px;color:#17233b;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+/* ===== Üst panel renkli çerçeve; kartlar daha küçük; Teminat simgesi; evrak sürükle-bırak ===== */
+.editorhead:before{display:none!important}
+.editorhead{position:relative;isolation:isolate;border:0!important}
+.editorhead::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;background:conic-gradient(from var(--gdA),#3b6cff,#22d3ee,#a78bfa,#f59e0b,#3b6cff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:gdSpin 7s linear infinite;opacity:.65}
+html.noMotion .editorhead::after{animation:none}
+.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{height:232px!important}
+.goodsDock .gdPdf .pdfDropZone{min-height:0}
+.ggTitle{display:flex;align-items:center;gap:10px;min-width:0}.ggTitle b{display:block;font-size:14px}.ggTitle small{display:block;font-size:11px;color:#7a86a1;font-weight:500}
+.ggShield{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;font-size:17px;background:linear-gradient(135deg,#19b36b,#0e8a6a);box-shadow:0 8px 16px -8px rgba(14,138,106,.8);color:#fff}
+.gdGuar .ggHead{padding-bottom:8px;margin-bottom:8px}
+.gdGuar .ggBody{gap:8px}.gdGuar .ggWho{padding:8px 10px}.gdGuar .ggAmt strong{font-size:22px}
+.gdDocs .pdDrop{flex-direction:column;align-items:stretch;gap:6px;border:1.5px dashed #b9c8ea;border-radius:14px;background:linear-gradient(160deg,#f7faff,#fff);padding:10px}
+.gdDocs .pdDrop>div:first-child{display:flex!important;align-items:center;justify-content:center;gap:10px;padding:6px 0}
+.gdDocs .pdDrop>div:first-child small{display:none}
+.gdDocs .pdDropIco{font-size:20px;opacity:.8}.gdDocs .pdDrop>div:first-child b{font-size:13px;color:#2447b5}
+.gdDocs .pdDrop.over{border-color:#3b6cff;background:#eaf1ff}
+.gdDocs .pdEmpty{display:none}
+.gdDocs .pdEmbed .pdList{max-height:64px}
+.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{height:256px!important}
+.gdDocs .pdEmbedHead{flex-wrap:nowrap;gap:8px;margin-bottom:6px}.gdDocs .pdEmbedHead>div:first-child{min-width:0;flex:1}.gdDocs .pdEmbedHead b{white-space:nowrap}.gdDocs .pdEmbedHead small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:150px}
+.gdDocs .pdMore{white-space:nowrap;padding:5px 8px!important}
+.gdDocs .pdUp{flex-wrap:nowrap!important;gap:8px}.gdDocs .pdName{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:11px}.gdDocs .pdName input{width:100%!important;min-width:0}
+.gdDocs .pdBtn{white-space:nowrap;padding:8px 12px!important}
+.gdDocs .pdDrop>div:first-child b{white-space:nowrap}
+.gdDocs .pdDrop>div:first-child b{white-space:normal!important;font-size:12.5px;text-align:center}.gdDocs .pdEmbedHead small{max-width:170px}
