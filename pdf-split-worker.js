@@ -16,7 +16,7 @@ self.onmessage=async e=>{
     if(bytes.length>maxBytes&&end-start>1){end=start+Math.max(1,Math.floor((end-start)/2));continue}
     self.postMessage({part:bytes.buffer,n:++n,upto:end,total},[bytes.buffer]);break;
    }
-   if(end>=total)break;start=end-1;
+   if(end>=total)break;start=Math.max(start+1,end-1);
   }
   self.postMessage({done:true});
  }catch(err){self.postMessage({error:String(err&&err.message||err)})}

@@ -47,7 +47,7 @@ export async function splitPdf(file,onProgress){
     if(bytes.length>14*1024*1024&&end-start>1){end=start+Math.max(1,Math.floor((end-start)/2));continue}
     parts.push(new Blob([bytes],{type:'application/pdf'}));onProgress&&onProgress(end,total);break;
    }
-   if(end>=total)break;start=end-1;
+   if(end>=total)break;start=Math.max(start+1,end-1);
   }
   return parts;
  }
