@@ -754,3 +754,24 @@ button.waGo{border:0;cursor:pointer;font:inherit}
 #financeView .firmInfo input{height:36px;min-height:36px!important;padding:0 10px!important;font-size:13px!important;border-radius:10px!important}
 #financeView .firmInfo .field span{font-size:10.5px!important}
 #financeView .firmInfo .finBar{margin-top:12px}
+
+/* ===== Firma dökümanları ===== */
+.fdPanel{padding:18px 20px 20px}
+.fdBar{display:flex;align-items:center;gap:20px;margin-bottom:18px;flex-wrap:wrap}
+.fdPrimary{display:inline-flex;align-items:center;padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,#3b6cff,#2447b5);color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;box-shadow:0 10px 22px -12px rgba(47,91,234,.8)}
+.fdLink{padding:0!important;border:0!important;background:none!important;color:#2f5bea!important;font-weight:800;font-size:13px!important;cursor:pointer;box-shadow:none!important}.fdLink:disabled{opacity:.4;cursor:not-allowed}
+.fdHint{margin-left:auto;color:#9aa5bd;font-size:12px}
+.fdHead{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid #e6ecf8}.fdHead h3{margin:0;font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:15px}.fdHead span{background:#e6eeff;color:#2447b5;font-weight:800;font-size:11px;border-radius:99px;padding:2px 9px}
+.fdList{display:flex;flex-direction:column}
+.fdRow{display:flex;align-items:center;gap:16px;padding:12px 4px;border-bottom:1px solid #f0f4fb}.fdRow:hover{background:#fafcff}
+.fdThumb{width:52px;height:60px;border-radius:8px;border:1px solid #e1e8f7;background:#f6f9ff;display:grid;place-items:center;overflow:hidden;flex:none;font-size:10px;font-weight:800;color:#fff;position:relative}
+.fdThumb span{width:100%;height:100%;display:grid;place-items:end center;padding-bottom:8px;background:linear-gradient(160deg,#8793ae,#5b6a8c)}
+.fdThumb.pdf span{background:linear-gradient(160deg,#ff6b6b,#d63d4a)}.fdThumb.xls span{background:linear-gradient(160deg,#4ade80,#16874a)}.fdThumb.doc span{background:linear-gradient(160deg,#60a5fa,#2f5bea)}.fdThumb.zip span{background:linear-gradient(160deg,#fbbf24,#d97706)}
+.fdThumb img{width:100%;height:100%;object-fit:cover}
+.fdMain{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.fdMain small{color:#8a96b0;font-size:12px}
+.fdName{display:flex;align-items:baseline;gap:2px;min-width:0}.fdName strong{font-size:14px;color:#17233b;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fdName em{font-style:normal;color:#9aa5bd;font-size:12px}
+.fdEdit{font:inherit;font-weight:700;padding:4px 8px;border:1.5px solid #2f5bea;border-radius:8px;min-width:200px;outline:0}
+.fdMenuWrap{position:relative}.fdDots{width:34px;height:30px;padding:0!important;border-radius:9px!important;border:0!important;background:#e6eeff!important;color:#2447b5!important;font-weight:800;letter-spacing:1px;cursor:pointer}
+.fdMenu{position:absolute;right:0;top:34px;z-index:20;min-width:170px;padding:6px;border-radius:12px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 20px 44px -16px rgba(8,18,50,.4);display:flex;flex-direction:column}
+.fdMenu button{padding:9px 12px!important;border:0!important;background:none!important;border-radius:8px!important;text-align:left;font-size:13px!important;font-weight:600;color:#17233b!important;cursor:pointer;box-shadow:none!important}.fdMenu button:hover{background:#eef3ff!important}.fdMenu .danger{color:#c0233b!important}
+#firmCardView.fdOver .fdPanel{outline:3px dashed #3b6cff;outline-offset:-6px;background:#f4f8ff}
