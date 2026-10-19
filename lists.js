@@ -44,14 +44,15 @@ export function listPage({combos={},extraActions=[],navAfter=null,id,nav,navIcon
   if(de){const r=rows().find(x=>rowId(x)===de.dataset.del);if(r)confirmAction('Kaydı sil','Bu kayıt rehberden silinecek. Daha önce hazırlanmış beyannameler etkilenmez.',async()=>{try{await onRemove(r);refresh(true);toast('Kayıt silindi.')}catch(err){toast(err.message)}})}};
  $('[data-act=import]').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{toast(await onImport(file));refresh()}catch(err){toast('Dosya alınamadı: '+err.message)}finally{e.target.value=''}};
  $('[data-act=export]').onclick=()=>download(exportData(),exportFile);
- return {nav:btn,view,refresh};
+ return {nav:btn,view,refresh,edit:id=>{const r=rows().find(x=>rowId(x)===id);if(r)openEdit(r)}};
 }
-export function installLists({references,plates,toast,confirmAction,show}){
+export function installLists({references,plates,toast,confirmAction,show,onFirm}){
  const anchor=document.querySelector('#navReferences');
  const sorted=(()=>{let src=null,n=-1,out=[];return()=>{const cur=references.listCompanies();if(cur!==src||cur.length!==n){src=cur;n=cur.length;out=[...cur].sort((a,b)=>a.name.localeCompare(b.name,'tr'))}return out}})();
  const companies=listPage({id:'companies',nav:'navCompanies',navIcon:'▤',navLabel:'Firmalar',eyebrow:'KAYITLI BİLGİLER',title:'Firmalar',intro:'Gönderici, alıcı ve taşıyıcı firmalar. T1 formlarında firma yazarken buradan önerilir.',newLabel:'＋ Yeni firma',importLabel:'Firma listesi içe aktar',accept:'.json,.csv,.tsv,.xlsx',noun:'firma',
   anchor,toast,confirmAction,
-  columns:[{label:'FİRMA ADI',html:c=>'<strong>'+esc(c.name)+'</strong>'+(c.originalName?'<small>'+esc(c.originalName)+'</small>':'')},{label:'VERGİ NO',get:c=>c.taxNo},{label:'EORI',get:c=>c.eori},{label:'ÜLKE',get:c=>c.country},{label:'ŞEHİR',get:c=>c.city},{label:'ADRES',html:c=>'<span class="lstAddr">'+esc(c.address)+'</span>'}],
+  extraActions:[{label:'👁',title:'Firma kartını aç',fn:c=>onFirm&&onFirm(c)}],
+  columns:[{label:'FİRMA ADI',html:c=>'<button type="button" class="firmLink" data-firm="'+esc(c.id)+'">'+esc(c.name)+'</button>'+(c.originalName?'<small>'+esc(c.originalName)+'</small>':'')},{label:'VERGİ NO',get:c=>c.taxNo},{label:'EORI',get:c=>c.eori},{label:'ÜLKE',get:c=>c.country},{label:'ŞEHİR',get:c=>c.city},{label:'ADRES',html:c=>'<span class="lstAddr">'+esc(c.address)+'</span>'}],
   fields:[{name:'name',label:'Firma adı',required:true,full:true},{name:'taxNo',label:'Vergi numarası'},{name:'eori',label:'EORI'},{name:'country',label:'Ülke kodu',max:2,placeholder:'TR'},{name:'city',label:'Şehir'},{name:'postal',label:'Posta kodu'},{name:'whatsapp',label:'WhatsApp numarası (hat bildirimi mesajı)',full:true,placeholder:'905321234567 — birden fazla için virgülle ayır'},{name:'address',label:'Açık adres',type:'textarea',full:true}],
   filters:[{key:'country',label:'Ülke',get:c=>c.country}],
   rows:sorted,rowId:c=>c.id,match:(c,q)=>hay(c).some(v=>v.includes(q)),
@@ -71,5 +72,5 @@ export function installLists({references,plates,toast,confirmAction,show}){
   exportFile:'T1_Arac_Rehberi.json',exportData:()=>plates.exportJson()});
  companies.nav.onclick=()=>show('companies');vehicles.nav.onclick=()=>show('vehicles');
  references.onChange(()=>{if(!companies.view.hidden)companies.refresh(true)});plates.onChange(()=>{if(!vehicles.view.hidden)vehicles.refresh(true)});
- return {render:name=>(name==='companies'?companies:vehicles).refresh()};
+ return {render:name=>(name==='companies'?companies:vehicles).refresh(),editCompany:id=>companies.edit(id)};
 }

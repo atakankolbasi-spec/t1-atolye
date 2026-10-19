@@ -202,7 +202,7 @@ export function installFinanceSettings({references,getCompanies,toast,confirmAct
    commit('Kur, teminat ve KDV ayarları kaydedildi.');renderRates()}});
  // Fiyat denemesindeki firma kutusuna rehber önerisi
  view.addEventListener('focusin',e=>{const t=e.target;if(t.matches('[data-t=customer]')&&!t.dataset.combo){t.dataset.combo='1';companyCombo(t,getCompanies,c=>{test.customer=c.name;renderTest()})}});
- return {nav:btn,view,show};
+ return {nav:btn,view,show,selectFirm:n=>{firmSel=n||'*';tab='firms'}};
 }
 
 /* ----------------------- Finansal bilgiler paneli (T1 / ENS) ----------------------- */
