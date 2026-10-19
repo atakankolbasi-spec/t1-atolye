@@ -981,3 +981,24 @@ dialog.guarDlg #bulkDialog,#bulkDialog{width:min(520px,calc(94vw/var(--z,1)))}
 .bkChecks{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.bkChecks .check{padding:8px 10px;border:1px solid #e1e8f7;border-radius:10px;background:#f8faff;display:flex;align-items:center;gap:10px;font-size:13px}
 .bkErr{margin:0 20px 8px;padding:10px 12px;border-radius:10px;background:#fff1f0;color:#a8281d;font-size:13px}.bkErr[hidden]{display:none}
 .bkCancel{margin-right:8px;border:1px solid #dfe7f6!important;background:#fff!important;color:#46567a!important;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+
+/* Kartlar daha dar */
+.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{height:176px!important}
+.goodsDock .gdCard{padding:10px 12px}
+.gdPdf .gdHead small,.gdGuar .ggTitle small,.gdDocs .pdEmbedHead small{display:none}
+.gdPdf .gdHead{margin-bottom:6px}.gdPdf .pdfDropZone{padding:6px 10px}
+.gdDocs .pdDrop{flex-direction:row!important;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px}
+.gdDocs .pdDrop>div:first-child{flex:1 1 100%;padding:2px 0}.gdDocs .pdDropIco{font-size:16px}
+.gdDocs .pdEmbedHead{margin-bottom:6px}.gdDocs .pdEmbedHead .pdEmbedIco{width:28px;height:28px;font-size:13px}
+.gdGuar .ggHead{padding-bottom:6px;margin-bottom:6px}.gdGuar .ggShield{width:28px;height:28px;font-size:14px}
+.gdGuar .ggWho{padding:6px 8px}.gdGuar .ggIco{width:26px;height:26px;font-size:13px}.gdGuar .ggAmt strong{font-size:19px}.gdGuar .ggBody{gap:4px}
+/* Havuz aktarım penceresi */
+dialog.poolDlg{width:min(760px,calc(94vw/var(--z,1)))}
+.poolBody{display:flex;flex-direction:column;gap:16px}
+.pxSec h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;color:#5b6a8c;text-transform:uppercase}.pxSec h4 em{font-style:normal;color:#2447b5;margin-left:6px}
+.pxSearch{width:100%;margin-bottom:8px}.pxBar{display:flex;gap:8px;align-items:flex-start}.pxBar .pxSearch{flex:1}.pxAll{white-space:nowrap;border:1px solid #dfe7f6;background:#f6f9ff;color:#2447b5;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}
+.pxList{max-height:210px;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.pxRow{display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid #e1e8f7;border-radius:12px;background:#fff;cursor:pointer}.pxRow.on{border-color:#3b6cff;background:#f1f6ff}
+.pxMain{flex:1;min-width:0}.pxMain b{display:block;font-size:13px}.pxMain small,.pxSide small{display:block;color:#7a86a1;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxSide{text-align:right;font-size:12px;font-weight:700;color:#2a3a63;white-space:nowrap}
+.pxNew{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.pxNew[hidden]{display:none}.pxNone{color:#8b97b3;text-align:center;padding:14px}
+.pxRow input[type=checkbox],.pxRow input[type=radio]{width:18px;height:18px;margin:0;accent-color:#3b6cff}
