@@ -963,3 +963,13 @@ label:has(#pdfUseAi),.pdfAiToggle{display:none!important}
 .partyToggle{display:none!important}
 .docNote{display:block;margin-top:6px;color:#8a5a00;font-size:11.5px}
 .goodNotice{margin:0 0 14px;padding:12px 16px;border-radius:12px;background:#fff1f0;border:1px solid #f5c2bd;color:#a8281d;font-size:13px;line-height:1.5}.goodNotice[hidden]{display:none}
+
+/* Tablolardaki onay kutuları (Fiyat ayarları, listeler): aynı şık görünüm */
+table input[type=checkbox],.finBody input[type=checkbox],.tablewrap input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;flex:none;display:inline-grid;place-content:center;width:20px!important;height:20px!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;border:2px solid #b4c4e8!important;border-radius:6px!important;background:#fff!important;box-shadow:none!important;outline:none!important;cursor:pointer;vertical-align:middle;transition:background .15s,border-color .15s,box-shadow .15s}
+table input[type=checkbox]::after,.tablewrap input[type=checkbox]::after{content:"";width:10px;height:5px;margin-top:-2px;border:solid #fff;border-width:0 0 2.5px 2.5px;transform:rotate(-45deg) scale(0);transition:transform .15s cubic-bezier(.3,1.6,.5,1)}
+table input[type=checkbox]:checked,.tablewrap input[type=checkbox]:checked{background:linear-gradient(135deg,#3b6cff,#2447b5)!important;border-color:#2447b5!important}
+table input[type=checkbox]:checked::after,.tablewrap input[type=checkbox]:checked::after{transform:rotate(-45deg) scale(1)}
+table input[type=checkbox]:hover:not(:checked),.tablewrap input[type=checkbox]:hover:not(:checked){border-color:#3b6cff!important}
+table input[type=checkbox]:focus-visible,.tablewrap input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px rgba(59,108,255,.28)!important}
+table td:has(>input[type=checkbox]),.finBody td:has(>input[type=checkbox]){text-align:center}
+html.dark table input[type=checkbox]:checked{filter:invert(1) hue-rotate(180deg)}
