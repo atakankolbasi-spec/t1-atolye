@@ -871,3 +871,38 @@ html.dark label.check input[type=checkbox]:checked{filter:invert(1) hue-rotate(1
 .chOpt.hi{background:#eef3ff}.chOpt.sel{background:#5b8def;color:#fff}.chOpt.sel.hi{background:#4a7be0}
 .chNone{padding:12px;color:#8b97b3;text-align:center}
 html.dark .chPop{filter:invert(.92) hue-rotate(180deg)}
+
+/* ===== Yeni üst panel: referans başlığı (ikon + bilgi + düğme grubu + sekmeler) ===== */
+.editorhead{flex-wrap:wrap!important;align-items:center!important;row-gap:0!important}
+.editorhead .ehLeft{flex:1 1 520px!important}
+.ehCard{display:flex;align-items:center;gap:16px;margin-top:4px}
+.ehIcon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:26px;flex:none;color:#fff;background:linear-gradient(135deg,#3b6cff,#22a7ee);box-shadow:0 14px 26px -14px rgba(47,91,234,.8)}
+.ehInfo{min-width:0}
+.ehType{display:block;font-size:11.5px;font-weight:700;color:#8b97b3;letter-spacing:.02em;margin-bottom:2px}
+.ehMeta{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px;font-size:12.5px;color:#5b6a8c;font-weight:600}
+.ehMeta span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.ehMeta i{font-style:normal;opacity:.85}
+.editorhead .headtools{flex:0 0 auto!important;align-self:flex-start;margin-top:14px;position:relative}
+.htBar{display:flex;align-items:stretch;border:1px solid #dfe7f6;border-radius:14px;background:#fff;box-shadow:0 8px 20px -14px rgba(30,60,140,.5);position:relative}
+.htBar>button,.htBar .ehMoreWrap>button{border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;padding:11px 18px!important;font-size:13px!important;font-weight:800!important;color:#2a3a63!important;cursor:pointer;border-right:1px solid #e6ecf8!important;white-space:nowrap}
+.htBar>button:first-child{border-radius:13px 0 0 13px!important}
+.htBar>button:hover,.htBar .ehMoreWrap>button:hover{background:#f1f5ff!important;color:#2447b5!important}
+#saveDraft{color:#fff!important;background:linear-gradient(135deg,#3b6cff,#2447b5)!important;border-right:0!important}
+#saveDraft:hover{filter:brightness(1.08);background:linear-gradient(135deg,#4f7bff,#2f55c8)!important;color:#fff!important}
+#sendDecl{color:#1d8a52!important}
+.ehMoreWrap{position:relative;display:flex}.htBar .ehMoreWrap>button{border-right:0!important;border-radius:0 13px 13px 0!important;padding:11px 14px!important;letter-spacing:.1em}
+.ehMenu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:250px;background:#fff;border:1px solid #dfe7f6;border-radius:14px;box-shadow:0 24px 50px -18px rgba(20,40,100,.45);padding:6px;display:flex;flex-direction:column}
+.ehMenu[hidden]{display:none}
+.ehMenu button{border:0!important;background:none!important;text-align:left;padding:10px 12px!important;border-radius:9px!important;font-size:13px!important;font-weight:700!important;color:#2a3a63!important;cursor:pointer;box-shadow:none!important}
+.ehMenu button:hover{background:#eef3ff!important}.ehMenu hr{border:0;border-top:1px solid #edf1fa;margin:4px 6px;width:auto}
+.ehTabs{flex:1 0 100%;display:flex;gap:6px;margin-top:14px;border-top:1px solid #e8edf8;padding-top:2px}
+.ehTabs button{border:0!important;background:none!important;box-shadow:none!important;padding:12px 16px 11px!important;font-size:13px!important;font-weight:800!important;color:#7a86a1!important;cursor:pointer;border-bottom:3px solid transparent!important;border-radius:0!important;margin-bottom:-1px}
+.ehTabs button:hover{color:#2447b5!important}.ehTabs button.on{color:#2447b5!important;border-bottom-color:#3b6cff!important}
+.histList{display:flex;flex-direction:column;gap:6px}.histList>div{display:flex;gap:14px;padding:9px 12px;background:#f6f9ff;border-radius:10px;font-size:13px}.histList time{color:#7a86a1;white-space:nowrap;font-size:12px;min-width:130px}
+.gdUpd{position:absolute;top:0;right:46px;height:36px;padding:0 14px!important;border:0!important;border-radius:11px!important;background:linear-gradient(135deg,#3b6cff,#2447b5)!important;color:#fff!important;font-size:12.5px!important;font-weight:800!important;cursor:pointer;box-shadow:0 8px 18px -10px rgba(47,91,234,.8)!important}
+.gdUpd:hover{filter:brightness(1.1)}
+.goodsDock{position:relative}
+html.dark .ehIcon,html.dark #saveDraft,html.dark .gdUpd{filter:invert(1) hue-rotate(180deg)}
+@media(max-width:1100px){.editorhead .headtools{align-self:stretch}.htBar{flex-wrap:wrap}}
+.editorhead,.editorhead .headtools{overflow:visible!important}.editorhead{z-index:5}
+.ehMenu #quickAddGood,.ehMenu #quickAddGood.primary{background:none!important;color:#2a3a63!important;box-shadow:none!important}
+.ehMenu #quickAddGood,.ehMenu #quickAddGood.primary{background:none!important;color:#2a3a63!important;box-shadow:none!important}
