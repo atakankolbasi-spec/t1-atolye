@@ -973,3 +973,11 @@ table input[type=checkbox]:hover:not(:checked),.tablewrap input[type=checkbox]:h
 table input[type=checkbox]:focus-visible,.tablewrap input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px rgba(59,108,255,.28)!important}
 table td:has(>input[type=checkbox]),.finBody td:has(>input[type=checkbox]){text-align:center}
 html.dark table input[type=checkbox]:checked{filter:invert(1) hue-rotate(180deg)}
+
+/* ⋮ menüsü ve toplu işlem pencereleri */
+.gdMenu hr{border:0;border-top:1px solid #edf1fa;margin:6px 8px}
+.gdMenu{max-height:70vh;overflow:auto}
+dialog.guarDlg #bulkDialog,#bulkDialog{width:min(520px,calc(94vw/var(--z,1)))}
+.bkChecks{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.bkChecks .check{padding:8px 10px;border:1px solid #e1e8f7;border-radius:10px;background:#f8faff;display:flex;align-items:center;gap:10px;font-size:13px}
+.bkErr{margin:0 20px 8px;padding:10px 12px;border-radius:10px;background:#fff1f0;color:#a8281d;font-size:13px}.bkErr[hidden]{display:none}
+.bkCancel{margin-right:8px;border:1px solid #dfe7f6!important;background:#fff!important;color:#46567a!important;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}

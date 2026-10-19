@@ -1,5 +1,7 @@
 import {installChoice} from './choice.js';
-import {groups,fields,currencies} from './schema.js';
+import {groups,fields,currencies,documentCodes} from './schema.js';
+import {installBulk} from './bulk.js';
+import {DOC_MAX} from './lines.js';
 import {makeExcel,readExcel,num} from './excel.js';
 import {parseDocs,parseKolis,docNumber} from './lines.js';
 import {DB_KEY,goodsKey,loadDB,readGoods,normalizeMeta,normalizeGood,allProblems,metaProblems,goodProblems,totals,text} from './model.js';
@@ -313,6 +315,8 @@ function buildGoodsDock(){const step=document.getElementById('goodsStep'),tb=ste
  const mi=menu.querySelector('.gdMenu');for(const el of [...tb.querySelectorAll('label.upload')])mi.append(el);const add=tb.querySelector('#addGood');if(add){add.className='gdCard gdAdd';add.type='button';add.innerHTML='<span class="gdPlus">＋</span><span class="gdAddTx"><b>Beyanname bilgisi ekle</b><small>MRN · GTİP · firma · fatura</small></span>'}
  menu.querySelector('.gdMenuBtn').onclick=e=>{e.stopPropagation();mi.hidden=!mi.hidden};
  document.addEventListener('click',e=>{if(!menu.contains(e.target))mi.hidden=true});
+ {const hr=document.createElement('hr');mi.append(hr);const items=installBulk({getWork:()=>work,commit:msg=>{work.status='Taslak';flushDraft();renderGoods();renderRail();try{updateGuarCard()}catch{}toast(msg)},confirmAction,toast,normalizeGood,openGood:()=>openGood(),others:()=>db.declarations.filter(d=>d.id!==work?.id).map(d=>({id:d.id,label:(d.ref||'Taslak')+(d.customer?' · '+d.customer:'')+(d.arrivalOffice?' · '+String(d.arrivalOffice).split(/\s+/)[0]:''),records:readGoods(d.id).records})).filter(x=>x.records.length),exportExcel:()=>$('#exportExcel').click(),currencies,documentCodes,parseDocs,DOC_MAX,num});
+ for(const it of items){const b=document.createElement('button');b.type='button';b.textContent=it.label;b.onclick=()=>it.run();mi.append(b)}}
  mi.addEventListener('click',e=>{if(e.target.closest('button,label'))setTimeout(()=>{mi.hidden=true},0)});
  const c3=document.createElement('section');c3.className='gdCard gdGuar';c3.id='gdGuar';
  c3.innerHTML='<div class="ggHead"><div class="ggTitle"><span class="ggShield">🛡</span><div><b>Teminat Bilgileri</b><small>Garantör · tutar · durum</small></div></div><span class="ggAct"><button type="button" data-gg="edit" title="Teminat adımını aç">✎</button><button type="button" data-gg="sync" title="Garantörü ve tutarı yeniden hesapla">↻</button></span></div><div class="ggBody"><div class="ggWho"><span class="ggIco">🏦</span><div><b data-gg-name>—</b><small data-gg-ref>Teminat referansı yok</small></div></div><div class="ggAmt"><small>Gümrük Teminat Tutarı</small><div><strong data-gg-amt>0,00</strong><em data-gg-cur>EUR</em><i class="ggChip" data-gg-chip>Beklemede</i></div></div></div>';
