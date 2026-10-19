@@ -957,3 +957,5 @@ html.noMotion .editorhead::after{animation:none}
 .gdDocs .pdBtn{white-space:nowrap;padding:8px 12px!important}
 .gdDocs .pdDrop>div:first-child b{white-space:nowrap}
 .gdDocs .pdDrop>div:first-child b{white-space:normal!important;font-size:12.5px;text-align:center}.gdDocs .pdEmbedHead small{max-width:170px}
+
+label:has(#pdfUseAi),.pdfAiToggle{display:none!important}
