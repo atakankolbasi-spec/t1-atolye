@@ -233,5 +233,5 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   let saved=0;if($('#pdfSaveFirms').checked&&newFirms.length){try{saved=(await references.importRecords(newFirms)).added}catch{}}
   dlg.close();toast(added+' beyanname forma eklendi'+(saved?'; '+saved+' yeni firma rehbere kaydedildi':'')+'. Alanları kontrol edip gerekirse düzeltin.');
  };
- return {open:()=>label.querySelector('input').click()};
+ return {open:()=>label.querySelector('input').click(),run:runFiles};
 }

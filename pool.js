@@ -23,8 +23,16 @@ export function installPool({toast,confirmAction,api,currencies,navAfter,pdf}){
   extraActions:[{label:'➜',title:'Bu MRN’i bir referansa aktar',fn:r=>openTransfer({ids:[r.id]})},{label:'↗',title:'Aktarıldığı referansı aç',fn:r=>{if(r.assignedId)api.openDeclaration(r.assignedId);else toast('Bu kayıt henüz aktarılmadı.')}}]});
  const view=document.getElementById('poolView'),bar=view.querySelector('.plateBtns');
  const b1=document.createElement('button');b1.type='button';b1.className='primary';b1.textContent='➜ Plakaya aktar';b1.onclick=()=>openTransfer({});
- const b2=document.createElement('button');b2.type='button';b2.textContent='📄 PDF’den havuza';b2.onclick=()=>{pdf.setSink({mrns:()=>list.map(x=>x.mrn),add:recs=>addMany(recs)});pdf.open()};
- bar.prepend(b1,b2);
+  bar.prepend(b1);
+ const sink=()=>pdf.setSink({mrns:()=>list.map(x=>x.mrn),add:recs=>addMany(recs)});
+ const card=document.createElement('section');card.className='gdCard gdPdf poolPdf';card.innerHTML='<div class="gdHead"><span class="gdIco">📄</span><div><b>PDF’den oku</b><small>Yapay zekâ ile otomatik · beyanname ve fatura</small></div></div><div class="pdfDropZone"><span>📄</span><div><strong>PDF’leri buraya sürükleyip bırakın</strong><small>ya da tıklayıp dosya seçin · okunan MRN’ler havuza eklenir</small></div></div>';
+ const zone=card.querySelector('.pdfDropZone');zone.onclick=()=>{sink();pdf.open()};
+ const hasFiles=e=>[...(e.dataTransfer?.types||[])].includes('Files');
+ for(const ev of ['dragenter','dragover'])zone.addEventListener(ev,e=>{if(hasFiles(e)){e.preventDefault();zone.classList.add('over')}});
+ for(const ev of ['dragleave','drop'])zone.addEventListener(ev,e=>{zone.classList.remove('over')});
+ zone.addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();sink();pdf.run(e.dataTransfer.files)});
+ view.querySelector('.pagehead').after(card);
+ view.addEventListener('click',e=>{const n=e.target.closest('[data-act=new]'),ed=e.target.closest('[data-edit]');if(!n&&!ed)return;e.preventDefault();e.stopImmediatePropagation();const rec=ed?list.find(x=>x.id===ed.dataset.edit):null;api.openGoodDialog(rec,g=>{const m=String(g.mrn||'').trim().toUpperCase();if(list.some(x=>x.mrn===m&&(!rec||x.id!==rec.id)))return 'Bu MRN havuzda zaten var.';const r={...(rec||{poolAt:new Date().toISOString(),status:'Havuzda'}),...g,id:rec?.id||crypto.randomUUID(),mrn:m,pVehicle:plate(g.pVehicle),pTrailer:plate(g.pTrailer)};list=rec?list.map(x=>x.id===rec.id?r:x):[...list,r];save();page.refresh(true);toast(rec?'Havuz kaydı güncellendi.':'MRN havuza eklendi.')})},true);
  let dlg=null;
  function openTransfer({ids=[],toWork=false}={}){
   const pool=list.filter(x=>x.status==='Havuzda');if(!pool.length){toast('Havuzda aktarılacak MRN yok. Önce MRN ekle.');return}

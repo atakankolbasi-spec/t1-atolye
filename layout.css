@@ -1002,3 +1002,12 @@ dialog.poolDlg{width:min(760px,calc(94vw/var(--z,1)))}
 .pxMain{flex:1;min-width:0}.pxMain b{display:block;font-size:13px}.pxMain small,.pxSide small{display:block;color:#7a86a1;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxSide{text-align:right;font-size:12px;font-weight:700;color:#2a3a63;white-space:nowrap}
 .pxNew{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.pxNew[hidden]{display:none}.pxNone{color:#8b97b3;text-align:center;padding:14px}
 .pxRow input[type=checkbox],.pxRow input[type=radio]{width:18px;height:18px;margin:0;accent-color:#3b6cff}
+
+/* Havuz: aynı eşya formu; PDF kartı */
+.poolOnly{display:none}#goodDialog.poolMode .poolOnly{display:block}
+.poolPdf{max-width:420px;margin:0 0 16px;height:auto!important}.poolPdf .pdfDropZone{cursor:pointer}
+/* Alt çubuk: buzlu boş şerit yerine yalnızca Kaydet düğmesi */
+.wizardfooter{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;pointer-events:none}
+.wizardfooter>*{pointer-events:auto}.wizardfooter #nextStep{box-shadow:0 14px 30px -10px rgba(36,71,181,.7)}
+/* Uyarı (toast) en üst katmanda: pencerelerin de üstünde görünür */
+#toast[popover]{position:fixed!important;inset:auto auto 28px 50%!important;margin:0!important;padding:15px 24px!important;border:1px solid #ffffff1f!important;overflow:visible;color:#fff!important;transform:translateX(-50%);z-index:2147483647}
