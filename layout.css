@@ -917,3 +917,17 @@ html.dark .ehIcon,html.dark #saveDraft,html.dark .gdUpd{filter:invert(1) hue-rot
 #metadataFields[inert] .mergedPanel::before{animation:none;opacity:.35}
 
 .wizardfooter{justify-content:flex-end!important;gap:14px}.wizardfooter #stepFooter{margin-right:auto}.wizardfooter #nextStep{margin-left:auto}
+
+/* Üç kart eşit genişlik ve yükseklikte */
+.goodsDock{align-items:stretch!important}
+.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{flex:1 1 0!important;min-width:0!important;max-width:none!important;align-self:stretch!important}
+.gdGuar{justify-content:flex-start;gap:0}
+.gdGuar .ggHead{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #edf1fa}
+.gdGuar .ggBody{flex:1;justify-content:space-between;gap:12px}
+.gdGuar .ggWho{padding:10px 12px;border-radius:12px;background:#f6f9ff}
+.gdGuar .ggAmt{padding:2px 2px 0}.gdGuar .ggAmt strong{font-size:24px}
+.goodsDock .gdAdd{align-self:flex-end!important}
+@media(max-width:900px){.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{flex:1 1 100%!important}}
+.goodsDock>.gdPdf,.goodsDock>.gdDocs,.goodsDock>.gdGuar{height:348px!important;max-height:none!important;overflow:hidden}
+.gdDocs .pdEmbed{overflow:auto}
+.ggRows{display:flex;flex-direction:column;gap:8px}.ggRows>div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 2px;border-bottom:1px dashed #e3e9f6}.ggRows small{font-size:11px;color:#7a86a1;white-space:nowrap}.ggRows b{font-size:12.5px;color:#17233b;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
