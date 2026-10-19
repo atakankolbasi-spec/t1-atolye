@@ -815,3 +815,20 @@ button.waGo{border:0;cursor:pointer;font:inherit}
 .ggAmt strong{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:20px;color:#17233b}.ggAmt em{font-style:normal;font-size:12px;font-weight:800;color:#5b6a8c}
 .ggChip{font-style:normal;margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:99px;background:#fff4dc;color:#b7791f}.ggChip.ok{background:#e0f7ea;color:#1d8a52}
 @media(max-width:900px){.gdGuar{max-width:none;flex:1 1 100%!important}}
+
+/* Elle düzenleme modu */
+#ltBtn{position:fixed;left:104px;bottom:14px;z-index:2147483000;border:0!important;border-radius:99px!important;padding:9px 16px!important;background:#17233b!important;color:#fff!important;font:800 12px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 26px -10px rgba(10,20,50,.6);opacity:.85}
+#ltBtn:hover,#ltBtn.on{opacity:1;background:#3b6cff!important}
+#ltPanel{position:fixed;right:16px;bottom:16px;width:330px;max-height:calc(100vh - 32px);overflow:auto;z-index:2147483001;background:#fff;color:#17233b;border:1px solid #dfe7f6;border-radius:18px;box-shadow:0 24px 60px -20px rgba(10,20,50,.5);padding:14px;font:12.5px Inter,sans-serif}
+#ltPanel[hidden]{display:none}
+#ltPanel button{font:700 12px Inter,sans-serif;border:1px solid #dfe7f6;background:#f6f9ff;color:#2447b5;border-radius:9px;padding:7px 10px;cursor:pointer}
+#ltPanel .ltPri{background:#3b6cff;color:#fff;border-color:#3b6cff}
+.ltHead,.ltFoot,.ltRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.ltRow{flex-wrap:wrap;justify-content:flex-start}.ltFoot{margin:10px 0 0;flex-wrap:wrap}
+.ltInfo{margin-bottom:10px}.ltInfo code{display:block;font-size:10.5px;color:#5b6a8c;word-break:break-all;background:#f3f6fc;border-radius:8px;padding:6px 8px}.ltInfo small{display:block;margin-top:4px;color:#7a86a1}
+.ltGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}.ltGrid label{display:flex;flex-direction:column;gap:3px;font-size:10.5px;font-weight:700;color:#5b6a8c}
+#ltPanel input,#ltPanel textarea{border:1px solid #dfe7f6;border-radius:8px;padding:6px 8px;font:12.5px Inter,sans-serif;width:100%;box-sizing:border-box}#ltPanel textarea{min-height:56px;resize:vertical}
+.ltHelp,.ltHint{color:#7a86a1;line-height:1.5}.ltExport{margin-top:8px;height:90px}
+html.ltOn .ltHover{outline:2px dashed #3b6cff!important;outline-offset:1px;cursor:crosshair!important}
+html.ltOn .ltSel{outline:3px solid #ff7a1a!important;outline-offset:2px;cursor:move!important}
+#ltFlash{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:2147483002;background:#17233b;color:#fff;padding:10px 18px;border-radius:12px;font:700 13px Inter,sans-serif}
+.ltList{max-height:120px;overflow:auto;margin-top:8px;border-top:1px solid #eef2fa;padding-top:6px}.ltList>div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0}.ltList span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:#5b6a8c}.ltList button{padding:2px 7px!important}
