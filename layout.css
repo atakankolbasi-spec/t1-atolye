@@ -855,3 +855,19 @@ label.check input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px rgba(59,108,
 label.check:hover input[type=checkbox]:not(:checked){border-color:#3b6cff!important}
 html.dark label.check input[type=checkbox]:checked{filter:invert(1) hue-rotate(180deg)}
 #declarationForm.isMerged .aeoRow>label.aeoSeal{flex:1 1 100%;order:9}
+
+/* Aranabilir açılır liste */
+.chWrap{position:relative;display:block}
+.chWrap .chInput{text-transform:none!important;cursor:pointer;padding-right:54px!important;text-overflow:ellipsis;caret-color:transparent}
+.chWrap.open .chInput{border-color:#3b6cff!important;box-shadow:0 0 0 3px rgba(59,108,255,.15)!important}
+.chClr{position:absolute;right:30px;top:50%;transform:translateY(-50%);width:20px;height:20px;border:0;border-radius:50%;background:none;color:#9aa6c0;font-size:16px;line-height:1;cursor:pointer;display:none;padding:0}
+.chWrap.has .chClr{display:block}.chClr:hover{background:#eef2fb;color:#e0453a}
+.chArr{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:#8b97b3;pointer-events:none;display:grid;transition:transform .15s}.chWrap.open .chArr{transform:translateY(-50%) rotate(180deg)}
+.chPop{position:fixed;z-index:2147482000;background:#fff;border:1px solid #cfd9ef;border-radius:10px;box-shadow:0 18px 40px -12px rgba(20,40,100,.4);padding:8px;max-height:320px;display:flex;flex-direction:column;font:13px Inter,sans-serif;color:#17233b}
+.chSearch{width:100%;height:38px;border:1px solid #b9c8ea!important;border-radius:8px!important;padding:0 10px!important;margin:0 0 8px;background:#fff!important;font:13px Inter,sans-serif!important;text-transform:none!important;outline:none!important}
+.chSearch:focus{border-color:#3b6cff!important;box-shadow:0 0 0 3px rgba(59,108,255,.15)}
+.chList{overflow:auto;display:flex;flex-direction:column}
+.chOpt{padding:10px 12px;border-radius:6px;cursor:pointer;line-height:1.35;text-transform:none}
+.chOpt.hi{background:#eef3ff}.chOpt.sel{background:#5b8def;color:#fff}.chOpt.sel.hi{background:#4a7be0}
+.chNone{padding:12px;color:#8b97b3;text-align:center}
+html.dark .chPop{filter:invert(.92) hue-rotate(180deg)}

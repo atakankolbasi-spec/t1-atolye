@@ -1,3 +1,4 @@
+import {installChoice} from './choice.js';
 import {groups,fields,currencies} from './schema.js';
 import {makeExcel,readExcel,num} from './excel.js';
 import {parseDocs,parseKolis,docNumber} from './lines.js';
@@ -48,6 +49,7 @@ migrateRefs();
 steps[1].name='Gümrük, taşıyıcı & güzergâh';steps[1].title='Gümrükleri, taşıyıcıyı, plakaları ve güzergâhı yaz.';steps[1].description='Önce müşteriyi seç; fiyatlar ve izinli gönderici durumu ona göre gelir. Sonra taşıyıcı, plakalar, taşıma modu ve transit kapıları.';
 let firmCardApi=null;
 const form=$('#declarationForm');let db=loadDB(),work=null,currentStep=0,page=1,goodEditId=null,draftTimer=null;
+installChoice(form.elements.stampDuty,['0 - Damga vergisinden muaf','1 - Damga vergisi ödenecek','2 - Damga vergisi istisnası var','3 - Damga vergisi deftere kayıt edilecek']);
 const guarDlg=document.createElement('dialog');guarDlg.id='guarDialog';guarDlg.className='guarDlg';guarDlg.innerHTML='<div class="gdlHead"><div><b>Teminat ve beyan ayrıntıları</b><small>Rejim hak sahibi, garantör, teminat tipi ve tutarı</small></div><button type="button" data-gdl="x" aria-label="Kapat">✕</button></div><div class="gdlBody"></div><div class="gdlFoot"><button type="button" class="primary" data-gdl="x">Tamam</button></div>';
 {const p4=document.querySelector('[data-panel="4"]');guarDlg.querySelector('.gdlBody').append(p4);p4.hidden=false;form.append(guarDlg)}
 guarDlg.addEventListener('click',e=>{if(e.target===guarDlg||e.target.closest('[data-gdl]'))guarDlg.close()});
