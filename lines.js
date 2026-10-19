@@ -1,4 +1,4 @@
-export const KOLI_MAX=2,DOC_MAX=2;
+export const KOLI_MAX=2,DOC_MAX=6;
 const s=v=>String(v??'').trim().slice(0,200);
 export const typeCode=v=>s(v).toUpperCase().split(/[\s-]/)[0].slice(0,3);
 export const docNumber=v=>(s(v).match(/^N?\s*(\d{3})/i)||[])[1]||'';

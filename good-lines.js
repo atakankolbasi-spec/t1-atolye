@@ -8,7 +8,7 @@ const match=(items,q,label)=>{const n=q.toLocaleLowerCase('tr-TR');return items.
 export function installGoodLines(form){
  const koliBox=form.querySelector('#koliRows'),docBox=form.querySelector('#docRows'),addKoli=form.querySelector('#addKoli'),addDoc=form.querySelector('#addDoc');
  const whBox=form.querySelector('#warehouseRows'),addWh=form.querySelector('#addWarehouse'),INCO=['','EXW','FCA','FOB','CFR','CIF','CPT','CIP','DAP','DPU','DDP'],WH_MAX=10;
- let K=defaultKolis(),D=[],W=[];
+ let K=defaultKolis(),D=[],W=[];const docNote=document.createElement('small');docNote.className='docNote';addDoc.after(docNote);
  const sync=()=>{form.elements.kolis.value=JSON.stringify(K);form.elements.docs.value=JSON.stringify(D);form.elements.warehouse.value=JSON.stringify(W);const w=W[0]||{};form.elements.warehouseDoc.value=w.doc||'';form.elements.warehouseLine.value=w.line||'';form.elements.warehouseQuantity.value=w.qty||'';form.elements.delivery.value=w.delivery||''};
  const opts=(list,v)=>list.map(x=>'<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>').join('');
  function renderWh(){
@@ -29,6 +29,7 @@ export function installGoodLines(form){
   docBox.innerHTML=D.length?D.map((d,i)=>'<div class="lineRow docRow" data-i="'+i+'"><label class="field"><span>Döküman kodu</span><input data-f="code" autocomplete="off" value="'+esc(d.code)+'"></label><label class="field"><span>Referans</span><input data-f="ref" value="'+esc(d.ref)+'"></label><label class="field"><span>Evrak tarihi</span><input data-f="date" type="date" value="'+esc(d.date)+'"></label><button type="button" class="lineRemove" data-rm="'+i+'" aria-label="Belge satırını sil">✕</button></div>').join(''):'<p class="lineHint">Belge satırı yok. Excel’e belge bilgisi yazılmaz.</p>';
   docBox.querySelectorAll('[data-f=code]').forEach(input=>{const i=Number(input.closest('[data-i]').dataset.i);attachCombo(input,{minChars:1,emptyText:'Kod bulunamadı. N380 gibi kodu elle yazabilirsin.',search:(q,limit)=>(q?match(documentCodes,q,docLabel):documentCodes).slice(0,limit),item:t=>({title:docLabel(t),sub:t[2]}),onPick:t=>{input.value=docLabel(t);D[i].code=input.value;touch()}})});
   addDoc.disabled=D.length>=DOC_MAX;
+  docNote.textContent=D.length>2?'PCS Excel dosyasına ilk 2 belge yazılır; diğerleri beyanname kaydında saklanır.':'';
  }
  const edit=(box,rows)=>e=>{const row=e.target.closest('[data-i]'),f=e.target.dataset.f;if(row&&f){rows()[Number(row.dataset.i)][f]=e.target.value;sync()}};
  koliBox.addEventListener('input',edit(koliBox,()=>K));docBox.addEventListener('input',edit(docBox,()=>D));
