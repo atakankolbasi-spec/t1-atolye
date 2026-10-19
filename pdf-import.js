@@ -59,7 +59,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
  async function aiRead(file,say,{maxAttempts=4}={}){
   const store=new Map,orphans=[],askCode=async()=>window.prompt('Yapay zekâ erişim kodunu yazın:')||'';let lastErr=null,used=0,prevMissing=Infinity;
   say('PDF hazırlanıyor…');
-  const sig=SIG(file),cache=loadParts(sig),parts=await splitPdf(file),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N).fill(null),done=new Array(N).fill(false);
+  const sig=SIG(file),cache=loadParts(sig),parts=await splitPdf(file,(n,t)=>say('PDF hazırlanıyor: sayfa '+n+' / '+t+'…')),N=parts.length,seen=parts.map(()=>new Set),res=new Array(N).fill(null),done=new Array(N).fill(false);
   const tag=N>1?' · '+N+' parça':'';
   for(let i=0;i<N;i++)if(cache[i]){res[i]=cache[i];done[i]=true}
   const cached=done.filter(Boolean).length;

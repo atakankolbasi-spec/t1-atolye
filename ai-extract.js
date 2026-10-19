@@ -21,20 +21,34 @@ export async function askGemini(file,{askCode,attempt=1,retry=null}={}){
 // Büyük PDF'i küçük parçalara böler (her parça bir önceki ile 1 sayfa örtüşür; böylece sayfa kesilmesi bilgi kaybettirmez).
 const PART_PAGES=15,WHOLE_LIMIT=10*1024*1024;
 function loadPdfLib(){return window.PDFLib?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src=new URL('./vendor/pdf-lib.min.js',import.meta.url).href;s.onload=res;s.onerror=()=>rej(Error('PDF bölme bileşeni yüklenemedi.'));document.head.append(s)})}
-export async function splitPdf(file){
+const tick=()=>new Promise(r=>setTimeout(r,0));
+export async function splitPdf(file,onProgress){
  if(file.size<=WHOLE_LIMIT)return [file];
- await loadPdfLib();const {PDFDocument}=window.PDFLib;
- const src=await PDFDocument.load(new Uint8Array(await file.arrayBuffer()),{ignoreEncryption:true}),total=src.getPageCount(),parts=[];
- for(let start=0;start<total;){
-  let end=Math.min(total,start+PART_PAGES);
-  for(;;){
-   const out=await PDFDocument.create(),idx=[];for(let i=start;i<end;i++)idx.push(i);
-   (await out.copyPages(src,idx)).forEach(pg=>out.addPage(pg));
-   const bytes=await out.save();
-   if(bytes.length>14*1024*1024&&end-start>1){end=start+Math.max(1,Math.floor((end-start)/2));continue}
-   parts.push(new Blob([bytes],{type:'application/pdf'}));break;
+ const buf=await file.arrayBuffer();
+ // Önce arka plan işçisiyle böl (sayfa donmaz); olmazsa ana iş parçacığında, parça arası nefes vererek.
+ try{
+  return await new Promise((res,rej)=>{
+   const w=new Worker(new URL('./pdf-split-worker.js',import.meta.url)),parts=[];
+   w.onmessage=e=>{const d=e.data;if(d.error){w.terminate();rej(Error(d.error));return}if(d.part){parts.push(new Blob([d.part],{type:'application/pdf'}));onProgress&&onProgress(d.upto,d.total)}if(d.done){w.terminate();res(parts)}};
+   w.onerror=ev=>{w.terminate();rej(Error(ev.message||'işçi başlatılamadı'))};
+   w.postMessage({buf,partPages:PART_PAGES,maxBytes:14*1024*1024},[buf]);
+  });
+ }catch(e){
+  const copy=await file.arrayBuffer();
+  await loadPdfLib();const {PDFDocument}=window.PDFLib;
+  const src=await PDFDocument.load(new Uint8Array(copy),{ignoreEncryption:true}),total=src.getPageCount(),parts=[];
+  for(let start=0;start<total;){
+   let end=Math.min(total,start+PART_PAGES);
+   for(;;){
+    await tick();
+    const out=await PDFDocument.create(),idx=[];for(let i=start;i<end;i++)idx.push(i);
+    (await out.copyPages(src,idx)).forEach(pg=>out.addPage(pg));
+    const bytes=await out.save();
+    if(bytes.length>14*1024*1024&&end-start>1){end=start+Math.max(1,Math.floor((end-start)/2));continue}
+    parts.push(new Blob([bytes],{type:'application/pdf'}));onProgress&&onProgress(end,total);break;
+   }
+   if(end>=total)break;start=end-1;
   }
-  if(end>=total)break;start=end-1;
+  return parts;
  }
- return parts;
 }
