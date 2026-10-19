@@ -906,3 +906,12 @@ html.dark .ehIcon,html.dark #saveDraft,html.dark .gdUpd{filter:invert(1) hue-rot
 .editorhead,.editorhead .headtools{overflow:visible!important}.editorhead{z-index:5}
 .ehMenu #quickAddGood,.ehMenu #quickAddGood.primary{background:none!important;color:#2a3a63!important;box-shadow:none!important}
 .ehMenu #quickAddGood,.ehMenu #quickAddGood.primary{background:none!important;color:#2a3a63!important;box-shadow:none!important}
+
+/* Adım şeridi kalktı; sekmelerle gezilir. Bilgi kilidi. */
+#stepper,.stepcard>.sectionhead,#previousStep{display:none!important}
+.lockBar{display:flex;align-items:center;gap:12px;margin:14px 20px 0;padding:10px 14px;border-radius:12px;background:#fff7e6;border:1px solid #f3dca8;color:#8a5a00;font-size:13px}
+.lockBar[hidden]{display:none}.lockBar span{font-weight:800}.lockBar small{flex:1;color:#a37a2b;font-size:12.5px}
+.lockBar button{border:0;border-radius:10px;padding:8px 14px;background:linear-gradient(135deg,#3b6cff,#2447b5);color:#fff;font-weight:800;font-size:12.5px;cursor:pointer}
+#metadataFields[inert]{opacity:.93}
+#metadataFields[inert] input,#metadataFields[inert] select,#metadataFields[inert] textarea{background:#f4f6fb!important;color:#33415f!important}
+#metadataFields[inert] .mergedPanel::before{animation:none;opacity:.35}
