@@ -775,3 +775,29 @@ button.waGo{border:0;cursor:pointer;font:inherit}
 .fdMenu{position:absolute;right:0;top:34px;z-index:20;min-width:170px;padding:6px;border-radius:12px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 20px 44px -16px rgba(8,18,50,.4);display:flex;flex-direction:column}
 .fdMenu button{padding:9px 12px!important;border:0!important;background:none!important;border-radius:8px!important;text-align:left;font-size:13px!important;font-weight:600;color:#17233b!important;cursor:pointer;box-shadow:none!important}.fdMenu button:hover{background:#eef3ff!important}.fdMenu .danger{color:#c0233b!important}
 #firmCardView.fdOver .fdPanel{outline:3px dashed #3b6cff;outline-offset:-6px;background:#f4f8ff}
+
+/* ===== Firma kartı: sağ panel (Aktiviteler / Mesajlar / Dökümanlar / Notlar / Diğer) ===== */
+.fcRight{display:flex;flex-direction:column;gap:16px;min-width:0}
+.fcFeed{background:#fff;border:1px solid #e1e8f7;border-radius:18px;padding:6px 16px 16px;box-shadow:0 12px 30px -24px rgba(30,60,140,.45);min-height:420px}
+.ffTabs{display:flex;gap:2px;border-bottom:1px solid #e6ecf8;margin:0 -4px 14px;overflow-x:auto}
+.ffTabs button{padding:12px 11px!important;border:0!important;background:none!important;border-radius:0!important;box-shadow:none!important;font-size:13px!important;font-weight:600;color:#7a86a1!important;border-bottom:2px solid transparent!important;white-space:nowrap;cursor:pointer}
+.ffTabs button.on{color:#2f5bea!important;border-color:#2f5bea!important}
+.ffTabs b{margin-left:4px;font-size:10.5px;background:#ffe9b8;color:#9a5b00;border-radius:6px;padding:1px 6px}
+.ffBox{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.ffBox textarea{width:100%;padding:12px 14px;border:1px solid #d6e0f7;border-radius:12px;font:inherit;resize:vertical;min-height:84px;background:#fbfcff}
+.ffAdd{align-self:flex-start;padding:8px 22px!important;border-radius:9px!important;background:#3b82f6!important;color:#fff!important;border:0!important;font-weight:800;font-size:13px!important;cursor:pointer}
+.ffLine{position:relative;display:flex;flex-direction:column;gap:14px}
+.ffLine:not(.flat)::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:2px;background:#dbe8fb}
+.ffItem{position:relative;display:flex;gap:12px;align-items:flex-start}
+.ffAv{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#2f5bea;font-weight:800;font-size:13px;flex:none;z-index:1;border:3px solid #fff}
+.ffAv.ic{font-size:16px}
+.ffCont{flex:1;min-width:0}
+.ffMeta{font-size:12px;color:#7a86a1;margin-bottom:4px;display:flex;align-items:center;gap:6px}.ffMeta b{color:#17233b;font-size:12px}
+.ffDel{margin-left:auto;padding:0 6px!important;border:0!important;background:none!important;color:#b3bccd!important;cursor:pointer;font-size:12px!important}.ffDel:hover{color:#c0233b!important}
+.ffBubble{padding:10px 14px;border-radius:12px;background:#f1f5fb;color:#17233b;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.ffDocBar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.fdPrimary.sm{padding:8px 16px;font-size:12.5px}
+.ffDoc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 6px!important;border:0!important;background:none!important;border-bottom:1px solid #f0f4fb!important;border-radius:0!important;cursor:pointer;box-shadow:none!important}.ffDoc:hover{background:#f6f9ff!important}
+.ffIco{width:36px;height:42px;border-radius:7px;display:grid;place-items:end center;padding-bottom:5px;font-size:9px;font-weight:800;color:#fff;background:linear-gradient(160deg,#8793ae,#5b6a8c);flex:none}.ffIco.pdf{background:linear-gradient(160deg,#ff6b6b,#d63d4a)}.ffIco.xls{background:linear-gradient(160deg,#4ade80,#16874a)}.ffIco.doc{background:linear-gradient(160deg,#60a5fa,#2f5bea)}.ffIco.img{background:linear-gradient(160deg,#34d399,#0f9d6e)}
+.ffDocT{display:flex;flex-direction:column;min-width:0}.ffDocT b{font-size:13px;color:#17233b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ffDocT small{color:#8a96b0;font-size:11.5px}
+.ffWa{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;padding:10px 14px;border-radius:12px;background:#e8f8ee;color:#14804a!important;text-decoration:none}.ffWa span{grid-row:span 2;font-size:20px}.ffWa b{font-size:13.5px}.ffWa small{font-size:11.5px;opacity:.85}
+.fcEmpty.sm{padding:8px;font-size:12px}

@@ -24,7 +24,7 @@ const kind=e=>/^pdf$/.test(e)?['PDF','pdf']:/^(jpe?g|png|webp|gif|heic)$/.test(e
 export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDeclarations,getFinance,openDeclaration,editCompany,openPrices,backToList,toast,confirmAction,goList}){
  const view=document.createElement('section');view.id='firmCardView';view.className='view';view.hidden=true;
  (document.querySelector('main>footer')||document.querySelector('main')).before(view);
- let cur=null,tab='detay',noteOpen=false,docCounts=new Map(),menuOpen='';
+ let cur=null,tab='detay',feedTab='not',noteOpen=false,docCounts=new Map(),menuOpen='';
  const loadCount=async c=>{try{const all=await idb('readonly',st=>st.index('firm').getAll(c.id));docCounts.set(c.id,all.length)}catch{}};
  const decls=c=>getDeclarations().filter(d=>normalizeSearch(d.customer)===normalizeSearch(c.name)).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
  const stLabel=s=>s==='Kontrol edildi'?['ok','Kontrol edildi']:s==='Ön hazırlık'?['pre','Ön hazırlık']:['draft',s||'Taslak'];
@@ -36,7 +36,7 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
   const list=(loadNotes()[c.id]||[]);
   return '<div class="fcNotesHead"><h3>Firma notları</h3><button type="button" class="fcPrimary" data-fc="newnote">＋ Yeni not ekle</button></div>'
    +(noteOpen?'<form class="fcNoteForm" data-fc="noteform"><input name="title" placeholder="Not başlığı" maxlength="120" required><select name="type">'+NOTE_TYPES.map(t=>'<option>'+t+'</option>').join('')+'</select><textarea name="text" placeholder="Not…" rows="3"></textarea><div><button type="button" data-fc="notecancel">Vazgeç</button><button type="submit" class="fcPrimary">Kaydet</button></div></form>':'')
-   +(list.length?'<table class="fcTable"><thead><tr><th>NOT BAŞLIĞI</th><th>TİP</th><th>TARİH</th><th>NOT</th><th></th></tr></thead><tbody>'+list.map(n=>'<tr><td><strong>'+esc(n.title)+'</strong></td><td><i class="fcTag">'+esc(n.type)+'</i></td><td>'+esc(fmtDate(n.at))+'</td><td class="fcNoteTx">'+esc(n.text)+'</td><td><button type="button" class="fcDel" data-nd="'+esc(n.id)+'" title="Sil">🗑</button></td></tr>').join('')+'</tbody></table>':'<p class="fcEmpty">Henüz not yok.</p>');
+   +(list.length?'<table class="fcTable"><thead><tr><th>NOT BAŞLIĞI</th><th>TİP</th><th>TARİH</th><th>NOT</th><th></th></tr></thead><tbody>'+list.map(n=>'<tr><td><strong>'+esc(n.title||(n.text||'').slice(0,40)||'—')+'</strong></td><td><i class="fcTag">'+esc(n.type)+'</i></td><td>'+esc(fmtDate(n.at))+'</td><td class="fcNoteTx">'+esc(n.text)+'</td><td><button type="button" class="fcDel" data-nd="'+esc(n.id)+'" title="Sil">🗑</button></td></tr>').join('')+'</tbody></table>':'<p class="fcEmpty">Henüz not yok.</p>');
  }
  function pricesHtml(c){
   const fin=getFinance(),rules=F.rulesOf(fin,c.name),prof=F.firmProfile(fin,c.name);
@@ -62,7 +62,7 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
    const ext=extOf(f.name),name=f.name.replace(/\.[A-Za-z0-9]{1,5}$/,'');
    try{await idb('readwrite',s=>{s.put({id:c.id+'|'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),firm:c.id,name,ext,orig:f.name,size:f.size,type:f.type,user:getUserName(),added:Date.now(),blob:f})});n++}catch(e){toast(e.message)}}
   if(n)toast(n+' evrak eklendi.');
-  await renderDocs(c);
+  await renderDocs(c);if(tab==='detay')await renderFeed(c);
  }
  const urlOf=d=>URL.createObjectURL(d.blob.type||!d.type?d.blob:new Blob([d.blob],{type:d.type}));
  async function docAction(c,id,act){
@@ -82,6 +82,39 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
   const files={},used=new Set();for(const d of list){let n=d.name+(d.ext?'.'+d.ext:''),i=2;while(used.has(n.toLowerCase()))n=d.name+' ('+(i++)+')'+(d.ext?'.'+d.ext:'');used.add(n.toLowerCase());files[n]=[new Uint8Array(await d.blob.arrayBuffer()),{level:0}]}
   const zip=z.zipSync(files),u=URL.createObjectURL(new Blob([zip],{type:'application/zip'})),a=document.createElement('a');a.href=u;a.download=c.name.replace(/[\\/:*?"<>|]/g,'')+'_Evraklar.zip';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Dosya paketi hazırlandı.');
  }
+
+ // ---- Sağ panel: Aktiviteler / Mesajlar / Dökümanlar / Notlar / Diğer ----
+ const FEEDS=[['akt','Aktiviteler'],['msj','Mesajlar'],['dok','Dökümanlar'],['not','Notlar'],['dig','Diğer']];
+ const ini=n=>String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr');
+ const stamp=t=>{const d=new Date(t),p=n=>String(n).padStart(2,'0');return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())};
+ async function renderFeed(c){
+  const host=view.querySelector('[data-feed]');if(!host)return;
+  let docs=[];try{docs=(await idb('readonly',s=>s.index('firm').getAll(c.id))).sort((a,b)=>b.added-a.added);docCounts.set(c.id,docs.length)}catch{}
+  const notes=loadNotes()[c.id]||[];
+  const counts={dok:docs.length,not:notes.length};
+  const head='<div class="ffTabs">'+FEEDS.map(([k,l])=>'<button type="button" data-feedtab="'+k+'" class="'+(k===feedTab?'on':'')+'">'+l+(counts[k]?' <b>'+counts[k]+'</b>':'')+'</button>').join('')+'</div>';
+  let body='';
+  if(feedTab==='not'){
+   body='<div class="ffBox"><textarea data-feednote placeholder="Notlarınızı ekleyin" rows="3"></textarea><button type="button" class="ffAdd" data-fc="feedadd">Ekle</button></div><div class="ffLine">'
+    +(notes.length?notes.map(n=>'<div class="ffItem"><span class="ffAv">'+esc(ini(n.by||getUserName()||'?'))+'</span><div class="ffCont"><div class="ffMeta"><b>'+esc((n.by||getUserName()||'').toLocaleUpperCase('tr'))+'</b> '+esc(stamp(n.at))+'<button type="button" class="ffDel" data-nd="'+esc(n.id)+'" title="Sil">✕</button></div><div class="ffBubble">'+(n.title?'<strong>'+esc(n.title)+'</strong><br>':'')+esc(n.text).replace(/\n/g,'<br>')+'</div></div></div>').join(''):'<p class="fcEmpty">Henüz not yok.</p>')+'</div>';
+  }else if(feedTab==='akt'){
+   const ev=[];for(const d of decls(c))ev.push({t:Date.parse(d.createdAt||d.updatedAt)||0,x:'<b>'+esc(d.ref||'Beyanname')+'</b> beyannamesi oluşturuldu',ic:'📄'});
+   for(const n of notes)ev.push({t:Date.parse(n.at)||0,x:'Not eklendi: <b>'+esc((n.title||n.text||'').slice(0,60))+'</b>',ic:'📝'});
+   for(const d of docs)ev.push({t:d.added,x:'Evrak eklendi: <b>'+esc(d.name)+'</b>',ic:'📎'});
+   if(c.importedAt)ev.push({t:Date.parse(c.importedAt)||0,x:'Firma kaydı oluşturuldu',ic:'🏢'});
+   ev.sort((a,b)=>b.t-a.t);
+   body='<div class="ffLine">'+(ev.length?ev.slice(0,30).map(e=>'<div class="ffItem"><span class="ffAv ic">'+e.ic+'</span><div class="ffCont"><div class="ffMeta">'+esc(stamp(e.t))+'</div><div class="ffBubble">'+e.x+'</div></div></div>').join(''):'<p class="fcEmpty">Henüz hareket yok.</p>')+'</div>';
+  }else if(feedTab==='dok'){
+   body='<div class="ffDocBar"><label class="fdPrimary sm">Belge ekle<input type="file" multiple hidden data-fdfile></label><button type="button" class="fcLink" data-fc="gotodoc">Tümünü yönet →</button></div><div class="ffLine flat">'
+    +(docs.length?docs.slice(0,8).map(d=>{const [lab,cls]=kind(d.ext);return '<button type="button" class="ffDoc" data-fddoc="'+esc(d.id)+'"><span class="ffIco '+cls+'">'+esc(lab)+'</span><span class="ffDocT"><b>'+esc(d.name)+'</b><small>'+esc(d.user||'—')+' · '+esc(fmtDT(d.added))+', '+esc(fmtSize(d.size))+'</small></span></button>'}).join(''):'<p class="fcEmpty">Henüz evrak yok.</p>')+'</div>';
+  }else if(feedTab==='msj'){
+   const ns=nums(c);
+   body='<div class="ffLine flat">'+(ns.length?ns.map(n=>{const d=n.replace(/\D/g,''),w=d.length===11&&d[0]==='0'?'90'+d.slice(1):d.length===10&&d[0]==='5'?'90'+d:d;return '<a class="ffWa" target="_blank" rel="noopener" href="https://wa.me/'+w+'"><span>💬</span><b>+'+esc(w)+'</b><small>WhatsApp’ta sohbet aç</small></a>'}).join(''):'<p class="fcEmpty">Bu firma için WhatsApp numarası yok. Düzenle → WhatsApp alanına yazabilirsin.</p>')+'<p class="fcEmpty sm">Hat bildirimi mesajları bu numaralara hazırlanır.</p></div>';
+  }else{
+   body='<div class="ffLine flat"><div class="fcKv"><span>Kaynak</span><b>'+esc(c.source||'—')+'</b></div><div class="fcKv"><span>Kayıt tarihi</span><b>'+esc(fmtDate(c.importedAt)||'—')+'</b></div><div class="fcKv"><span>Firma numarası (sistem)</span><b>'+esc(c.sourceId||c.id)+'</b></div></div>';
+  }
+  host.innerHTML=head+'<div class="ffBody">'+body+'</div>';
+ }
  function render(){
   if(!cur){view.innerHTML='';return}
   const c=cur,list=decls(c),notes=(loadNotes()[c.id]||[]);
@@ -95,8 +128,7 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
     +card('İletişim bilgileri',kv('EORI',c.eori)+kv('Vergi numarası',c.taxNo)+'<div class="fcKv"><span>WhatsApp (hat bildirimi)</span><b>'+(nums(c).length?nums(c).map(n=>'<i class="fcPhone">💬 +'+esc((x=>x.length===11&&x[0]==='0'?'90'+x.slice(1):x.length===10&&x[0]==='5'?'90'+x:x)(n.replace(/\D/g,'')))+'</i>').join(' '):'<em>—</em>')+'</b></div>','edit')
     +card('Finansal bilgiler',kv('Firma adı',c.name)+'<div class="fcTwo">'+kv('İzinli gönderici (AEO)',prof?.permitted?'Evet':'Hayır')+kv('Özel fiyat',rules.length?rules.length+' kural':'')+'</div><div class="fcTwo">'+kv('Son beyanname',last?fmtDate(last.createdAt||last.updatedAt):'')+kv('Açık işler',String(open))+'</div>','prices')
     +card('Diğer bilgiler',kv('Firma grubu','Müşteri')+kv('Kaynak',c.source)+kv('Kayıt tarihi',fmtDate(c.importedAt)),'edit')
-    +'</div><aside class="fcSide"><div class="fcSideHead"><h3>Son beyannameler</h3><button type="button" class="fcLink" data-fc="gobeyan">Tümü →</button></div>'+declRows(list,7)+'</aside></div>'
-    +'<div class="fcNotesBox">'+notesHtml(c)+'</div>';
+    +'</div><aside class="fcRight"><div class="fcSide"><div class="fcSideHead"><h3>Son beyannameler</h3><button type="button" class="fcLink" data-fc="gobeyan">Tümü →</button></div>'+declRows(list,5)+'</div><section class="fcFeed" data-feed></section></aside></div>';
   }else if(tab==='fiyat')body='<div class="fcPanel">'+pricesHtml(c)+'</div>';
   else if(tab==='beyan')body='<div class="fcPanel"><div class="fcNotesHead"><h3>Beyannameler</h3></div><div class="fcRows">'+declRows(list,200)+'</div></div>';
   else if(tab==='dok')body='<div class="fcPanel fdPanel" data-docs></div>';
@@ -105,8 +137,11 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
    +'<header class="fcHead"><div class="fcAvatar">'+esc(initials(c.name))+'</div><div class="fcTitle"><small>Firma</small><h1>'+esc(c.name)+'</h1><div class="fcMeta">'+[c.taxNo&&'Vergi no: '+c.taxNo,c.eori&&'EORI: '+c.eori,[c.city,c.country].filter(Boolean).join(' / '),prof?.permitted&&'AEO'].filter(Boolean).map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div><div class="fcActs"><button type="button" data-fc="edit">✎ Düzenle</button></div></header>'
    +'<nav class="fcTabs">'+tabs.map(([k,l])=>'<button type="button" data-ft="'+k+'" class="'+(k===tab?'on':'')+'">'+l+'</button>').join('')+'</nav><div class="fcContent">'+body+'</div>';
   if(tab==='dok')renderDocs(c);
+  if(tab==='detay')renderFeed(c);
  }
  view.addEventListener('click',e=>{
+  const ftb=e.target.closest('[data-feedtab]');if(ftb&&cur){feedTab=ftb.dataset.feedtab;renderFeed(cur);return}
+  const fdd=e.target.closest('[data-fddoc]');if(fdd){idb('readonly',s=>s.get(fdd.dataset.fddoc)).then(d=>{if(d){const u=URL.createObjectURL(d.blob);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000)}});return}
   const t=e.target.closest('[data-ft]');if(t){tab=t.dataset.ft;noteOpen=false;render();return}
   const od=e.target.closest('[data-od]');if(od){openDeclaration(od.dataset.od);return}
   const nd=e.target.closest('[data-nd]');if(nd&&cur){confirmAction('Notu sil','Bu not silinecek.',()=>{const all=loadNotes();all[cur.id]=(all[cur.id]||[]).filter(n=>n.id!==nd.dataset.nd);saveNotes(all);render()});return}
@@ -120,6 +155,8 @@ export function installFirmCard({getUserName=()=>'',anchor,getCompanies,getDecla
   else if(k==='edit'&&cur)editCompany(cur);
   else if(k==='prices'&&cur)openPrices(cur.name);
   else if(k==='gobeyan'){tab='beyan';render()}
+  else if(k==='gotodoc'){tab='dok';render()}
+  else if(k==='feedadd'&&cur){const ta=view.querySelector('[data-feednote]'),text=(ta?.value||'').trim();if(!text){toast('Önce notu yaz.');return}const all=loadNotes();all[cur.id]=[{id:crypto.randomUUID(),title:'',type:'Genel',text,by:getUserName(),at:new Date().toISOString()},...(all[cur.id]||[])];saveNotes(all);toast('Not eklendi.');renderFeed(cur)}
   else if(k==='newnote'){noteOpen=true;render();view.querySelector('.fcNoteForm [name=title]')?.focus()}
   else if(k==='notecancel'){noteOpen=false;render()}
  });
