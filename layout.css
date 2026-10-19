@@ -842,3 +842,16 @@ dialog.guarDlg::backdrop{background:rgba(15,25,55,.45);backdrop-filter:blur(3px)
 .gdlBody{padding:18px 20px;overflow:auto;flex:1}
 .gdlBody .steppanel{display:block!important;margin:0!important;padding:0!important;border:0!important;background:none!important}
 .gdlFoot{padding:12px 20px;border-top:1px solid #e6ecf8;display:flex;justify-content:flex-end}
+
+/* Şık onay kutusu (tarayıcının varsayılan odak/seçim kutusu yerine) */
+label.check,label.check *{-webkit-tap-highlight-color:transparent}
+label.check{user-select:none;-webkit-user-select:none;outline:none!important;transition:background .15s,border-color .15s,box-shadow .15s!important}
+label.check input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;flex:none;width:20px!important;height:20px!important;min-height:0!important;margin:0!important;padding:0!important;display:grid;place-content:center;border:2px solid #b4c4e8!important;border-radius:6px!important;background:#fff!important;box-shadow:none!important;outline:none!important;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}
+label.check input[type=checkbox]::after{content:"";width:10px;height:5px;margin-top:-2px;border:solid #fff;border-width:0 0 2.5px 2.5px;transform:rotate(-45deg) scale(0);transition:transform .15s cubic-bezier(.3,1.6,.5,1)}
+label.check input[type=checkbox]:checked{background:linear-gradient(135deg,#3b6cff,#2447b5)!important;border-color:#2447b5!important}
+label.check input[type=checkbox]:checked::after{transform:rotate(-45deg) scale(1)}
+label.check input[type=checkbox]:focus{outline:none!important;box-shadow:none!important}
+label.check input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px rgba(59,108,255,.28)!important}
+label.check:hover input[type=checkbox]:not(:checked){border-color:#3b6cff!important}
+html.dark label.check input[type=checkbox]:checked{filter:invert(1) hue-rotate(180deg)}
+#declarationForm.isMerged .aeoRow>label.aeoSeal{flex:1 1 100%;order:9}
