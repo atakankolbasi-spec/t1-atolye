@@ -30,7 +30,7 @@ const SCHEMA={type:'OBJECT',properties:{declarations:{type:'ARRAY',items:{type:'
  mrn:{type:'STRING'},kalemCount:{type:'INTEGER',nullable:true},
  senderName:str,senderTaxNo:str,senderAddress:str,
  receiverName:str,receiverAddress:str,receiverCountry:str,
- gtip8:str,gtip12:str,description:str,
+ gtip8:str,description:str,
  grossKg:str,netKg:str,packages:str,
  invoiceAmount:str,currency:str,invoiceNo:str,invoiceDate:str,
  vehiclePlate:str,trailerPlate:str,notes:str
@@ -53,7 +53,7 @@ Alanlar:
 - receiverName: alıcı (kutu 8) tam unvanı, adres olmadan.
 - receiverAddress: alıcının adresi.
 - receiverCountry: alıcının/nihai varış ülkesinin 2 harfli ISO kodu (Arnavutluk=AL gibi).
-- gtip8: ilk kalemin eşya kodunun ilk 8 hanesi (kutu 33). gtip12: 12 haneli tam kod (varsa).
+- gtip8: SADECE ilk kalemin eşya kodunun İLK 8 HANESİ, yalnızca rakam (kutu 33). Kutu 33'te "74081100 00 11" veya "7408.11.00.00.11" yazıyorsa 74081100 yaz; ilk 8 haneden sonrasını (00, 11 gibi) ASLA ekleme. Fatura ya da ekli listede 12 haneli kod (740811000011) varsa yine yalnızca ilk 8 hanesini yaz. Önce beyannamedeki kutu 33'e bak; orada yoksa faturaya bak. Rakamları tek tek dikkatle oku, harfle karıştırma (O/0, I/1, S/5, B/8); emin değilsen boş bırak.
 - description: malın SADE cinsi. Ölçü, kalınlık, marka, model, renk, adet ve kod yazma: "20 MM KEÇE" yerine sadece "KEÇE", "15 mm siyah kolar 10.000 lik" yerine sadece "KOLAR". Aynı cinsten birden çok kalem varsa cinsi yalnızca BİR KEZ yaz (15 mm keçe ve 20 mm keçe varsa tek "KEÇE"). Farklı cinsleri " - " ile ayır (örn. "ŞİŞE - VALF - KAPAK"). Büyük harfle, belgedeki dilde (Türkçe), çevirme.
 - grossKg, netKg: beyannamenin TOPLAM brüt ve net ağırlığı (çok kalemliyse ekli listedeki "Toplam" satırı). Belgede yazıldığı gibi, binlik nokta ve ondalık virgülle (örn. "1.516,40").
 - packages: toplam kap/koli adedi (kutu 6).
