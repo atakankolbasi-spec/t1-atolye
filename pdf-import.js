@@ -68,6 +68,8 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
    for(let w=0;;w++){
     try{return await askGemini(parts[i],{askCode,attempt,retry})}
     catch(err){
+     const busyErr=err.code==='SERVICE'&&(err.status===503||err.status===500||err.status===502||/high demand|overload|unavailable|try again|yoğun/i.test(err.message));
+     if(busyErr&&w<5){await waitSec([5,10,20,30,45][w],'Google şu an yoğun, otomatik yeniden deneniyor ('+(w+1)+'/5) · '+label,say);continue}
      if(err.code!=='QUOTA'||err.daily||w>=6)throw err;
      await waitSec(Math.min(Math.max(err.retryAfter||20,5)+2,90),'Google istek sınırı: bekleniyor · '+label,say);
     }

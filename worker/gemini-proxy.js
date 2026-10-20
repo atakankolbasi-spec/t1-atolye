@@ -117,6 +117,7 @@ async function handle(request,env){
    try{data=await r.json()}catch{data={}}
    if(!r.ok&&gone(r.status,data?.error?.message))return false;
    if(r.status===429){quotas.push(quotaInfo(data?.error));return false}
+   if(r.status===503||r.status===500||/high demand|overloaded|unavailable/i.test(String(data?.error?.message||'')))return false; // yoğun model: sıradakini dene
    return true;
   };
   let net=false,ok=false;

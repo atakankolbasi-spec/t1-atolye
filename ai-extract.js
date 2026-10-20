@@ -13,7 +13,7 @@ export async function askGemini(file,{askCode,attempt=1,retry=null}={}){
  let data;try{data=await r.json()}catch{data={}}
  if(!r.ok){
   if(r.status===429||data.quota)throw Object.assign(Error(data.daily?'Google ücretsiz günlük kotası dolmuş.':'Google istek sınırı aşıldı.'),{code:'QUOTA',daily:!!data.daily,retryAfter:Number(data.retryAfter)||0,detail:data.error||''});
-  throw Object.assign(Error(data.error||'Yapay zekâ servisi hata verdi ('+r.status+').'),{code:r.status===401?'ACCESS':'SERVICE'});
+  throw Object.assign(Error(data.error||'Yapay zekâ servisi hata verdi ('+r.status+').'),{code:r.status===401?'ACCESS':'SERVICE',status:r.status});
  }
  return Array.isArray(data.declarations)?data.declarations:[];
 }
