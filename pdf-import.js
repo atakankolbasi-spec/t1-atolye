@@ -36,7 +36,7 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   $('#pdfApply').disabled=!groups.some(g=>!ex.has(g.mrn));try{setStep()}catch(e){}
  }
  const dist=(a,b)=>{let d=Math.abs(a.length-b.length);for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d};
- const fixNum=v=>{v=String(v??'').trim();return /^\d+\.\d{2}$/.test(v)?v.replace('.',','):v};
+ const fixNum=v=>{v=String(v??'').trim().replace(/\s/g,'');if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(v))v=v.replace(/,/g,'');return /^\d+\.\d{2}$/.test(v)?v.replace('.',','):v};
  const toNum=v=>{let t=String(v||'').replace(/[^\d.,-]/g,'');if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');else t=t.replace(/,/g,'');return parseFloat(t)||0};
  const sameVal=(a,b)=>String(a).replace(/[\s.]/g,'').toLowerCase()===String(b).replace(/[\s.]/g,'').toLowerCase();
  function aiValues(a){const cur=String(a.currency||'').toUpperCase();return {sender:a.senderName||'',senderTax:String(a.senderTaxNo||'').replace(/\D/g,''),receiver:a.receiverName||'',receiverCountry:String(a.receiverCountry||'').toUpperCase().slice(0,2),gtip:String(a.gtip8||'').replace(/\D/g,'').slice(0,8),description:simplifyDesc(a.description||''),gross:fixNum(a.grossKg),net:fixNum(a.netKg),packages:String(a.packages||'').replace(/\D/g,''),amount:fixNum(a.invoiceAmount),currency:currencies.includes(cur)?cur:'',invoice:String(a.invoiceNo||'').replace(/\s/g,''),invoiceDate:/^\d{4}-\d{2}-\d{2}$/.test(a.invoiceDate||'')?a.invoiceDate:''}}
@@ -187,17 +187,32 @@ export function installPdfImport({references,toast,existingMrns,addRecords,curre
   }
   return n;
  }
+ // PDF okuma bitince haber ver: ekranda uyarı + kısa ses; sekme arkadaysa sistem bildirimi ve başlıkta işaret.
+ const baseTitle=document.title;
+ window.addEventListener('focus',()=>{if(document.title!==baseTitle)document.title=baseTitle});
+ function chime(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),t=c.currentTime;[[880,0],[1318,.16]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.18,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.35);o.connect(g).connect(c.destination);o.start(t+d);o.stop(t+d+.4)});setTimeout(()=>c.close(),900)}catch{}}
+ function notifyDone(ok,bad,n){
+  const msg=n?n+' ihracat beyannamesi okundu'+(bad?' · '+bad+' dosya okunamadı':''):(bad?bad+' dosya okunamadı':'Beyanname bulunamadı');
+  chime();toast('PDF okuma bitti: '+msg);
+  if(document.hidden||!document.hasFocus()){
+   document.title='✔ PDF okundu · '+baseTitle;
+   try{if('Notification' in window&&Notification.permission==='granted'){const nt=new Notification('PCS TRANSİT · PDF okuma bitti',{body:msg,tag:'pcs-pdf'});nt.onclick=()=>{window.focus();nt.close()}}}catch{}
+  }
+ }
+ const askNotify=()=>{try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch{}};
  async function pump(){
   if(busy)return;busy=true;
   startKeepAlive();try{while(queue.length&&dlg.open){const item=queue.shift();await processFile(item)}}
   finally{busy=false;stopKeepAlive()}
   const attached=attachInvoices();render();
   const done=files.filter(f=>f.state==='tamam'),bad=files.filter(f=>f.state==='hata'),noInv=groups.filter(g=>!g.values.invoice).length;
+  try{notifyDone(done.length,bad.length,groups.length)}catch{}
   $('#pdfStatus').innerHTML='<b>'+files.length+' dosya işlendi</b> · '+groups.length+' ihracat beyannamesi bulundu'+(attached?' · '+attached+' faturanın bilgisi ayrı dosyadan eşleştirildi':'')+(noInv?'<br><span class="pdfAiErr">'+noInv+' beyannamede fatura bilgisi yok. Fatura ayrı bir PDF ise “＋ Başka PDF ekle” ile ekleyin; tutarı uyuşan beyannameye otomatik bağlanır.</span>':'')+(bad.length?' · <span class="pdfAiErr">'+bad.length+' dosya okunamadı</span>':'')+'. Bilgileri kontrol et, gerekirse düzelt; sonra “Seçilenleri forma ekle”.'+files.map(f=>f.status&&f.state!=='tamam'?'<br>'+f.status:'').join('')+files.filter(f=>f.state==='tamam'&&/UYARI|okunamadı/.test(f.note)).map(f=>'<br><span class="pdfAiErr">'+esc(f.name)+': '+esc(f.note.split(' · ').pop())+'</span>').join('')+(!aiProxyUrl()?'<br>Yapay zekâ ile okuma kurulu değil (daha doğru sonuç için kurulabilir).':'');
  }
  const runFiles=list=>{
   const pdfs=[...list].filter(f=>f&&(/\.pdf$/i.test(f.name)||f.type==='application/pdf'));
   if(!pdfs.length){toast('Yalnızca PDF dosyası okunabilir.');return}
+  askNotify();
   if(!dlg.open){groups=[];files=[];queue=[];$('#pdfResults').innerHTML='';$('#pdfApply').disabled=true;$('#pdfAiRow').hidden=!aiProxyUrl();$('#pdfStatus').textContent='';dlg.showModal()}
   for(const f of pdfs){const item={id:++fileSeq,file:f,name:f.name,size:f.size,state:'bekliyor',note:'',count:0,pages:0};files.push(item);queue.push(item)}
   renderFiles();pump();

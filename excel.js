@@ -1,11 +1,16 @@
 import {parseKolis,parseDocs,typeCode,docNumber} from './lines.js';
 const enc=new TextEncoder(),dec=new TextDecoder();
-export const columns={A:'gtip',B:'description',C:'gross',D:'net',E:'amount',F:'currency',H:'mrn',L:'sender',M:'senderTax',O:'senderCity',Q:'senderAddress',R:'receiver',S:'receiverTax',T:'receiverCountry',U:'receiverCity',V:'receiverPostal',W:'receiverAddress',X:'packages',AE:'invoice',AF:'invoiceDate'};
-const fixed={N:'TR',P:'TR',Y:'BI',Z:'ADDR',AD:'380',AG:'730',AH:'CMR'};
-export function num(v){const s=String(v??'').trim().replace(/\s/g,'');if(!s)return NaN;return Number(s.includes(',')?s.replace(/\./g,'').replace(',','.'):s)}
+export const columns={A:'gtip',B:'description',C:'gross',D:'net',E:'amount',F:'currency',H:'mrn',L:'sender',M:'senderTax',O:'senderCity',P:'senderPostal',Q:'senderAddress',R:'receiver',S:'receiverTax',T:'receiverCountry',U:'receiverCity',V:'receiverPostal',W:'receiverAddress',X:'packages',AE:'invoice',AF:'invoiceDate'};
+const fixed={N:'TR',Y:'BI',Z:'ADDR',AD:'380',AG:'730',AH:'CMR'};
+export function num(v){let s=String(v??'').trim().replace(/\s/g,'');if(!s)return NaN;const c=s.lastIndexOf(','),d=s.lastIndexOf('.');
+ // Hem nokta hem virgül varsa sondaki ayraç ondalıktır: 290.852,67 (TR) ve 290,852.67 (EN) ikisi de 290852.67
+ if(c>=0&&d>=0)s=c>d?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+ else if(c>=0)s=(s.match(/,/g).length>1?s.replace(/,/g,''):s.replace(',','.'));
+ else if(d>=0&&s.match(/\./g).length>1)s=s.replace(/\./g,'');
+ return Number(s)}
 const xml=v=>String(v).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 const numeric=new Set(['C','D','E','X','AA']);
-function lineCells(r){const m={};parseKolis(r).forEach((k,i)=>{const [c,t,z]=i?['AA','AB','AC']:['X','Y','Z'];m[c]=k.count||(i?'':r.packages);m[t]=typeCode(k.type)||'BI';m[z]=k.desc||'ADDR'});parseDocs(r).slice(0,2).forEach((d,i)=>{const [t,n,dt]=i?['AG','AH','AI']:['AD','AE','AF'],code=docNumber(d.code);let ref=d.ref,date=d.date;if(code==='380'){ref=ref||r.invoice;date=date||r.invoiceDate}m[t]=code;m[n]=ref;m[dt]=date});return m}
+function lineCells(r){const m={};m.P=r.senderPostal||(String(r.senderAddress||'').match(/\b\d{5}\b(?!.*\b\d{5}\b)/)||[''])[0];parseKolis(r).forEach((k,i)=>{const [c,t,z]=i?['AA','AB','AC']:['X','Y','Z'];m[c]=k.count||(i?'':r.packages);m[t]=typeCode(k.type)||'BI';m[z]=k.desc||'ADDR'});parseDocs(r).slice(0,2).forEach((d,i)=>{const [t,n,dt]=i?['AG','AH','AI']:['AD','AE','AF'],code=docNumber(d.code);let ref=d.ref,date=d.date;if(code==='380'){ref=ref||r.invoice;date=date||r.invoiceDate}m[t]=code;m[n]=ref;m[dt]=date});return m}
 const colName=n=>n<26?String.fromCharCode(65+n):'A'+String.fromCharCode(65+n-26);
 export function makeExcel(source,records){
  const files=fflate.unzipSync(source),sheet=dec.decode(files['xl/worksheets/sheet1.xml']),strings=dec.decode(files['xl/sharedStrings.xml']);
