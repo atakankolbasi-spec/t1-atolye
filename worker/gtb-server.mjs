@@ -1,6 +1,8 @@
 // gtb-proxy.js'i Cloudflare yerine sabit IP'li bir sunucuda (Node 18+) çalıştırır.
 // Ortam değişkenleri: IGHB_USER, IGHB_PASS, MUSAVIR_TC, MUSAVIR_SIFRE, ACCESS_CODE (isteğe bağlı), PORT (varsayılan 8787)
 import http from 'node:http';
+import {webcrypto} from 'node:crypto';
+globalThis.crypto??=webcrypto; // Node 18'de crypto genel değişken değil
 import handler from './gtb-proxy.js';
 const env=process.env;
 http.createServer(async(req,res)=>{
