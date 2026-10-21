@@ -34,6 +34,10 @@ const SECTIONS=[
   {k:'waNumbers',t:'text',l:'Varsayılan numara(lar)',h:'Müşterinin kendi numarası yoksa buraya gider. Müşteri numarasını Firmalar sayfasında yaz. Ülke koduyla, virgülle ayır.',ph:'905321234567'},
   {k:'waTemplate',t:'area',l:'Mesaj metni',h:'{ref} beyanname no, {hat} hat rengi, {mrn} MRN, {plaka} çekici / treyler yazılabilir',ph:'{ref} Hat bildirimi yapılmıştır. {hat} Hattan işlem görecektir.'},
   {k:'waProxy',t:'text',l:'Otomatik gönderim servisi (isteğe bağlı)',h:'Boşsa mesaj WhatsApp’ta hazır açılır, sen “Gönder”e basarsın. Servis adresi yazılırsa arka planda kendiliğinden gider.',ph:'https://…workers.dev/'}]},
+ {id:'gtb',icon:'🛰',title:'Gümrük bağlantısı',desc:'Hat bildirimi gönderme ve beyanname durumu sorgulama',items:[
+  {k:'gtbProxy',t:'text',l:'Aracı servis adresi',h:'worker/gtb-proxy.js Worker’ının adresi. Kullanıcı adı ve şifreler yalnızca Worker’da durur; buraya yazılmaz. Boşsa canlı bağlantı kapalıdır.',ph:'https://…workers.dev'},
+  {k:'gtbVergiNo',t:'text',l:'İzinli gönderici vergi no',h:'Hat bildiriminde gönderilir (10 hane)',ph:'1234567890',max:11},
+  {k:'gtbEposta',t:'text',l:'Bildirim e-postası (isteğe bağlı)',h:'Hat bildirimi ile birlikte gönderilir',ph:'ad@firma.com'}]},
  {id:'seal',icon:'🔒',title:'Mühür',desc:'Mühür stoğu ve uyarılar',items:[
   {k:'sealLow',t:'num',l:'Düşük stok uyarısı',h:'Stok bu sayının altına inince ana sayfa kartı kırmızı olur',min:0,max:1000},
   {t:'act',l:'Mühür stoğunu yönet',h:'Aralık ekle, kalan mühürleri gör',a:[['seals','STOĞU AÇ']]}]},

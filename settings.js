@@ -6,6 +6,7 @@ export const DEFAULTS={
  refPrefix:'PCS',defType:'T1',defDispatch:'TR',defTransport:'Karayolu',defCurrency:'EUR',defGuarantor:'EUROTÜRK LOJİSTİK DIŞ TİCARET LİMİTED ŞİRKETİ',facilityCode:'Z34089',aeoAutoHat:true,dueDays:2,backupDays:7,
  sealLow:20,
  waNumbers:'',waTemplate:'{ref} Hat bildirimi yapılmıştır. {hat} Hattan işlem görecektir.',waAuto:true,waProxy:'',
+ gtbProxy:'',gtbVergiNo:'',gtbEposta:'',
  ratesAuto:true,ratesHours:12,
  docHeader:'PCS TRANSİT GÜMRÜKLEME',docBarcode:true,cmrAgreement:'*Yükleme ve Boşaltmalarda 48 saatten sonra beher gün için 180,-EUR bekleme ücreti alınır.'
 };

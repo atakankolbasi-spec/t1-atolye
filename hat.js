@@ -1,4 +1,5 @@
 import {listPage} from './lists.js';
+import {gtbUrl,gtbCall,hatColor} from './gtb.js';
 import {normalizeSearch} from './directory.js';
 import {dc,bars,donut,lastDays,esc as cesc} from './charts.js';
 const KEY='t1-hat-v1',KINDS=['TCGB Hazır Bildirimi','Transit Varış Bildirimi'],STATUS=['Hazırlandı','Gönderildi','İşlemde','Statü Uygun','Hata Aldı'],PRIORITY=['Sarı','Mavi','Kırmızı','Dark'];
@@ -39,6 +40,28 @@ export function installHat({toast,confirmAction,show,settings,customerOf,saveCus
   d.onclick=ev=>{const b=ev.target.closest('[data-w]');if(!b)return;if(b.dataset.w==='close')d.close();if(b.dataset.w==='go'){waMark(r,r.priority);page.refresh(true)}if(b.dataset.w==='copy'){navigator.clipboard?.writeText(waText(r)).then(()=>toast('Mesaj kopyalandı.'),()=>toast(waText(r)))}};
   if(!d.open)d.showModal();
  }
+ // ---- Resmî sistem (gümrük): hat bildirimi gönder / beyanname durumu sorgula ----
+ const noProxy=()=>{toast('Önce Ayarlar → Gümrük bağlantısı bölümüne aracı servis adresini yaz.');return true};
+ function gtbSend(r){
+  const base=gtbUrl(S);if(!base&&noProxy())return;
+  const vergi=String(S('gtbVergiNo')||'').replace(/\D/g,''),tesis=String(S('facilityCode')||r.location||'').trim(),gum=String(r.office||'').trim().split(/\s+/)[0],plaka=String(r.vehicle||r.trailer||'').replace(/\s/g,'');
+  const eksik=[!vergi&&'İzinli gönderici vergi no (Ayarlar → Gümrük bağlantısı)',!tesis&&'Tesis kodu',!gum&&'Hareket gümrüğü',!plaka&&'Plaka'].filter(Boolean);
+  if(eksik.length){toast('Eksik: '+eksik.join(', ')+'.');return}
+  confirmAction('Hat bildirimi resmî sisteme gönderilsin mi?',r.mrn+' · '+gum+' · '+plaka+'. Bu işlem gümrük sistemine gerçek bildirim gönderir.',async()=>{
+   try{const d=await gtbCall(base,'/hat',{tesisKodu:tesis,vergiNo:vergi,gumrukKodu:gum,plaka,ePosta:S('gtbEposta')||'',tcgb:[r.mrn]});r.status='Gönderildi';r.message=clean('Resmî yanıt: '+(d.yanit||'tamam')+' · ref '+d.refId);save();page.refresh(true);toast(r.mrn+' hat bildirimi gönderildi.')}
+   catch(err){r.status='Hata Aldı';r.message=clean(err.message+(err.detail?' · '+err.detail:''));save();page.refresh(true);toast('Gönderilemedi: '+err.message)}})}
+ async function gtbStatus(r){
+  const base=gtbUrl(S);if(!base&&noProxy())return;
+  toast(r.mrn+' için durum sorgulanıyor…');
+  try{const d=await gtbCall(base,'/durum',{mrn:r.mrn});const b=d.bilgi;
+   if(!b){const h=(d.hatalar||[]).map(x=>x.hataAciklamasi||x.HataAciklamasi).filter(Boolean).join('; ');toast('Sonuç yok'+(h?': '+h:'.'));return}
+   const old={...r},color=hatColor(b);
+   r.message=clean(['Statü: '+(b.statu||b.Statu||'—'),'Muayene: '+(b.muayeneDurum||'—'),b.hat1?'Hat: '+b.hat1+(b.hat2?' / '+b.hat2:''):''].filter(Boolean).join(' · '));
+   if(/uygun/i.test(b.statu||''))r.status='Statü Uygun';
+   if(color&&r.priority!==color)r.priority=color;
+   save();page.refresh(true);toast(r.mrn+': '+r.message);
+   if(color&&waDue(r,old))setTimeout(()=>waSend(r),300)
+  }catch(err){toast('Sorgulanamadı: '+err.message)}}
  const waDue=(r,old)=>S('waAuto')!==false&&WA_COLORS.includes(r.priority)&&r.priority!==r.wa&&(!old||old.priority!==r.priority);
  const page=listPage({id:'hat',nav:'navHat',navIcon:'⚑',navLabel:'Hat bildirimleri',navAfter:document.querySelector('#navEns'),eyebrow:'İZİNLİ GÖNDERİCİ İŞLEMLERİ',title:'Hat bildirimleri',intro:'TCGB hazır bildirimi ve transit varış bildirimi kayıtların. Kalem satırındaki “Hat bildirimi” düğmesi buraya hazır kayıt açar.',newLabel:'＋ Yeni bildirim',importLabel:'Yedekten yükle (JSON)',accept:'.json',noun:'hat bildirimi',
   anchor:document.querySelector('#navReferences'),toast,confirmAction,
@@ -51,17 +74,17 @@ export function installHat({toast,confirmAction,show,settings,customerOf,saveCus
   onRemove:async r=>{list=list.filter(x=>x.id!==r.id);save()},
   async onImport(f){const v=JSON.parse(await f.text()),a=Array.isArray(v)?v:v.hat||[];const n=importData(a);return n+' hat bildirimi eklendi.'},
   exportFile:'T1_Hat_Bildirimleri.json',exportData:()=>JSON.stringify({format:'t1-hat',hat:list},null,2),
-  extraActions:[{label:'👁',title:'Detay',fn:r=>detail(r)},{label:'➜',title:'Sonraki duruma geçir (Hazırlandı → Gönderildi → İşlemde → Statü Uygun)',fn:r=>{const i=STATUS.indexOf(r.status);if(i<0||i>=3){toast(r.status==='Hata Aldı'?'Hata alan kayıt: önce düzenleyip durumunu seç.':'Bu kayıt zaten son durumda.');return}r.status=STATUS[i+1];save();page.refresh(true);toast(r.mrn+' → '+r.status)}},{label:'⧉',title:'MRN, lokasyon, plaka ve gümrüğü kopyala',fn:copy},{label:'💬',title:'WhatsApp mesajı gönder (hat rengi seçili olmalı)',fn:r=>{if(!WA_COLORS.includes(r.priority)){toast('Önce kaydı düzenleyip Öncelik / hat olarak Mavi, Sarı veya Kırmızı seç.');return}waSend(r)}}]});
+  extraActions:[{label:'👁',title:'Detay',fn:r=>detail(r)},{label:'➜',title:'Sonraki duruma geçir (Hazırlandı → Gönderildi → İşlemde → Statü Uygun)',fn:r=>{const i=STATUS.indexOf(r.status);if(i<0||i>=3){toast(r.status==='Hata Aldı'?'Hata alan kayıt: önce düzenleyip durumunu seç.':'Bu kayıt zaten son durumda.');return}r.status=STATUS[i+1];save();page.refresh(true);toast(r.mrn+' → '+r.status)}},{label:'⧉',title:'MRN, lokasyon, plaka ve gümrüğü kopyala',fn:copy},{label:'🔍',title:'Resmî sistemden beyanname durumunu ve hat rengini sorgula',fn:r=>gtbStatus(r)},{label:'🛰',title:'Hat bildirimini resmî sisteme gönder',fn:r=>gtbSend(r)},{label:'💬',title:'WhatsApp mesajı gönder (hat rengi seçili olmalı)',fn:r=>{if(!WA_COLORS.includes(r.priority)){toast('Önce kaydı düzenleyip Öncelik / hat olarak Mavi, Sarı veya Kırmızı seç.');return}waSend(r)}}]});
 
 
  document.addEventListener('click',e=>{const b=e.target.closest('[data-hatopen]');if(!b)return;const r=list.find(x=>x.id===b.dataset.hatopen);if(r)detail(r)});
  function detail(r){let d=document.getElementById('hatDetail');if(!d){d=document.createElement('dialog');d.id='hatDetail';d.className='hatDlg';document.body.append(d)}
   const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),row=(l,v)=>'<div class="dRow"><span>'+l+'</span><b>'+(e(v)||'—')+'</b></div>';
-  d.innerHTML='<div class="dHead"><div><small>HAT BİLDİRİMİ</small><h2>'+e(r.mrn)+' <span class="hatBadge hb'+STATUS.indexOf(r.status)+'">'+e(r.status)+'</span></h2></div><div class="dBtn"><button type="button" data-d="next">SONRAKİ DURUM ➜</button><button type="button" data-d="wa">💬 WHATSAPP</button><button type="button" data-d="copy">⧉ KOPYALA</button><button type="button" data-d="close">KAPAT</button></div></div>'
+  d.innerHTML='<div class="dHead"><div><small>HAT BİLDİRİMİ</small><h2>'+e(r.mrn)+' <span class="hatBadge hb'+STATUS.indexOf(r.status)+'">'+e(r.status)+'</span></h2></div><div class="dBtn"><button type="button" data-d="next">SONRAKİ DURUM ➜</button><button type="button" data-d="status">🔍 DURUM SORGULA</button><button type="button" data-d="send">🛰 RESMÎ GÖNDER</button><button type="button" data-d="wa">💬 WHATSAPP</button><button type="button" data-d="copy">⧉ KOPYALA</button><button type="button" data-d="close">KAPAT</button></div></div>'
    +'<div class="dGrid"><section><h3>Genel Bilgiler</h3>'+row('Bildirim türü',r.kind)+row('Durum',r.status)+row('Öncelik / hat',r.priority)+row('WhatsApp',r.wa?r.wa+' hat mesajı gönderildi':'—')+row('Beyanname',r.declarationRef)+row('Lokasyon kodu',r.location)+'</section>'
    +'<section><h3>Taşıma Bilgileri</h3>'+row('Çekici plaka',r.vehicle)+row('Treyler plaka',r.trailer)+row('Hareket gümrüğü',r.office)+'</section>'
    +'<section><h3>Ek Bilgiler</h3>'+row('Hazır bildirim tarihi',r.readyAt)+row('Statü uygun tarihi',r.approvedAt)+row('IGHB no',r.ighb)+row('GUID',r.guid)+row('Kullanıcı',r.user)+row('Mesaj',r.message)+'</section></div>';
-  d.onclick=ev=>{const b=ev.target.closest('[data-d]');if(!b)return;if(b.dataset.d==='close')d.close();else if(b.dataset.d==='copy')copy(r);else if(b.dataset.d==='wa'){if(!WA_COLORS.includes(r.priority)){toast('Önce Öncelik / hat olarak Mavi, Sarı veya Kırmızı seç.');return}waSend(r)}else{const i=STATUS.indexOf(r.status);if(i<0||i>=3){toast('Bu kayıt zaten son durumda veya hata aldı; düzenleyip durumu seç.');return}r.status=STATUS[i+1];save();page.refresh(true);detail(r)}};
+  d.onclick=ev=>{const b=ev.target.closest('[data-d]');if(!b)return;if(b.dataset.d==='close')d.close();else if(b.dataset.d==='copy')copy(r);else if(b.dataset.d==='status')gtbStatus(r);else if(b.dataset.d==='send')gtbSend(r);else if(b.dataset.d==='wa'){if(!WA_COLORS.includes(r.priority)){toast('Önce Öncelik / hat olarak Mavi, Sarı veya Kırmızı seç.');return}waSend(r)}else{const i=STATUS.indexOf(r.status);if(i<0||i>=3){toast('Bu kayıt zaten son durumda veya hata aldı; düzenleyip durumu seç.');return}r.status=STATUS[i+1];save();page.refresh(true);detail(r)}};
   if(!d.open)d.showModal()}
  function summary(){const v=document.getElementById('hatView');if(!v)return;let el=v.querySelector('.hatSummary');if(!el){el=document.createElement('div');el.className='hatSummary dash';const ph=v.querySelector('.pagehead');if(!ph)return;ph.after(el)}
   const COL=['#94a3b8','#2f5bea','#f59e0b','#16a34a','#e11d48'],items=STATUS.map((s,i)=>({label:s,n:list.filter(r=>r.status===s).length,color:COL[i]}));
