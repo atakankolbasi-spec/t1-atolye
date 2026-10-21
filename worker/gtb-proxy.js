@@ -63,9 +63,9 @@ async function handle(request,env,o){
   if(!env.IGHB_USER||!env.IGHB_PASS)return json({error:'Worker’da IGHB_USER / IGHB_PASS tanımlı değil.',code:'NOCRED'},500,o);
   const refId=crypto.randomUUID();
   const xml=buildIghbEnvelope({refId,user:env.IGHB_USER,pass:env.IGHB_PASS,tesisKodu:body.tesisKodu,vergiNo:body.vergiNo,gumrukKodu:body.gumrukKodu,plaka:body.plaka,ePosta:body.ePosta||'',tcgb});
-  const r=await fetch(IGHB_URL,{method:'POST',headers:{'Content-Type':'text/xml; charset=utf-8',SOAPAction:'"'+IGHB_ACTION+'"'},body:xml});
+  const r=await fetch(IGHB_URL,{method:'POST',headers:{'Content-Type':'text/xml; charset=utf-8',SOAPAction:'"'+IGHB_ACTION+'"',Authorization:'Basic '+btoa(unescape(encodeURIComponent(env.IGHB_USER+':'+env.IGHB_PASS)))},body:xml});
   const text=await r.text(),s=readSoap(text);
-  if(!r.ok||s.fault)return json({error:s.fault||('Hat bildirimi servisi hata verdi ('+r.status+').'),detail:s.text},502,o);
+  if(!r.ok||s.fault)return json({error:s.fault||('Hat bildirimi servisi hata verdi ('+r.status+')'+(s.text?': '+s.text.slice(0,160):'.')),detail:s.text},502,o);
   return json({ok:true,refId,yanit:s.text},200,o);
  }
  if(path==='/ncts')return json({error:'NCTS gönderimi henüz kapalı: servis tanımı (WSDL) alınınca açılacak.',code:'NOTYET'},501,o);
