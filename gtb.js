@@ -1,7 +1,7 @@
 // Gümrük (Ticaret Bakanlığı) servislerine aracı Worker (worker/gtb-proxy.js) üzerinden bağlanır.
 import {GTB_PROXY_URL} from './config.js';
 const CODE_KEY='t1-gtb-code';
-export const gtbUrl=S=>String((S&&S('gtbProxy'))||GTB_PROXY_URL||'').trim().replace(/\/+$/,'');
+export const gtbUrl=S=>{const u=String((S&&S('gtbProxy'))||GTB_PROXY_URL||'').trim().replace(/\/+$/,'');return u&&!/^https?:\/\//i.test(u)?'https://'+u:u};
 // path: '/durum' | '/hat' | '/ncts'  → {ok,…} ya da Error(.code)
 export async function gtbCall(base,path,payload){
  const send=code=>fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json',...(code?{'X-Access-Code':code}:{})},body:JSON.stringify(payload)});
