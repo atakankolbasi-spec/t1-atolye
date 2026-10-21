@@ -341,7 +341,7 @@ function buildGoodsDock(){const step=document.getElementById('goodsStep'),tb=ste
  dock.append(c1,c2,c3);if(add)dock.append(add);dock.append(upd,menu);tb.before(dock);tb.hidden=true}
 function applyLock(){const mf=$('#metadataFields');if(!mf||!work)return;const on=!!work.locked;mf.inert=on;form.classList.toggle('isLocked',on);const bar=$('#lockBar');if(bar)bar.hidden=!(on&&currentStep===1);const sd=$('#saveDraft');if(sd)sd.textContent=on?'Güncelle':'Kaydet'}
 function enterEdit(){if(!work)return;work.locked=false;setStep(1);applyLock();toast('Düzenleme açıldı. Bilgileri değiştirip Kaydet’e bas.')}
-function afterSave(){if(work&&work.lockMode&&!work.locked){work.locked=true}applyLock();renderHead();if(currentStep===1){setStep(3);window.scrollTo({top:0,behavior:'smooth'})}}
+function afterSave(){if(work){work.lockMode=true;work.locked=true}applyLock();renderHead();if(currentStep===1){setStep(3);window.scrollTo({top:0,behavior:'smooth'})}}
 {const lb=document.createElement('div');lb.id='lockBar';lb.className='lockBar';lb.hidden=true;lb.innerHTML='<span>🔒 Bilgiler kilitli</span><small>Düzenlemek için <b>Güncelle</b>’ye bas.</small><button type="button" id="lockEdit">✎ Güncelle</button>';$('#metadataFields').before(lb);lb.querySelector('#lockEdit').onclick=enterEdit}
 function renderHead(v){if(!work)return;v=v||work.values||{};const d=db.declarations.find(x=>x.id===work.id);const fmt=t=>{if(!t)return '';const x=new Date(t);return Number.isFinite(x.getTime())?x.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):''};
  const items=[['👤',SET.get('userName')||''],['🏢',v.customer||v.carrier||''],['📅',fmt(d?.createdAt)],['⟳',fmt(d?.updatedAt)]].filter(x=>x[1]);
