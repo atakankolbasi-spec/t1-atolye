@@ -441,3 +441,15 @@ body:not(.navWide) .navToggle{margin:0 0 10px}body.navWide .navToggle{width:auto
 #declarationsTable tbody tr:last-child td{border-bottom:0}
 #declarationsTable tbody tr:last-child td:first-child{border-bottom-left-radius:13px}
 #declarationsTable tbody tr:last-child td:last-child{border-bottom-right-radius:13px}
+#declarationsTable thead th{background:linear-gradient(135deg,#14284d 0%,#315cc8 100%);color:#f5f8ff;border-bottom-color:#244a9f;letter-spacing:.8px;text-shadow:0 1px 1px rgba(0,0,0,.18)}
+#declarationsTable thead th:first-child{border-top-left-radius:13px}
+#declarationsTable thead th:last-child{border-top-right-radius:13px}
+#declarationsTable tbody tr:nth-child(even){background:#f4f8ff}
+#declarationsTable tbody tr:nth-child(odd){background:#ffffff}
+#declarationsTable tbody tr:hover{background:linear-gradient(90deg,#e5efff 0%,#f7faff 100%);box-shadow:inset 4px 0 0 #315cc8}
+#declarationsTable tbody td{color:#50688e}
+#declarationsTable .rowactions{gap:6px}
+#declarationsTable .rowactions button{width:29px;height:29px;padding:0;border:1px solid #d8e4fb;border-radius:8px;background:#f1f6ff;color:#4167b8;box-shadow:0 2px 6px rgba(54,92,213,.08)}
+#declarationsTable .rowactions button:hover{background:#315cc8;border-color:#315cc8;color:#fff;transform:translateY(-1px)}
+#declarationsTable .rowactions button.danger{background:#fff1f1;border-color:#ffd7d7;color:#d45b61}
+#declarationsTable .rowactions button.danger:hover{background:#d45b61;border-color:#d45b61;color:#fff}
