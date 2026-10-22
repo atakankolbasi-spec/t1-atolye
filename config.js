@@ -5,4 +5,6 @@ export const AI_PROXY_URL='https://pcs-ai.atakankolbasi.workers.dev';
 // VKN (vergi numarası) ile firma unvanı sorgusu için Cloudflare Worker adresi (worker/vkn-proxy.js). Boşsa "VKN'den getir" düğmesi çalışmaz.
 export const VKN_PROXY_URL='https://vkn-proxy.atakankolbasi.workers.dev';
 // Gümrük (Ticaret Bakanlığı) servisleri için aracı Cloudflare Worker adresi (worker/gtb-proxy.js). Boşsa canlı bağlantı düğmeleri çalışmaz; Ayarlar → Gümrük bağlantısı'ndan da yazılabilir.
+// PORTAL-BİLGE için güvenli aracı Worker adresi. Boş bırakılırsa yalnızca hazırlık dosyası üretilir.
 export const GTB_PROXY_URL='';
+export const PORTAL_BILGE_URL='https://bgp-portal.ticaret.gov.tr/';
