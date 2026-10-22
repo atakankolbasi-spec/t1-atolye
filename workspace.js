@@ -1,3 +1,5 @@
+const CSS_CACHE_VERSION='17f411e';
+if(!document.querySelector('link[data-workspace-style-refresh]')){const link=document.createElement('link');link.rel='stylesheet';link.href='workspace.css?v='+CSS_CACHE_VERSION;link.dataset.workspaceStyleRefresh='1';document.head.appendChild(link)}
 import {installChoice} from './choice.js';
 import {groups,fields,currencies,documentCodes} from './schema.js';
 import {installBulk} from './bulk.js';
