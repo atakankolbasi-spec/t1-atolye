@@ -9,69 +9,146 @@
 /* "Beyanname bilgisi ekle" sekme gibi kesik değil, tam yuvarlak düğme */
 .goodsDock .gdAdd{margin-right:0!important;border-radius:16px!important;align-self:flex-end}
 
-/* ---- Ortak: tablo tasarımlarında satır hareketi kapalı ---- */
+
+/* Yeni sütun öğeleri (müşteri simgesi, plaka rozeti) yalnızca tasarım seçilince görünür */
+.av{display:none}
+
+/* ==================== ORTAK PARÇALAR (tüm tasarımlar) ==================== */
 html[data-skin] #declarationsTable tbody tr:hover{transform:none!important}
-html[data-skin] #declarationsTable td .tag{font-weight:700}
+html[data-skin] .plate{display:inline-block;position:relative;margin:0 6px 0 0!important;padding:3px 9px 3px 17px!important;border:1.5px solid #1b2a4e;border-radius:6px;background:#fff;color:#0b1530!important;font:800 12px/1.35 ui-monospace,'SF Mono',Menlo,Consolas,monospace!important;letter-spacing:.6px;white-space:nowrap;vertical-align:middle}
+html[data-skin] .plate::before{content:'';position:absolute;left:0;top:0;bottom:0;width:9px;border-radius:4px 0 0 4px;background:#1f4fd8 radial-gradient(circle at 50% 28%,#ffd84d 0 1.4px,transparent 1.8px) no-repeat}
+html[data-skin] small.plate{margin-left:0!important}
+html[data-skin] small.plate::before{content:'';display:block;background:#6b7fc4;width:9px}
+html[data-skin] #declarationsTable td small.plate{display:inline-block!important;font-size:11.5px!important;color:#0b1530!important;opacity:.85}
+html[data-skin] #declarationsTable td:nth-child(7) small.plate:before{content:'';}
+html:is([data-skin=k2],[data-skin=k4]) .cuCell{display:flex!important;align-items:center;gap:10px}
+html[data-skin] .av{margin-right:10px;vertical-align:middle}
+html[data-skin] .av{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:hsl(var(--h) 80% 91%);color:hsl(var(--h) 55% 30%);font:800 11px/1 Inter,system-ui;letter-spacing:.4px}
+html[data-skin] .cuCell .cellMain{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-skin] #declarationsTable td .tag{font-weight:700;border-radius:99px!important}
+html[data-skin] #declarationsTable .rowactions button{width:30px!important;height:30px!important;padding:0!important;border-radius:9px!important;display:inline-grid;place-items:center}
+html[data-skin] #declarationsTable td.rt .cellMain{font:700 12.5px/1.2 ui-monospace,'SF Mono',Menlo,Consolas,monospace!important;letter-spacing:.3px}
 
-/* ---- 1 · Çizgili (sade, zebra) ---- */
+/* ==================== 1 · OPERASYON (profesyonel tablo) ==================== */
+html[data-skin=k1] .listcard .tablewrap{background:#fff!important;border:1px solid #e1e7f2!important;border-radius:18px!important;overflow:hidden!important;padding:0!important;box-shadow:0 18px 40px -26px rgba(20,40,110,.45)!important;margin:0 18px 18px!important}
 html[data-skin=k1] #declarationsTable{border-spacing:0!important}
-html[data-skin=k1] #declarationsTable thead th{background:#f1f4f9!important;color:#5b6784!important;border-bottom:1px solid #dfe5f0!important;padding:11px 12px!important}
-html[data-skin=k1] #declarationsTable tbody td{background:#fff!important;border:0!important;border-bottom:1px solid #e8edf5!important;border-radius:0!important;padding:9px 12px!important;box-shadow:none!important}
-html[data-skin=k1] #declarationsTable tbody tr:nth-child(even) td{background:#f8fafd!important}
-html[data-skin=k1] #declarationsTable tbody td:first-child{border-left-width:3px!important}
-html[data-skin=k1] #declarationsTable tbody tr:hover td{background:#eaf1ff!important;box-shadow:none!important}
-html[data-skin=k1] #declarationsTable .rowactions button{background:#fff!important;border:1px solid #dbe3f2!important;border-radius:6px!important}
+html[data-skin=k1] #declarationsTable thead th{background:linear-gradient(180deg,#f8faff,#eef2fa)!important;color:#5f6f93!important;border:0!important;border-bottom:1px solid #dfe6f3!important;border-radius:0!important;padding:14px 12px!important;font-size:10.5px!important;letter-spacing:1.2px!important}
+html[data-skin=k1] #declarationsTable tbody td{background:#fff!important;border:0!important;border-bottom:1px solid #edf1f8!important;border-radius:0!important;padding:14px 12px!important;box-shadow:none!important}
+html[data-skin=k1] #declarationsTable tbody tr:last-child td{border-bottom:0!important}
+html[data-skin=k1] #declarationsTable tbody td:first-child{border-left:0!important;box-shadow:inset 4px 0 0 transparent!important;padding-left:16px!important}
+html[data-skin=k1] #declarationsTable tbody tr:hover td{background:#f4f8ff!important}
+html[data-skin=k1] #declarationsTable tbody tr:hover td:first-child{box-shadow:inset 4px 0 0 #2f5bea!important}
+html[data-skin=k1] #declarationsTable .ref{font-weight:800!important;font-size:13.5px!important;color:#1d43c0!important;letter-spacing:.2px}
+html[data-skin=k1] #declarationsTable .rowactions button{background:#fff!important;border:1px solid #dbe3f2!important;color:#3a5bb8!important;box-shadow:0 1px 2px rgba(20,40,110,.08)!important}
+html[data-skin=k1] #declarationsTable .rowactions button:hover{background:#2f5bea!important;border-color:#2f5bea!important;color:#fff!important}
 
-/* ---- 2 · Yüzen kartlar (yumuşak gölge, hap durum) ---- */
-html[data-skin=k2] #declarationsTable{border-spacing:0 12px!important}
-html[data-skin=k2] #declarationsTable thead th{background:transparent!important;color:#7a88a3!important;border:0!important}
-html[data-skin=k2] #declarationsTable tbody td{background:#fff!important;border:0!important;box-shadow:0 14px 18px -16px rgba(30,60,140,.5)!important;padding:15px 12px!important}
-html[data-skin=k2] #declarationsTable tbody td:first-child{border-left:5px solid var(--a,#2f5bea)!important;border-radius:18px 0 0 18px!important}
-html[data-skin=k2] #declarationsTable tbody td:last-child{border-radius:0 18px 18px 0!important}
-html[data-skin=k2] #declarationsTable tbody tr:hover td{background:#f5f8ff!important;box-shadow:0 16px 26px -14px rgba(47,91,234,.55)!important}
-html[data-skin=k2] #declarationsTable .stCell .tag,html[data-skin=k2] #declarationsTable .stCell .aeoBadge{border-radius:99px!important}
-html[data-skin=k2] #declarationsTable .rowactions button{border-radius:50%!important;border:0!important;background:#eef3ff!important}
+/* ==================== 2 & 4 · KARGO KARTLARI (satır = kart) ==================== */
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable{display:block!important;min-width:0!important;border-spacing:0!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable thead,html:is([data-skin=k2],[data-skin=k4]) #declarationsTable colgroup{display:none!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody{display:block!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody tr{display:grid!important;grid-template-columns:minmax(150px,.9fr) minmax(86px,.6fr) minmax(86px,.6fr) minmax(190px,1.1fr) minmax(190px,1.2fr) auto;grid-template-rows:auto auto auto;column-gap:22px;row-gap:3px;align-items:center;padding:16px 22px 16px 26px;margin:0 0 14px;position:relative;border-radius:20px;overflow:hidden}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody tr::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;background:#94a3b8}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody tr:has(.tag.checked)::before{background:linear-gradient(180deg,#16a34a,#34d399)}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody tr:has(.tag.pre)::before{background:linear-gradient(180deg,#8b5cf6,#c4b5fd)}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable tbody td{display:block!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;min-width:0;white-space:normal!important;overflow:visible!important;border-radius:0!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(1){grid-column:1;grid-row:1}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(2){grid-column:1;grid-row:2;color:#7a88a3}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(2) small{display:inline!important;margin-left:6px}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(3){grid-column:1;grid-row:3;margin-top:6px}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(4){grid-column:2;grid-row:1/4}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(5){grid-column:3;grid-row:1/4;position:relative;align-self:center}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(4){align-self:center}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(4)::before,html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(5)::before{display:block;font:800 9.5px/1 Inter,system-ui;letter-spacing:1.4px;color:#8a97b3;margin-bottom:6px}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(4)::before{content:'ÇIKIŞ'}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(5)::before{content:'VARIŞ'}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(5)::after{content:'';position:absolute;left:-19px;top:calc(50% + 8px);width:10px;height:10px;margin-top:-5px;border-top:2px solid #9fb0d6;border-right:2px solid #9fb0d6;transform:rotate(45deg)}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td.rt .cellMain{font-size:17px!important;font-weight:800!important;color:#12204a}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(6){grid-column:4;grid-row:3;color:#7a88a3;font-size:11.5px}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(7){grid-column:4;grid-row:1/3}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(8){grid-column:5;grid-row:1/3}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(12){grid-column:5;grid-row:3;color:#4b5b80;font-weight:700}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(12) small{display:inline!important;margin-left:8px;color:#8a97b3}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td:nth-child(13){grid-column:6;grid-row:1/4;align-self:center}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable td.extra{display:none!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable .ref{font-size:16px!important;font-weight:800!important}
+html:is([data-skin=k2],[data-skin=k4]) #declarationsTable .rowactions{flex-wrap:wrap!important;max-width:168px!important;gap:5px!important;justify-content:flex-end}
+html:is([data-skin=k2],[data-skin=k4]) .listcard .tablewrap{overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:6px 18px 4px!important;margin:0!important}
 
-/* ---- 3 · Kurumsal ızgara (lacivert başlık bandı) ---- */
-html[data-skin=k3] .listcard .tablewrap{border:1px solid #1f3270!important;border-radius:12px!important;overflow:hidden!important;background:#fff!important}
-html[data-skin=k3] #declarationsTable{border-spacing:0!important}
-html[data-skin=k3] #declarationsTable thead th{background:linear-gradient(135deg,#10204d,#27438f)!important;color:#fff!important;border:0!important;border-radius:0!important;padding:13px 12px!important;letter-spacing:1.1px!important}
-html[data-skin=k3] #declarationsTable tbody td{background:#fff!important;border:0!important;border-bottom:1px solid #dfe5f2!important;border-right:1px solid #eef1f8!important;border-radius:0!important;padding:11px 12px!important;box-shadow:none!important}
-html[data-skin=k3] #declarationsTable tbody td:last-child{border-right:0!important}
-html[data-skin=k3] #declarationsTable tbody td:first-child{border-left-width:4px!important}
-html[data-skin=k3] #declarationsTable tbody tr:hover td{background:#eaf0ff!important}
-html[data-skin=k3] #declarationsTable .rowactions button{background:#eef2fb!important;border:1px solid #cfd9ef!important;border-radius:6px!important;color:#1f3270!important}
-
-/* ---- 4 · Aurora (buzlu cam satırlar) ---- */
-html[data-skin=k4] .listcard .tablewrap{background:linear-gradient(135deg,#e6e9ff,#f1e8ff 50%,#dcf3ff)!important;border:1px solid #fff!important;border-radius:20px!important;padding:6px 14px 10px!important}
-html[data-skin=k4] #declarationsTable{border-spacing:0 8px!important}
-html[data-skin=k4] #declarationsTable thead th{background:transparent!important;color:#5a49b8!important;border:0!important}
-html[data-skin=k4] #declarationsTable tbody td{background:rgba(255,255,255,.72)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0!important;border-top:1px solid #fff!important;border-bottom:1px solid #ffffffb0!important;box-shadow:0 10px 20px -16px rgba(74,47,214,.55)!important}
-html[data-skin=k4] #declarationsTable tbody td:first-child{border-left:5px solid #7c5cff!important;border-radius:16px 0 0 16px!important}
-html[data-skin=k4] #declarationsTable tbody td:last-child{border-radius:0 16px 16px 0!important}
-html[data-skin=k4] #declarationsTable tbody tr:hover td{background:#fff!important}
+/* 2 · düz beyaz kartlar */
+html[data-skin=k2] #declarationsTable tbody tr{background:#fff;border:1px solid #e2e8f5;box-shadow:0 16px 30px -22px rgba(25,50,130,.55)}
+html[data-skin=k2] #declarationsTable tbody tr:hover{border-color:#b9c9f3;box-shadow:0 20px 38px -20px rgba(47,91,234,.5);background:#fbfcff}
+html[data-skin=k2] #declarationsTable .rowactions button{background:#f1f5ff!important;border:0!important;color:#3454b6!important}
+html[data-skin=k2] #declarationsTable .rowactions button:hover{background:#2f5bea!important;color:#fff!important}
+/* 4 · buzlu cam */
+html[data-skin=k4] .listcard{background:linear-gradient(135deg,#e4e8ff,#f1e8ff 52%,#d9f2ff)!important;border:1px solid #fff!important}
+html[data-skin=k4] #declarationsTable tbody tr{background:rgba(255,255,255,.66);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(255,255,255,.95);box-shadow:0 18px 34px -22px rgba(74,47,214,.6)}
+html[data-skin=k4] #declarationsTable tbody tr:hover{background:rgba(255,255,255,.92)}
+html[data-skin=k4] #declarationsTable tbody tr::before{background:linear-gradient(180deg,#7c5cff,#22d3ee)}
 html[data-skin=k4] #declarationsTable .ref{color:#4a2fd6!important}
-html[data-skin=k4] #declarationsTable .rowactions button{background:#f1ecff!important;color:#4a2fd6!important;border:0!important;border-radius:10px!important}
+html[data-skin=k4] #declarationsTable .rowactions button{background:rgba(124,92,255,.12)!important;border:0!important;color:#4a2fd6!important}
+html[data-skin=k4] #declarationsTable .rowactions button:hover{background:#6d4aff!important;color:#fff!important}
+html[data-skin=k4] #declarationsTable td.rt .cellMain{color:#2b1f86}
 
-/* ---- 5 · Mat / Minimal (çizgisiz, eş aralıklı sayılar, işlemler üstüne gelince) ---- */
+/* ==================== 3 · KOYU KONSOL ==================== */
+html[data-skin=k3] .listcard .tablewrap{background:#0d1630!important;border:1px solid #22305c!important;border-radius:18px!important;overflow:hidden!important;padding:0!important;box-shadow:0 24px 50px -24px rgba(5,10,40,.8)!important;margin:0 18px 18px!important}
+html[data-skin=k3] #declarationsTable{border-spacing:0!important}
+html[data-skin=k3] #declarationsTable thead th{background:#091026!important;color:#7f93c8!important;border:0!important;border-bottom:1px solid #1e2b55!important;border-radius:0!important;padding:14px 12px!important;font-size:10.5px!important;letter-spacing:1.3px!important;text-shadow:none!important}
+html[data-skin=k3] #declarationsTable tbody td{background:#0d1630!important;color:#d6e2ff!important;border:0!important;border-bottom:1px solid #18254b!important;border-radius:0!important;padding:14px 12px!important;box-shadow:none!important}
+html[data-skin=k3] #declarationsTable tbody tr:last-child td{border-bottom:0!important}
+html[data-skin=k3] #declarationsTable tbody td small{color:#7f93c8!important}
+html[data-skin=k3] #declarationsTable tbody td:first-child{border-left:0!important;box-shadow:inset 4px 0 0 #1f4fd8!important;padding-left:16px!important}
+html[data-skin=k3] #declarationsTable tbody tr:has(.tag.checked) td:first-child{box-shadow:inset 4px 0 0 #22c55e!important}
+html[data-skin=k3] #declarationsTable tbody tr:hover td{background:#14214a!important}
+html[data-skin=k3] #declarationsTable .ref{color:#67e8f9!important;font-weight:800!important;font-size:13.5px!important}
+html[data-skin=k3] #declarationsTable .stCell .tag{background:rgba(148,163,184,.16)!important;color:#dbe6ff!important}
+html[data-skin=k3] #declarationsTable .stCell .tag.checked{background:rgba(34,197,94,.18)!important;color:#7af0a6!important}
+html[data-skin=k3] #declarationsTable .stCell .aeoBadge{background:rgba(244,63,94,.2)!important;color:#ff9db1!important}
+html[data-skin=k3] #declarationsTable .kalemN,html[data-skin=k3] #declarationsTable .refDoc{background:rgba(255,255,255,.1)!important;color:#c9d8ff!important;border:0!important}
+html[data-skin=k3] #declarationsTable .rowactions button{background:#17234a!important;border:1px solid #26366a!important;color:#9fb7ff!important}
+html[data-skin=k3] #declarationsTable .rowactions button:hover{background:#2f5bea!important;color:#fff!important;border-color:#2f5bea!important}
+html[data-skin=k3] #declarationsTable .rowactions button.danger{color:#ff8da1!important}
+html[data-skin=k3] .av{background:hsl(var(--h) 55% 26%)!important;color:hsl(var(--h) 90% 82%)!important}
+html[data-skin=k3] #declarationsTable td.rt .cellMain{color:#bcd0ff}
+html[data-skin=k3] #declarationsTable input.sel{accent-color:#3b6cff}
+
+/* ==================== 5 · EDİTORYAL MİNİMAL ==================== */
+html[data-skin=k5] .listcard .tablewrap{background:transparent!important;border:0!important;box-shadow:none!important;padding:0 22px 8px!important;margin:0!important}
 html[data-skin=k5] #declarationsTable{border-spacing:0!important}
-html[data-skin=k5] #declarationsTable thead th{background:transparent!important;color:#6b665c!important;border:0!important;border-bottom:2px solid #1a1a1a!important;border-radius:0!important;font-size:10px!important;letter-spacing:1.4px!important;padding:10px 12px!important}
-html[data-skin=k5] #declarationsTable tbody td{background:transparent!important;border:0!important;border-bottom:1px solid #e6e2da!important;border-radius:0!important;box-shadow:none!important;padding:14px 12px!important;font-variant-numeric:tabular-nums}
-html[data-skin=k5] #declarationsTable tbody td:first-child{border-left:2px solid transparent!important}
+html[data-skin=k5] #declarationsTable thead th{background:transparent!important;color:#8b857a!important;border:0!important;border-bottom:1.5px solid #1a1a1a!important;border-radius:0!important;font-size:10px!important;letter-spacing:1.6px!important;padding:12px 12px!important}
+html[data-skin=k5] #declarationsTable tbody td{background:transparent!important;border:0!important;border-bottom:1px solid #e8e4dc!important;border-radius:0!important;box-shadow:none!important;padding:20px 12px!important;font-variant-numeric:tabular-nums}
+html[data-skin=k5] #declarationsTable tbody td:first-child{border-left:0!important;box-shadow:inset 3px 0 0 transparent!important;padding-left:16px!important}
 html[data-skin=k5] #declarationsTable tbody tr:hover td{background:#faf8f3!important}
-html[data-skin=k5] #declarationsTable tbody tr:hover td:first-child{border-left-color:#1a1a1a!important}
-html[data-skin=k5] #declarationsTable .stCell .tag,html[data-skin=k5] #declarationsTable .stCell .aeoBadge{border-radius:3px!important;background:#f1eee8!important;color:#1a1a1a!important}
-html[data-skin=k5] #declarationsTable .rowactions{opacity:.3;transition:opacity .15s}
+html[data-skin=k5] #declarationsTable tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 #1a1a1a!important}
+html[data-skin=k5] #declarationsTable .ref{color:#111!important;font-weight:800!important;font-size:15px!important;letter-spacing:-.2px}
+html[data-skin=k5] #declarationsTable .stCell .tag,html[data-skin=k5] #declarationsTable .stCell .aeoBadge{background:transparent!important;padding:0!important;color:#1a1a1a!important;font-size:12px!important}
+html[data-skin=k5] #declarationsTable .stCell .tag.checked{color:#0f7a43!important}
+html[data-skin=k5] #declarationsTable .stCell .aeoBadge{margin-left:8px;color:#b4233c!important}
+html[data-skin=k5] #declarationsTable .rowactions{opacity:0;transition:opacity .15s}
 html[data-skin=k5] #declarationsTable tr:hover .rowactions{opacity:1}
-html[data-skin=k5] #declarationsTable .rowactions button{background:transparent!important;border:1px solid #d9d4ca!important;border-radius:4px!important;color:#1a1a1a!important}
-html[data-skin=k5] #declarationsTable .ref{color:#000!important;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace!important}
+html[data-skin=k5] #declarationsTable .rowactions button{background:#fff!important;border:1px solid #d6d1c6!important;color:#1a1a1a!important}
+html[data-skin=k5] #declarationsTable .rowactions button:hover{background:#1a1a1a!important;color:#fff!important}
+html[data-skin=k5] .av{background:#ece8df!important;color:#4a463d!important}
+html[data-skin=k5] .plate{border-radius:3px;border-color:#1a1a1a}
 
 /* ---- Tasarım seçici ---- */
 #skinBtn{width:42px;height:42px;padding:0!important;border-radius:14px!important;font-size:18px;background:#f1f5fb!important;border:1px solid #e1e8f4!important;cursor:pointer}
-#skinMenu{position:fixed;z-index:2147483200;width:260px;padding:10px;border-radius:16px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 24px 60px -16px rgba(20,40,100,.45);display:none}
+#skinMenu{position:absolute;right:0;top:calc(100% + 10px);z-index:2147483200;width:270px;padding:10px;border-radius:16px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 24px 60px -16px rgba(20,40,100,.45);display:none}
 #skinMenu.open{display:block}
 #skinMenu b{display:block;font:800 11px/1 var(--head,Inter);letter-spacing:1.4px;color:#7a88a3;margin:4px 6px 8px}
 #skinMenu button{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;margin:0 0 2px;border:0;border-radius:12px;background:none;cursor:pointer;color:#14213d;font:700 13px Inter,system-ui;text-align:left}
 #skinMenu button:hover{background:#f1f5fd}#skinMenu button.on{background:#e8efff;color:#1d43c0}
 #skinMenu i{flex:none;width:42px;height:28px;border-radius:8px;border:1px solid #0b153022}
 html:is([data-skin=k1],[data-skin=k5]) .listcard .tablewrap{border:0!important;background:transparent!important;box-shadow:none!important}
+
+/* Tablo tasarımlarında (1, 3, 5) plakalar alt alta, müşteri adı iki satıra sığar, referans yanındaki rozetler kesilmez */
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td.plCell{white-space:normal!important;overflow:visible!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td.plCell .plate{display:block!important;width:max-content;margin:0!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td.plCell small.plate{margin-top:5px!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td.cuCell{white-space:normal!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable .cuCell .cellMain{display:inline-block!important;vertical-align:middle;width:calc(100% - 48px);max-height:2.5em;overflow:hidden;white-space:normal!important;line-height:1.25}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td:first-child{white-space:normal!important;overflow:visible!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable td:first-child>*{vertical-align:middle}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable col:nth-child(8){width:19%!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable col:nth-child(3){width:11%!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable col:nth-child(6){width:5%!important}
+html:is([data-skin=k1],[data-skin=k3],[data-skin=k5]) #declarationsTable col:nth-child(12){width:6%!important}
