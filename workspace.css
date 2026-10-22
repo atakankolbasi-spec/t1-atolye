@@ -427,3 +427,17 @@ body:not(.navWide) .navToggle{margin:0 0 10px}body.navWide .navToggle{width:auto
 .offWrap{flex:1;min-width:0;position:relative}.offWrap .officeSearch{position:absolute;z-index:40;left:0;right:0;top:100%;box-shadow:0 12px 30px #22365333}
 .routePanel>.grid>[data-repeat="transitOffices"]{order:1}.routePanel>.grid>[data-repeat="routeCountries"]{order:2}
 .routePanel>.grid>.field:has([name=inContainer]),.routePanel>.grid>.field:has([name=container]),.routePanel>.grid>.field:has([name=seal]),.routePanel>.grid>.check{order:3}
+/* Beyanname listesi: arama alanının mavi-mor vurgusunu tablo paneline taşı */
+.listcard{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 100%);box-shadow:0 14px 35px rgba(54,92,213,.06)}
+.listcard .tablewrap{margin:0 14px 14px;border:1px solid #a9c3f5;border-radius:14px;background:linear-gradient(180deg,#f7faff 0%,#ffffff 100%);box-shadow:0 0 0 3px rgba(91,125,221,.06),inset 0 1px 0 #ffffff;overflow:auto}
+#declarationsTable{background:transparent;border-collapse:separate;border-spacing:0;min-width:980px}
+#declarationsTable thead th{background:linear-gradient(135deg,#edf4ff 0%,#f8f9ff 100%);color:#6d83ad;border-bottom:1px solid #c7d6f3;padding-top:14px;padding-bottom:14px}
+#declarationsTable thead th:first-child{border-top-left-radius:13px}
+#declarationsTable thead th:last-child{border-top-right-radius:13px}
+#declarationsTable tbody tr{background:rgba(255,255,255,.84);transition:background .18s ease,box-shadow .18s ease,transform .18s ease}
+#declarationsTable tbody tr:hover{background:#eef5ff;box-shadow:inset 3px 0 0 #5f86e8}
+#declarationsTable tbody tr.isSel{background:#eaf2ff;box-shadow:inset 3px 0 0 #416ad7}
+#declarationsTable tbody td{border-bottom:1px solid #e4ebf8;color:#5d7193}
+#declarationsTable tbody tr:last-child td{border-bottom:0}
+#declarationsTable tbody tr:last-child td:first-child{border-bottom-left-radius:13px}
+#declarationsTable tbody tr:last-child td:last-child{border-bottom-right-radius:13px}
