@@ -1,0 +1,77 @@
+/* ==========================================================================
+   PCS TRANSİT — beyanname listesi (tablo) tasarımları. Üst bardaki 🎨 düğmesinden seçilir.
+   Seçili tasarım <html data-skin="k1..k5"> ile gelir; hiçbiri seçili değilse varsayılan görünüm kalır. En son yüklenir.
+   ========================================================================== */
+
+/* ---- Her zaman geçerli düzeltmeler ---- */
+/* Yan menü genişleyince üst çubuğun ve kartların ALTINDA kalıyordu */
+.sidebar{z-index:2147483050!important}
+/* "Beyanname bilgisi ekle" sekme gibi kesik değil, tam yuvarlak düğme */
+.goodsDock .gdAdd{margin-right:0!important;border-radius:16px!important;align-self:flex-end}
+
+/* ---- Ortak: tablo tasarımlarında satır hareketi kapalı ---- */
+html[data-skin] #declarationsTable tbody tr:hover{transform:none!important}
+html[data-skin] #declarationsTable td .tag{font-weight:700}
+
+/* ---- 1 · Çizgili (sade, zebra) ---- */
+html[data-skin=k1] #declarationsTable{border-spacing:0!important}
+html[data-skin=k1] #declarationsTable thead th{background:#f1f4f9!important;color:#5b6784!important;border-bottom:1px solid #dfe5f0!important;padding:11px 12px!important}
+html[data-skin=k1] #declarationsTable tbody td{background:#fff!important;border:0!important;border-bottom:1px solid #e8edf5!important;border-radius:0!important;padding:9px 12px!important;box-shadow:none!important}
+html[data-skin=k1] #declarationsTable tbody tr:nth-child(even) td{background:#f8fafd!important}
+html[data-skin=k1] #declarationsTable tbody td:first-child{border-left-width:3px!important}
+html[data-skin=k1] #declarationsTable tbody tr:hover td{background:#eaf1ff!important;box-shadow:none!important}
+html[data-skin=k1] #declarationsTable .rowactions button{background:#fff!important;border:1px solid #dbe3f2!important;border-radius:6px!important}
+
+/* ---- 2 · Yüzen kartlar (yumuşak gölge, hap durum) ---- */
+html[data-skin=k2] #declarationsTable{border-spacing:0 12px!important}
+html[data-skin=k2] #declarationsTable thead th{background:transparent!important;color:#7a88a3!important;border:0!important}
+html[data-skin=k2] #declarationsTable tbody td{background:#fff!important;border:0!important;box-shadow:0 14px 18px -16px rgba(30,60,140,.5)!important;padding:15px 12px!important}
+html[data-skin=k2] #declarationsTable tbody td:first-child{border-left:5px solid var(--a,#2f5bea)!important;border-radius:18px 0 0 18px!important}
+html[data-skin=k2] #declarationsTable tbody td:last-child{border-radius:0 18px 18px 0!important}
+html[data-skin=k2] #declarationsTable tbody tr:hover td{background:#f5f8ff!important;box-shadow:0 16px 26px -14px rgba(47,91,234,.55)!important}
+html[data-skin=k2] #declarationsTable .stCell .tag,html[data-skin=k2] #declarationsTable .stCell .aeoBadge{border-radius:99px!important}
+html[data-skin=k2] #declarationsTable .rowactions button{border-radius:50%!important;border:0!important;background:#eef3ff!important}
+
+/* ---- 3 · Kurumsal ızgara (lacivert başlık bandı) ---- */
+html[data-skin=k3] .listcard .tablewrap{border:1px solid #1f3270!important;border-radius:12px!important;overflow:hidden!important;background:#fff!important}
+html[data-skin=k3] #declarationsTable{border-spacing:0!important}
+html[data-skin=k3] #declarationsTable thead th{background:linear-gradient(135deg,#10204d,#27438f)!important;color:#fff!important;border:0!important;border-radius:0!important;padding:13px 12px!important;letter-spacing:1.1px!important}
+html[data-skin=k3] #declarationsTable tbody td{background:#fff!important;border:0!important;border-bottom:1px solid #dfe5f2!important;border-right:1px solid #eef1f8!important;border-radius:0!important;padding:11px 12px!important;box-shadow:none!important}
+html[data-skin=k3] #declarationsTable tbody td:last-child{border-right:0!important}
+html[data-skin=k3] #declarationsTable tbody td:first-child{border-left-width:4px!important}
+html[data-skin=k3] #declarationsTable tbody tr:hover td{background:#eaf0ff!important}
+html[data-skin=k3] #declarationsTable .rowactions button{background:#eef2fb!important;border:1px solid #cfd9ef!important;border-radius:6px!important;color:#1f3270!important}
+
+/* ---- 4 · Aurora (buzlu cam satırlar) ---- */
+html[data-skin=k4] .listcard .tablewrap{background:linear-gradient(135deg,#e6e9ff,#f1e8ff 50%,#dcf3ff)!important;border:1px solid #fff!important;border-radius:20px!important;padding:6px 14px 10px!important}
+html[data-skin=k4] #declarationsTable{border-spacing:0 8px!important}
+html[data-skin=k4] #declarationsTable thead th{background:transparent!important;color:#5a49b8!important;border:0!important}
+html[data-skin=k4] #declarationsTable tbody td{background:rgba(255,255,255,.72)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0!important;border-top:1px solid #fff!important;border-bottom:1px solid #ffffffb0!important;box-shadow:0 10px 20px -16px rgba(74,47,214,.55)!important}
+html[data-skin=k4] #declarationsTable tbody td:first-child{border-left:5px solid #7c5cff!important;border-radius:16px 0 0 16px!important}
+html[data-skin=k4] #declarationsTable tbody td:last-child{border-radius:0 16px 16px 0!important}
+html[data-skin=k4] #declarationsTable tbody tr:hover td{background:#fff!important}
+html[data-skin=k4] #declarationsTable .ref{color:#4a2fd6!important}
+html[data-skin=k4] #declarationsTable .rowactions button{background:#f1ecff!important;color:#4a2fd6!important;border:0!important;border-radius:10px!important}
+
+/* ---- 5 · Mat / Minimal (çizgisiz, eş aralıklı sayılar, işlemler üstüne gelince) ---- */
+html[data-skin=k5] #declarationsTable{border-spacing:0!important}
+html[data-skin=k5] #declarationsTable thead th{background:transparent!important;color:#6b665c!important;border:0!important;border-bottom:2px solid #1a1a1a!important;border-radius:0!important;font-size:10px!important;letter-spacing:1.4px!important;padding:10px 12px!important}
+html[data-skin=k5] #declarationsTable tbody td{background:transparent!important;border:0!important;border-bottom:1px solid #e6e2da!important;border-radius:0!important;box-shadow:none!important;padding:14px 12px!important;font-variant-numeric:tabular-nums}
+html[data-skin=k5] #declarationsTable tbody td:first-child{border-left:2px solid transparent!important}
+html[data-skin=k5] #declarationsTable tbody tr:hover td{background:#faf8f3!important}
+html[data-skin=k5] #declarationsTable tbody tr:hover td:first-child{border-left-color:#1a1a1a!important}
+html[data-skin=k5] #declarationsTable .stCell .tag,html[data-skin=k5] #declarationsTable .stCell .aeoBadge{border-radius:3px!important;background:#f1eee8!important;color:#1a1a1a!important}
+html[data-skin=k5] #declarationsTable .rowactions{opacity:.3;transition:opacity .15s}
+html[data-skin=k5] #declarationsTable tr:hover .rowactions{opacity:1}
+html[data-skin=k5] #declarationsTable .rowactions button{background:transparent!important;border:1px solid #d9d4ca!important;border-radius:4px!important;color:#1a1a1a!important}
+html[data-skin=k5] #declarationsTable .ref{color:#000!important;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace!important}
+
+/* ---- Tasarım seçici ---- */
+#skinBtn{width:42px;height:42px;padding:0!important;border-radius:14px!important;font-size:18px;background:#f1f5fb!important;border:1px solid #e1e8f4!important;cursor:pointer}
+#skinMenu{position:fixed;z-index:2147483200;width:260px;padding:10px;border-radius:16px;background:#fff;border:1px solid #dfe7f6;box-shadow:0 24px 60px -16px rgba(20,40,100,.45);display:none}
+#skinMenu.open{display:block}
+#skinMenu b{display:block;font:800 11px/1 var(--head,Inter);letter-spacing:1.4px;color:#7a88a3;margin:4px 6px 8px}
+#skinMenu button{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;margin:0 0 2px;border:0;border-radius:12px;background:none;cursor:pointer;color:#14213d;font:700 13px Inter,system-ui;text-align:left}
+#skinMenu button:hover{background:#f1f5fd}#skinMenu button.on{background:#e8efff;color:#1d43c0}
+#skinMenu i{flex:none;width:42px;height:28px;border-radius:8px;border:1px solid #0b153022}
+html:is([data-skin=k1],[data-skin=k5]) .listcard .tablewrap{border:0!important;background:transparent!important;box-shadow:none!important}
