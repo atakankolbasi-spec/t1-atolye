@@ -47,3 +47,9 @@ html.needLogin body>*:not(#loginGate):not(script){visibility:hidden!important}
 #loginGate button:focus{outline:0}
 #loginGate button:focus-visible{outline:3px solid #2f5bea55;outline-offset:3px}
 #loginGate .lgBtn:focus{box-shadow:0 18px 30px -16px #2f5bea,0 0 0 4px #2f5bea33}
+
+/* Yuvarlak logo */
+.brandmark{border-radius:50%!important;overflow:visible!important;box-shadow:0 8px 22px #2f5bea55!important}
+.brandmark img{border-radius:50%}
+.lgMark{border-radius:50%;box-shadow:0 16px 34px -12px #1f3f8f}
+.lgBrand img{border-radius:50%}
