@@ -1,0 +1,49 @@
+/* PCS TRANSİT — giriş ekranı */
+html.needLogin body>*:not(#loginGate):not(script){visibility:hidden!important}
+#loginGate{position:fixed;inset:0;z-index:2147483100;display:grid;grid-template-columns:1.15fr 1fr;background:#f3f6fc;font-family:var(--font,Inter,system-ui,sans-serif);transition:opacity .6s cubic-bezier(.2,.8,.2,1),transform .6s cubic-bezier(.2,.8,.2,1)}
+#loginGate.out{opacity:0;transform:translateY(-3%) scale(1.02);pointer-events:none}
+.lgLeft{position:relative;overflow:hidden;color:#fff;padding:44px 56px;display:flex;flex-direction:column;background:radial-gradient(900px 520px at 80% 0%,#2f5bea99,transparent 60%),radial-gradient(700px 500px at 0% 100%,#22d3ee33,transparent 60%),linear-gradient(160deg,#0c1a44,#08112b 70%)}
+.lgGrid{position:absolute;inset:0;background:linear-gradient(#ffffff0b 1px,transparent 1px) 0 0/100% 40px,linear-gradient(90deg,#ffffff08 1px,transparent 1px) 0 0/40px 100%;mask-image:radial-gradient(70% 70% at 40% 40%,#000 30%,transparent 100%);-webkit-mask-image:radial-gradient(70% 70% at 40% 40%,#000 30%,transparent 100%)}
+.lgLeft>*{position:relative}
+.lgBrand{display:flex;align-items:center;gap:14px}.lgBrand img{filter:drop-shadow(0 10px 24px #2f5bea99)}
+.lgBrand b{display:block;font:800 26px/1 var(--head,Inter);letter-spacing:1px}.lgBrand span{display:block;font:700 11px/1 var(--head,Inter);letter-spacing:6px;color:#8fb0ff;margin-top:6px}
+.lgHero{margin-top:0}.lgHero h2{margin:0;font:800 clamp(34px,4.2vw,56px)/1.06 var(--head,Inter);letter-spacing:-1.5px}
+.lgHero em{font-style:normal;background:linear-gradient(90deg,#22d3ee,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lgHero p{max-width:460px;margin:18px 0 0;color:#b6c4e6;font-size:15.5px;line-height:1.6}
+.lgRoute{width:min(560px,96%);margin:auto 0 34px;overflow:visible}
+.lgChips{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.lgChips span{padding:9px 14px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff26;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:12.5px;font-weight:700;color:#e4ecff}
+.lgFoot{margin-top:34px;font-size:11.5px;color:#7f93c4;letter-spacing:.4px}
+.lgRight{display:grid;place-items:center;padding:32px;position:relative;background:radial-gradient(600px 420px at 100% 0%,#dbe6ff,transparent 60%),#f3f6fc}
+.lgCard{width:min(420px,100%);background:#fff;border:1px solid #e1e8f6;border-radius:28px;padding:34px 34px 22px;box-shadow:0 40px 80px -40px rgba(20,40,110,.45),0 2px 6px rgba(20,40,110,.06)}
+.lgMark{display:block;border-radius:18px;box-shadow:0 14px 30px -12px #2f5bea}
+.lgCard h1{margin:20px 0 4px;font:800 30px/1.1 var(--head,Inter);letter-spacing:-.8px;color:#0b1530}
+.lgDate{color:#7a88a3;font-size:13px;text-transform:capitalize;margin-bottom:22px}
+.lgUser{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e1e8f6;border-radius:16px;background:#f7f9fe;margin-bottom:18px}
+.lgUser i{margin-left:auto;font-style:normal;color:#22c55e;font-size:11px}
+.lgAv{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#3b6cff,#22d3ee);color:#fff;font:800 14px var(--head,Inter)}
+.lgUser b{display:block;color:#14213d;font-size:14.5px}.lgUser small{color:#7a88a3;font-size:12px}
+.lgField{display:block;margin-bottom:12px}.lgField span{display:block;font:700 11px/1 Inter;letter-spacing:1.2px;text-transform:uppercase;color:#6b7896;margin:0 2px 7px}
+.lgField input{width:100%;height:50px;padding:0 16px;border:1.5px solid #d6dff2;border-radius:14px;background:#fff;font:700 20px Inter;letter-spacing:6px;color:#0b1530;outline:0;transition:border-color .15s,box-shadow .15s}
+.lgField input:focus{border-color:#2f5bea;box-shadow:0 0 0 4px #2f5bea22}
+.lgBtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border:0;border-radius:15px;background:linear-gradient(135deg,#3b6cff,#1f43c0);color:#fff;font:800 15px var(--head,Inter);cursor:pointer;box-shadow:0 18px 30px -16px #2f5bea;transition:transform .15s,box-shadow .15s}
+.lgBtn:hover{transform:translateY(-1px);box-shadow:0 22px 34px -16px #2f5bea}.lgBtn b{transition:transform .15s}.lgBtn:hover b{transform:translateX(4px)}
+.lgErr{min-height:20px;margin-top:10px;font-size:12.5px;font-weight:700;color:#e11d48;text-align:center}.lgErr.ok{color:#16a34a}
+.lgLinks{display:flex;justify-content:center;gap:16px;margin-top:6px}.lgLinks button{border:0;background:none;color:#4260b8;font:700 12.5px Inter;cursor:pointer;padding:6px 8px;border-radius:8px}.lgLinks button:hover{background:#eef3ff}
+.lgNote{position:absolute;left:32px;right:32px;bottom:20px;text-align:center;font-size:11px;color:#8a97b3}
+.lgCard.shake{animation:lgShake .4s}@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@media(max-width:860px){#loginGate{grid-template-columns:1fr}.lgLeft{display:none}.lgNote{position:static;margin-top:18px}.lgRight{place-items:center;align-content:center}}
+
+/* Yeni PCS logosu: kenar çubuğu ve açılış ekranı */
+.brandmark{background:none!important;padding:0!important;overflow:hidden}
+.brandmark img{display:block;width:100%;height:100%}
+.spLogo{background:none!important;box-shadow:none!important;padding:0}
+.spLogo img{display:block;width:100%;height:100%;filter:drop-shadow(0 20px 40px #2f5bea99)}
+
+#loginGate,#loginGate *{text-transform:none!important}
+.lgHero h2{color:#fff!important}
+.lgCard h1{color:#0b1530!important}
+.lgField span,.lgLinks button,.lgNote,.lgFoot{text-transform:none!important}
+#loginGate button:focus{outline:0}
+#loginGate button:focus-visible{outline:3px solid #2f5bea55;outline-offset:3px}
+#loginGate .lgBtn:focus{box-shadow:0 18px 30px -16px #2f5bea,0 0 0 4px #2f5bea33}

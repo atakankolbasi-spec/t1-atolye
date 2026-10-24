@@ -9,7 +9,8 @@ const SECTIONS=[
   {k:'radius',t:'seg',l:'Köşe yuvarlaklığı',h:'Kartların köşe biçimi',o:[['sharp','Keskin'],['soft','Yumuşak'],['round','Yuvarlak']]},
   {k:'bold',t:'sw',l:'Kalın yazı',h:'Kapatırsan metinler normal kalınlıkta görünür'},
   {k:'motion',t:'sw',l:'Animasyonlar',h:'Geçişler, hareketli bant ve efektler'},
-  {k:'splash',t:'sw',l:'Açılış ekranı',h:'Siteyi açarken kısa logo animasyonu'}]},
+  {k:'loginScreen',t:'sw',l:'Giriş ekranı',h:'Siteyi açarken karşılama / PIN ekranı (oturum başına bir kez)'},
+  {k:'splash',t:'sw',l:'Açılış ekranı',h:'Giriş ekranı kapalıyken kısa logo animasyonu'}]},
  {id:'layout',icon:'🧭',title:'Yerleşim',desc:'Menü ve ana sayfa düzeni',items:[
   {k:'navDefault',t:'seg',l:'Sol menü',h:'Menü başlangıçta dar mı geniş mi olsun',o:[['narrow','Dar (ikon)'],['wide','Geniş']]},
   {k:'heroOn',t:'sw',l:'Karşılama bandı',h:'Ana sayfanın üstündeki büyük renkli bölüm'},

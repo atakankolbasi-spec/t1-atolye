@@ -1,7 +1,7 @@
 import {get as setting} from './settings.js';
 // Görsel efektler: açılış ekranı, konfeti, tamamlanma halkası
 export function installSplash(){if(!setting('splash')||!setting('motion')||sessionStorage.getItem('t1-splash'))return;try{sessionStorage.setItem('t1-splash','1')}catch{}
- const s=document.createElement('div');s.id='splash';s.innerHTML='<div class="spIn"><div class="spLogo">PCS</div><div class="spTxt">TRANSİT</div><div class="spBar"><i></i></div></div>';document.body.append(s);
+ const s=document.createElement('div');s.id='splash';s.innerHTML='<div class="spIn"><div class="spLogo"><img src="logo.svg" alt="PCS"></div><div class="spTxt">TRANSİT</div><div class="spBar"><i></i></div></div>';document.body.append(s);
  setTimeout(()=>s.classList.add('out'),950);setTimeout(()=>s.remove(),1500)}
 export function confetti(){const c=document.createElement('canvas');c.className='confetti';document.body.append(c);const x=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;
  const cols=['#2f5bea','#22d3ee','#16a34a','#f59e0b','#e11d48','#8b5cf6'],P=[...Array(120)].map(()=>({x:W/2+(Math.random()-.5)*200,y:H*.7,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,s:Math.random()*8+4,c:cols[Math.floor(Math.random()*cols.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4}));

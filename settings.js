@@ -1,7 +1,7 @@
 // Ayarlar: tek yerden tüm tercihler. Değerler 't1-settings-v1' içinde saklanır.
 const KEY='t1-settings-v1';
 export const DEFAULTS={
- theme:'light',accent:'blue',density:'normal',fontScale:100,radius:'soft',bold:true,motion:true,splash:true,navDefault:'narrow',appName:'TRANSİT',appSub:'BEYAN ÇALIŞMA ALANI',userName:'PCS TRANSİT',userRole:'Yazım & Kontrol',greetName:'',
+ theme:'light',accent:'blue',density:'normal',fontScale:100,radius:'soft',bold:true,motion:true,splash:true,loginScreen:true,navDefault:'narrow',appName:'TRANSİT',appSub:'BEYAN ÇALIŞMA ALANI',userName:'PCS TRANSİT',userRole:'Yazım & Kontrol',greetName:'',
  heroOn:true,dashOn:true,todayOn:true,defaultView:'table',pageSize:20,
  refPrefix:'PCS',defType:'T1',defDispatch:'TR',defTransport:'Karayolu',defCurrency:'EUR',defGuarantor:'EUROTÜRK LOJİSTİK DIŞ TİCARET LİMİTED ŞİRKETİ',facilityCode:'Z34089',aeoAutoHat:true,dueDays:2,backupDays:7,
  sealLow:20,

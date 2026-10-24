@@ -26,6 +26,7 @@ import * as Seals from './seals.js';
 import * as SET from './settings.js';
 import {installSettings} from './settings-ui.js';
 import {installSplash,confetti,ring} from './fx.js';
+import {installLogin} from './login.js';
 import {t1Draft,cmr,cmrAll,cmrGroups,printHtml} from './documents.js';
 import {installPdfImport} from './pdf-import.js';
 import {installFirmCard} from './firm-card.js';
@@ -404,7 +405,7 @@ installPalette();installChrome();installI18n();
 
 installSealUi();
 
-installSplash();
+if(!installLogin())installSplash();
 
 // ---- Ayarlar sayfası ----
 const dl=(text,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
